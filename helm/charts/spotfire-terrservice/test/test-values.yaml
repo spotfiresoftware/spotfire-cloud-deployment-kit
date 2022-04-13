@@ -1,0 +1,42 @@
+nodemanagerConfig:
+    serverBackendAddress: "mytss-spotfire-server"
+
+logging:
+  logLevel: "trace"
+  logForwarderAddress: "mytss-log-forwarder"
+
+extraEnvVars:
+  - name: TERRSERVICE
+    value: VALUE
+
+extraEnvVarsCM: terrservicecm
+extraEnvVarsSecret: terrservicesecret
+
+extraVolumeMounts:
+  - name: terrvolume
+    mountPath: /opt/tibco/services
+
+extraVolumes:
+  - name: terrvolume
+    persistentVolumeClaim:
+      claimName: terr-pvc
+
+kedaAutoscaling:
+  enabled: true
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitoring.svc.cluster.local
+    spotfireServerHelmRelease: tss
+  threshold: 8
+  fallback:                                          # Optional. Section to specify fallback options
+    replicas: 1                                      # Mandatory if fallback section is included
+    failureThreshold: 3                              # Mandatory if fallback section is included
+  advanced:                                          # Optional. Section to specify advanced options
+    restoreToOriginalReplicaCount: true              # Optional. Default: false
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15

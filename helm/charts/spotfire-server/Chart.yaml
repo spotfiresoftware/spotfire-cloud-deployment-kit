@@ -1,0 +1,23 @@
+apiVersion: v2
+name: spotfire-server
+description: A Helm chart for TIBCO Spotfire Server.
+
+type: application
+
+version: 0.1.0
+
+appVersion: "11.8.1"
+
+dependencies:
+  - name: fluent-bit
+    alias: log-forwarder
+    repository: https://fluent.github.io/helm-charts
+    version: 0.19.19
+    condition: log-forwarder.enabled
+  - name: haproxy
+    repository: https://haproxytech.github.io/helm-charts
+    version: 1.10.0
+    condition: haproxy.enabled
+  - name: spotfire-common
+    repository: file://../spotfire-common
+    version: 0.1.0

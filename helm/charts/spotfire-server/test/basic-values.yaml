@@ -1,0 +1,9 @@
+database:
+  url: "jdbc://server/"
+  password: "mypassword"
+  admin:
+    password: "adminpassword"
+    url: "jdbc://server/"
+
+site:
+  publicAddress: "http://localhost/"

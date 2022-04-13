@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <!--
+      Change values of properties to the log configuration (log4j2.xml)
+      in this file. The properties you can change are the values of
+      log.dir, serverLogSizePolicy, serverLogDefaultRollover,
+      nonServerLogsSizePolicy, nonServerLogsDefaultRollover.
+      The values of these properties will be copied during upgrade.
+
+      The log.dir property is relative to catalina.base (<Installation dir>/tomcat),
+      if an absolute path to an existing folder is not given.
+      Properties added to this file will not have any effect.
+  -->
+
+  <Properties>
+    <Property name="log.dir">logs</Property>
+    <Property name="serverLogSizePolicy">10MB</Property>
+    <Property name="serverLogDefaultRollover">2</Property>
+    <Property name="nonServerLogsSizePolicy">10MB</Property>
+    <Property name="nonServerLogsDefaultRollover">2</Property>
+    <Property name="tomcatLogsSizePolicy">10MB</Property>
+    <Property name="tomcatLogsDefaultRollover">1d</Property>
+    <Property name="logReconfigurationInterval">30</Property>
+  </Properties>
+  
+</Configuration>

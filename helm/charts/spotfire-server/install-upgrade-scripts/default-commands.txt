@@ -1,0 +1,7 @@
+# Public address
+set-public-address --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --site-name="${SITE_NAME}" --url="${SITE_PUBLIC_ADDRESS}" 
+
+# Admin user
+create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="${SPOTFIREADMIN_USERNAME}" --password="${SPOTFIREADMIN_PASSWORD}" --ignore-existing=true
+# set-user-password --username="${SPOTFIREADMIN_USERNAME}" --password="${SPOTFIREADMIN_PASSWORD}"
+promote-admin --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="${SPOTFIREADMIN_USERNAME}"

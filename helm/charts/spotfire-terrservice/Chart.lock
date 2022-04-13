@@ -1,0 +1,9 @@
+dependencies:
+- name: spotfire-fluentbit-configuration
+  repository: file://../spotfire-fluentbit-configuration
+  version: 0.1.0
+- name: spotfire-common
+  repository: file://../spotfire-common
+  version: 0.1.0
+digest: sha256:cad2bfbdc4510a3f48087f0dd988d8ebee6dbcfe85ad26255f948f50995e739f
+generated: "2022-03-22T13:59:56.062912405+01:00"

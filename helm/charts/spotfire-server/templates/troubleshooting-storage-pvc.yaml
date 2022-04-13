@@ -1,0 +1,22 @@
+{{- if .Values.volumes.troubleshooting.persistentVolumeClaim.create }}
+{{- $pvcCheck :=  (lookup "v1" "PersistentVolumeClaim" .Release.Namespace ( include "spotfire-server.troubleshooting.pvc.name" . )) }}
+{{- if not $pvcCheck }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "spotfire-server.troubleshooting.pvc.name" . }}
+  labels:
+  {{- include "spotfire-server.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.volumes.troubleshooting.persistentVolumeClaim.storageClassName | quote }}
+  {{- with .Values.volumes.troubleshooting.persistentVolumeClaim.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  volumeName: {{ .Values.volumes.troubleshooting.persistentVolumeClaim.volumeName | quote }}
+{{- end }}
+{{- end }}

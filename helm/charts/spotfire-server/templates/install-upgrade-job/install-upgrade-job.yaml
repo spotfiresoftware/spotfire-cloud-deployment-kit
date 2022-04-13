@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "spotfire-server.spotfireConfig.fullname" . | quote }}
+  labels:
+    app.kubernetes.io/component: configurator
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+  annotations:
+spec:
+  ttlSecondsAfterFinished: {{ .Values.configJob.ttlSecondsAfterFinished }} 
+  template:
+    spec:
+      {{- include "spotfire-server.spotfireConfig.imagePullSecrets" . | nindent 6 }}
+      restartPolicy: Never
+      {{- if .Values.extraInitContainers.configJob }}
+      initContainers:
+        {{- tpl (toYaml .Values.extraInitContainers.configJob) $ | nindent 8 }}
+      {{- end }}
+      containers:
+        - command: ["/bin/sh","-c"]
+          args: ["/opt/tibco/scripts/main.sh"]
+          image: "{{ template "spotfire-server.spotfireConfig.image" . }}"
+          imagePullPolicy: "{{ template "spotfire-server.spotfireConfig.image.pullPolicy" . }}"
+          envFrom:
+          - secretRef:
+              name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
+          - secretRef:
+              name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+          {{- if .Values.extraEnvVarsSecret }}
+          - secretRef:
+              name: {{ tpl .Values.extraEnvVarsSecret $ }}
+          {{- end }}
+          {{- if .Values.extraEnvVarsCM }}
+          - configMapRef:
+              name: {{ tpl .Values.extraEnvVarsCM $ }}
+          {{- end }}
+          env:
+            {{- if .Values.extraEnvVars }}
+            {{ tpl (toYaml .Values.extraEnvVars) $ | nindent 12 }}
+            {{- end }}
+            {{ include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{ include "spotfire-server.database.envVars" . | nindent 12 }}
+            {{ include "spotfire-server.configVars" . | nindent 12 }}
+            {{ include "spotfire-server.database.adminEnvVars" . | nindent 12}}
+            - name: LOG_APPENDER
+              value: "console"
+            - name: LOG_LEVEL
+              value: {{ .Values.configJob.logLevel | default .Values.logging.logLevel | quote }}
+            - name: JOB_INSTALL
+              value: {{ if and .Values.database.create .Values.database.admin.url .Values.database.admin.user .Values.database.admin.password }}"true"{{ else }}"false"{{ end }}
+            - name: JOB_DATABASE_UPGRADE
+              value: {{ .Values.database.upgrade | quote }}
+            - name: JOB_USE_EXISTING_CONFIGURATION
+              value: {{ .Values.configuration.useExisting | quote }}
+            - name: JOB_DEFAULT_CONFIGURE
+              value: {{ .Values.configuration.applyKubernetesConfiguration | quote }}
+            - name: JOB_CONFIGURATION_COMMENT
+              value: {{ printf "Helm configuration update - release=%s revision=%s" .Release.Name .Release.Revision }}
+          name: {{ printf "%s-%s" (include "spotfire-server.fullname" .) "basic-config-job" | quote }}
+          resources: {}
+          volumeMounts:
+            - name: install-upgrade-scripts-volume
+              mountPath: /opt/tibco/scripts/
+            {{- with .Values.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- if .Values.configuration.commandScripts }}
+            - name: command-scripts-volume
+              mountPath: /opt/tibco/command-scripts/
+            {{- end }}
+            {{- if .Values.configuration.configurationScripts }}
+            - name: configuration-scripts-volume
+              mountPath: /opt/tibco/configuration-scripts/
+            {{- end }}
+            {{- if .Values.volumes.spotfireDeployments.customPersistentVolumeClaimName }}
+            - name: {{ .Values.volumes.spotfireDeployments.name }}
+              mountPath: /opt/tibco/spotfireconfigtool/deployments
+            {{- end }}
+            {{- if .Values.volumes.customCertsFolder.customPersistentVolumeClaimName }}
+            - name: {{ .Values.volumes.customCertsFolder.name }}
+              mountPath: /opt/tibco/spotfireconfigtool/certs
+            {{- end }}
+            {{- if .Values.volumes.customExt.customPersistentVolumeClaimName }}
+            - name: {{ .Values.volumes.customExt.name }}
+              mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+            {{- end }}
+      # use sh txt
+      volumes:
+        {{- with .Values.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: install-upgrade-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-install-upgrade-scripts
+            defaultMode: 0755
+        {{- if .Values.configuration.configurationScripts }}
+        - name: command-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-command-scripts
+            defaultMode: 0755
+        {{- end -}}
+        {{- if .Values.configuration.commandScripts }}
+        - name: configuration-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-configuration-scripts
+            defaultMode: 0755
+        {{- end -}}
+        {{- if .Values.volumes.spotfireDeployments.customPersistentVolumeClaimName }}
+        - name: {{ .Values.volumes.spotfireDeployments.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.deployments.pvc.name" . }}
+        {{- end }}
+        {{- if .Values.volumes.customCertsFolder.customPersistentVolumeClaimName }}
+        - name: {{ .Values.volumes.customCertsFolder.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.custom-certificate-storage.pvc.name" . }}
+        {{- end }}
+        {{ if .Values.volumes.customExt.customPersistentVolumeClaimName -}}
+        - name: {{ .Values.volumes.customExt.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.custom-ext.pvc.name" . }}
+        {{- end }}

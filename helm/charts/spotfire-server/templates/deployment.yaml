@@ -1,0 +1,211 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spotfire-server.fullname" . }}
+  labels:
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.kedaAutoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "spotfire-server.labels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "spotfire-server.labels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: {{ add (ternary .Values.draining.timeoutSeconds 0 .Values.draining.enabled) 30 }}
+      {{- include "spotfire-server.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.extraInitContainers.spotfireServerDeployment }}
+      initContainers:
+        {{- tpl (toYaml .Values.extraInitContainers.spotfireServerDeployment) $ | nindent 10 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ template "spotfire-server.image" . }}"
+          imagePullPolicy: "{{ template "spotfire-server.image.pullPolicy" . }}"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: backend 
+              protocol: TCP
+              containerPort: 9443
+            - name: registration
+              protocol: TCP
+              containerPort: 9080
+            - name: monitoring
+              protocol: TCP
+              containerPort: 9081
+          {{- if .Values.startupProbe.enabled }}
+          startupProbe: {{- omit .Values.startupProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe: {{- omit .Values.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe: {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.draining.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /opt/tibco/scripts/pre-stop-hook.sh
+                - {{ printf "--minimum-draining-seconds=%v" .Values.draining.minimumSeconds }}
+                - {{ printf "--draining-timeout-seconds=%v" .Values.draining.timeoutSeconds }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - secretRef:
+                name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+            {{- if .Values.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ tpl .Values.extraEnvVarsSecret $ }}
+            {{- end }}
+            {{- if .Values.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ tpl .Values.extraEnvVarsCM $ }}
+            {{- end }}
+          env:
+            {{- if .Values.extraEnvVars }}
+            {{ tpl (toYaml .Values.extraEnvVars) $ | nindent 12 }}
+            {{- end }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SERVER_BACKEND_ADDRESS
+              value: {{ include "spotfire-server.fullname" . | quote }}
+            - name: SERVER_IP_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            {{- include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{- include "spotfire-server.database.envVars" . | nindent 12 }}
+            {{- include "spotfire-server.logging.serverEnvVars" . | nindent 12 }}
+            {{- if or .Values.spotfireServerJava.extraJavaOpts .Values.troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled }}
+            {{- include "spotfire-server.jvm.parameter" . | nindent 12 }}
+            {{- end }}
+          volumeMounts:
+          {{- with .Values.extraVolumeMounts }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+          - name: logs-volume
+            mountPath: /opt/tibco/tss/tomcat/logs
+          {{- if .Values.volumes.customExt.customPersistentVolumeClaimName }}
+          - name: {{ .Values.volumes.customExt.name }}
+            mountPath: {{ .Values.volumes.customExt.mountPath }}
+          {{- end }}
+          {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.customPersistentVolumeClaimName }}
+          - name: {{ .Values.volumes.libraryImportExport.name }}
+            mountPath: {{ .Values.volumes.libraryImportExport.mountPath }}
+          {{- end }}
+          {{- if .Values.volumes.customCertsFolder.customPersistentVolumeClaimName }}
+          - name: {{ .Values.volumes.customCertsFolder.name }}
+            mountPath: {{ .Values.volumes.customCertsFolder.mountPath }}
+          {{- end }}
+          {{- if .Values.troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled }}
+          - name: {{ .Values.volumes.troubleshooting.name }}
+            mountPath: {{ include "spotfire-server.dumpPath" . | quote }}
+            subPathExpr: troubleshooting/jvm-heap-dumps/$(POD_NAME)
+          {{- end }}
+        - name: fluent-bit
+          image: "{{ .Values.fluentBit.image.repository }}:{{ .Values.fluentBit.image.tag }}"
+          imagePullPolicy: "{{ .Values.fluentBit.image.pullPolicy }}"
+          ports:
+            - name: http
+              containerPort: 2020
+              protocol: TCP
+          env:
+          {{- include "spotfire-server.logging.podAnnotationsEnvVars" . | nindent 10 }}
+          {{- if (include "spotfire-server.log-forwarder.fullname" $) }}
+          - name: FLUENTBIT_FORWARD_HOST
+            value: {{ include "spotfire-server.log-forwarder.fullname" $ }}
+          - name: FLUENTBIT_FORWARD_PORT
+            value: "24224"
+          {{- end }}
+          - name: FILE_SEPARATOR
+            value: /
+          - name: TSS_HOME
+            value: /tss
+          - name: CONTAINER_NAME
+            value: {{ .Chart.Name }}
+          volumeMounts:
+          {{- if (include "spotfire-server.log-forwarder.fullname" $) }}
+          - name: fluent-bit-config
+            mountPath: /fluent-bit/etc/fluent-bit.conf
+            subPath: tss.forward.fluentbit.conf
+          {{- else }}
+          - name: fluent-bit-config
+            mountPath: /fluent-bit/etc/fluent-bit.conf
+            subPath: tss.stdout.fluentbit.conf
+          {{- end }}
+          - name: fluent-bit-config
+            mountPath: /fluent-bit/etc/tss.tail.fluentbit.conf
+            subPath: tss.tail.fluentbit.conf
+          - name: fluent-bit-config
+            mountPath: /fluent-bit/etc/tss.podannotations.fluentbit.conf
+            subPath: tss.podannotations.fluentbit.conf
+          - name: fluent-bit-config
+            mountPath: /fluent-bit/etc/tss.parsers.fluentbit.conf
+            subPath: tss.parsers.fluentbit.conf
+          - name: logs-volume
+            mountPath: /tss/logs
+      volumes:
+      {{- with .Values.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        - name: logs-volume
+          emptyDir: {}
+        - name: fluent-bit-config
+          configMap:
+            name: {{ .Release.Name }}-{{ .Chart.Name }}-fluent-bit
+        {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.customPersistentVolumeClaimName }}
+        - name: {{ .Values.volumes.libraryImportExport.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.library-import-export.pvc.name" . }}
+        {{- end }}
+        {{ if .Values.volumes.customExt.customPersistentVolumeClaimName -}}
+        - name: {{ .Values.volumes.customExt.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.custom-ext.pvc.name" . }}
+        {{- end }}
+        {{ if .Values.volumes.customCertsFolder.customPersistentVolumeClaimName -}}
+        - name: {{ .Values.volumes.customCertsFolder.name }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.volumes.custom-certificate-storage.pvc.name" . }}
+        {{- end }}
+        {{- if .Values.troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled }}
+        - name: {{ .Values.volumes.troubleshooting.name }}
+          {{- if or .Values.volumes.troubleshooting.persistentVolumeClaim.create .Values.volumes.troubleshooting.customPersistentVolumeClaimName }}
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-server.troubleshooting.pvc.name" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

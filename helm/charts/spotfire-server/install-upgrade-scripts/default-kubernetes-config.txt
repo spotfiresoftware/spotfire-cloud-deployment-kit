@@ -1,0 +1,25 @@
+# config properties
+set-config-prop --name=performance-monitoring.metrics-exporter.enabled --value=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}" 
+set-config-prop --name=status-controller.enabled --value=true  --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}" 
+set-config-prop --name=monitoring.haproxy-agent-check.enabled --value=true  --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}" 
+set-config-prop --name=security.trust.auto-trust.enabled --value=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}" 
+set-config-prop --name=general.calculate-public-address-per-request --value=true  --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=tomcat.remote-ip-valve.enabled --value=true  --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=nodemanager.expire-offline --value=5 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+config-external-ignite-process --add-jvm-opts-Djava.net.preferIPv4Stack=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+# TODO: Should this be enabled by default? Break out to separate file.
+config-action-logger --categories="all" --file-logging-enabled=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+config-action-log-web-service --categories="all" --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+# Reduce number of idle connections
+set-config-prop --name=data-sources.default.connection-timeout --value=10 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=data-sources.default.min-connections --value=1 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+# Monitor and handle changes, draining timeouts are multiples of monitor interval
+set-config-prop --name=lifecycle.changes-monitoring.interval-seconds --value=30 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.database-schema-change-action --value=IMMEDIATE_SHUTDOWN --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.technical-version-change-action --value=IGNORE --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.configuration-change-action --value=GRACEFUL_SHUTDOWN --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.draining.minimum-seconds --value=90 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.draining.timeout-seconds --value=180 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name=lifecycle.changes-monitoring.draining.shutdown --value=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"

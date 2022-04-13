@@ -1,0 +1,116 @@
+ingress:
+  enabled: true
+  tls:
+    - hosts:
+      - www.example.com
+      secretName: tlsSecretName
+  hosts:
+    - host: www.example.com
+      paths: 
+      - path: /spotfire
+        pathType: Prefix
+
+cliPod:
+  enabled: false
+  logLevel: TRACE
+
+serviceAccount:
+  create: true
+  name: "serviceaccountname"
+  annotations:
+    myAnnotation: myAnnotationValue
+
+troubleshooting:
+  jvm:
+    heapDumpOnOutOfMemoryError:
+      enabled: true
+  persistentVolumeClaim:
+    create: true
+
+volumes:
+  troubleshooting:
+    name: troubleshootingvolume
+    persistentVolumeClaim:
+      create: true
+
+  customExt:
+    name: customextvolume
+    persistentVolumeClaim:
+      create: true
+
+  customCertsFolder:
+    name: customextvolume
+    persistentVolumeClaimName: "customcertsclaimname"
+
+  spotfireDeployments:
+    customPersistentVolumeClaimName: "deploymentsclaimname"
+    customPersistentVolumeClaim:
+      create: true
+
+  libraryImportExport:
+    persistentVolumeClaim:
+      create: true
+
+configuration:
+  configurationScripts:
+    - name: my_custom_script
+      script: |
+        echo "This is an example custom configuration tasks. "
+        set-config-prop --name=lifecycle.changes-monitoring.draining.timeout-seconds --value=180 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+    - name: my_second_script
+      script: | 
+        echo "This script will be executed after the one above."
+        echo "Scripts are executed in the order in which they appear the values file."
+  commandScripts:
+    - name: mycommands_script
+      script: create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="mynewuser" --password="password" --ignore-existing=true
+
+spotfireConfig:
+  debug: true
+  cleanup:
+    secureCookieAttributeForHttp: true
+    sameSiteCookieAttributeForHttp: true
+    cache:
+      enabled: true
+
+spotfireAdminUsername: "spotfireadmin"
+spotfireAdminPassword: "secretpassword101"
+
+database:
+  url: "jdbc://server/"
+  user: "spotfireuser"
+  password: "mypassword"
+  admin:
+    password: "adminpassword"
+    url: "jdbc://server/"
+
+extraEnvVars:
+  - name: HELLO
+    value: world
+extraEnvVarsCM: configmapname
+extraEnvVarsSecret: secretname
+
+spotfireServerJava:
+  extraJavaOpts:
+    - -Dsystem.property=value
+
+site:
+  publicAddress: "http://localhost/"
+
+kedaAutoscaling:
+  enabled: true
+  pollingInterval: 30
+  cooldownPeriod: 300
+  minReplicas: 1
+  maxReplicas: 4
+  threshold: 8
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitoring.svc.cluster.local

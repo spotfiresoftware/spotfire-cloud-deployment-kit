@@ -1,0 +1,24 @@
+<!-- For more information on using app.config transformation visit http://go.microsoft.com/fwlink/?LinkId=125889 -->
+<Configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+    <Appenders>
+        <RollingFile
+                name="actionlog"
+                xdt:Locator="Match(name)"
+                xdt:Transform="SetAttributes(filePattern)"
+                filePattern="${basedir}/actionlogs/actionlog-%d{yyyy-MM-dd.HH}.log" >
+            <DirectWriteRolloverStrategy
+                    maxFiles="2"
+                    xdt:Transform="Insert">
+                    <Delete basePath="${basedir}/actionlogs" maxDepth="1">
+                        <IfFileName glob="actionlog*.log" />
+                        <IfLastModified age="12h" />
+                    </Delete>
+            </DirectWriteRolloverStrategy>
+        </RollingFile>
+        <RollingFile
+                name="actionlog"
+                xdt:Locator="Match(name)"
+                xdt:Transform="RemoveAttributes(fileName)">
+            </RollingFile>
+    </Appenders>
+</Configuration>

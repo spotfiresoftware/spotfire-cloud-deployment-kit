@@ -1,0 +1,1 @@
+{{ include "spotfire-common.test.serviceCurl" . }}
