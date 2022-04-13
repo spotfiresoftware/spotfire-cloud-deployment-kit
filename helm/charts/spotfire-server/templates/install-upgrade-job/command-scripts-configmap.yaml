@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  creationTimestamp: null
+  labels:
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-command-scripts
+data:
+{{- $index := 0 }}
+{{- range .Values.configuration.commandScripts }}
+  {{ printf "%04d-%s" $index .name }}: {{ tpl .script $ | quote }}
+  {{- $index = add $index 1 }}
+{{- end }}

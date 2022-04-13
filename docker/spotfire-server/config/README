@@ -1,0 +1,1 @@
+These files are used during build time and startup of the Spotfire server container and are not used directly by the spotfire server.

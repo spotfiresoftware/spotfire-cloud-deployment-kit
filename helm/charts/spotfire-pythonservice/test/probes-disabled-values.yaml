@@ -1,0 +1,11 @@
+nodemanagerConfig:
+    serverBackendAddress: "mytss-spotfire-server"
+
+startupProble:
+  enabled: false
+
+livenessProbe:
+  enabled: false
+
+readinessProbe:
+  enabled: false

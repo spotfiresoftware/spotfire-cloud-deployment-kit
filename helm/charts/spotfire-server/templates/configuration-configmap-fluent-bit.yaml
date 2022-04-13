@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  creationTimestamp: null
+  labels:
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-fluent-bit
+data:
+{{ (.Files.Glob "config/fluent-bit/*.conf").AsConfig | indent 2 }}

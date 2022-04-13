@@ -1,0 +1,16 @@
+<?xml
+  version="1.0"
+  encoding="UTF-8"
+?>
+<Context xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+    <Valve xdt:Transform="Insert"
+        className="org.apache.catalina.valves.ExtendedAccessLogValve"
+        directory="logs"
+        prefix="access.extendedvalve."
+        fileDateFormat="yyyy-MM-dd.HH"
+        maxDays="1"
+        suffix=".log"
+        requestAttributesEnabled="true"
+        pattern="date time c-ip x-R(spotfire.user) x-S(spotfire.session-number) x-R(spotfire.request-id) cs-method cs-uri-stem cs-uri-query sc-status bytes time-taken x-H(protocol) x-H(scheme)"
+    />
+</Context>

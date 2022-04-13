@@ -1,0 +1,634 @@
+# ===============================
+# image settings
+# ===============================
+
+# spotfire-global image settings
+global:
+  spotfire:
+    image:
+      # global.spotfire.image.registry -- Global container image registry, this will be used for tibco/spotfire container images unless overridden.
+      registry:
+      # global.spotfire.image.pullPolicy -- Global container image pull policy
+      pullPolicy: IfNotPresent
+      # global.spotfire.image.pullSecrets -- Global container image pull secrets
+      ## E.g.
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+# spotfire-server image settings
+image:
+  # image.registry -- image registry for spotfire-server, it overrides global.spotfire.image.registry value.
+  registry:
+  # image.repository -- spotfire-server image repository
+  repository: tibco/spotfire-server
+  # image.tag -- The container image tag to be used.
+  tag: "11.8.1-v0.1.0"
+  # image.pullPolicy -- spotfire-server image pull policy, It overrides global.spotfire.image.pullPolicy
+  pullPolicy:
+  ## Optionally specify an array of imagePullSecrets.
+  # image.pullSecrets -- spotfire-server image pull secrets
+  pullSecrets: []
+
+# spotfire-config jobs and cli pod image settings
+spotfireConfig:
+  image:
+    # -- image registry for spotfireConfig, it overrides global.spotfire.image.registry value.
+    registry:
+    # -- spotfireConfig image repository
+    repository: tibco/spotfire-config
+    # -- The spotfireConfig container image tag to be used.
+    tag: "11.8.1-v0.1.0"
+    # -- spotfireConfig image pull policy, It overrides global.spotfire.image.pullPolicy
+    pullPolicy:
+    #  -- spotfireConfig image pull secrets
+    pullSecrets: []
+
+fluentBit:
+  image:
+    # -- image repository for fluent-bit logging sidecar.
+    repository: fluent/fluent-bit
+    # -- image tag to be used for fluent-bit logging sidecar
+    tag: "1.8.12"
+    # -- image pull policy for the fluent-bit logging sidecar image.
+    pullPolicy: IfNotPresent
+
+# ===============================
+# various generic chart settings
+# ===============================
+
+# -- The number of spotfire server containers
+replicaCount: 1
+
+service:
+  ## -- haproxy deployment service type
+  type: ClusterIP
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+
+podSecurityContext: {}
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+## Spotfire Server startup, readiness and liveness probe initial delay and timeout
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /spotfire/rest/status/getStatus
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  failureThreshold: 30
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /spotfire/rest/status/getStatus
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 3
+  failureThreshold: 3
+readinessProbe:
+  enabled: false
+
+# -- Configuration of the Spotfire Server container lifecycle PreStop hook
+draining:
+  # -- enables or disables the container lifecycle PreStop hook
+  enabled: true
+  # -- The draining timeout in seconds which after the service is forcefully shutdown
+  timeoutSeconds: 60
+  # -- The minimum time in seconds that the server should be draining even if it is considered idle
+  minimumSeconds: 30
+
+ingress:
+  # -- Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the k8s cluster
+  enabled: false
+  hosts:
+      - host: "spotfire.local"
+        paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- KEDA autoscaling configuration, see https://keda.sh/docs/2.6/concepts/scaling-deployment for more details.
+# @default -- Disabled
+kedaAutoscaling:
+  enabled: false
+  # -- This is the interval to check each trigger on.
+  pollingInterval: 30
+  # -- The period to wait after the last trigger reported active before scaling the resource back to 0.
+  cooldownPeriod: 300
+  # -- Minimum number of replicas KEDA will scale the resource down to.
+  minReplicas: 1
+  # -- This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource.
+  maxReplicas: 4
+  # threshold: 8
+  # fallback: 
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 60
+  # -- Spotfire specific settings
+  spotfireConfig:
+    # -- REQUIRED The url to the Prometheus server where metrics should be fetched from
+    prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- Additional environment variables to be used by all spotfire-server pods
+extraEnvVars: []
+#  - name: NAME
+#    value: value
+
+# Name of ConfigMap containing extra environment variables all spotfire-server pods
+extraEnvVarsCM: ""
+
+# Name of Secret containing extra environment variables all spotfire-server pods
+extraEnvVarsSecret: ""
+
+# Extra initContainers
+extraInitContainers:
+  configJob: []
+  spotfireServerDeployment: []
+
+# ===============================
+# volume handling
+# ===============================
+
+# -- Extra volumeMounts for the spotfire-server container.
+# More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`
+extraVolumeMounts: []
+  # - name: example
+  #   mountPath: /opt/tibco/example.txt
+  #   subPath: example.txt
+
+# -- Extra volumes for the spotfire-server container.
+# More info: `kubectl explain deployment.spec.template.spec.volumes`
+extraVolumes: []
+  # - name: example
+  #   persistentVolumeClaim:
+  #     claimName: exampleClaim
+
+volumes:
+  troubleshooting:
+    # -- volumes.troubleshooting name
+    name: "troubleshooting"
+    persistentVolumeClaim:
+       # -- If 'true', then a 'PersistentVolumeClaim' will be created.
+      create: false
+
+      # -- Specify the name of the 'StorageClass' that should be used for the volumes.troubleshooting-claim.
+      storageClassName: ""
+
+      # -- Specifies the standard K8s resource requests and/or limits for the volumes.troubleshooting claims.
+      resources:
+        requests:
+          storage: 2Gi
+
+      # -- Specify the name of the persistent volume that should be used for the volumes.troubleshooting-claim.
+      volumeName:
+
+    # -- When 'persistentVolumeClaim.create' is 'false', then this value can be used to define already existing
+    # persistent volume claim
+    customPersistentVolumeClaimName: ""
+  
+  libraryImportExport:
+    name: "library-import-export"
+    mountPath: /opt/tibco/tss/tomcat/application-data/library
+    persistentVolumeClaim:
+       # -- If 'true', then a 'PersistentVolumeClaim' will be created.
+      create: false
+
+      # -- Specify the name of the 'StorageClass' that should be used for the libraryImportExport volume-claim.
+      storageClassName: ""
+
+      # -- Specifies the standard K8s resource requests and/or limits for the libraryImportExport volume claims.
+      resources:
+        requests:
+          storage: 1Gi
+
+      # -- Specify the name of the persistent volume that should be used for the libraryImportExport volume-claim.
+      volumeName:
+
+    # When 'persistentVolumeClaim.create' is 'false', then this value can be used to define already existing
+    # persistent volume claim
+    customPersistentVolumeClaimName: ""
+  
+  customExt:
+    name: "custom-ext"
+    mountPath: /opt/tibco/tss/tomcat/custom-ext
+    # This value can be used to define already existing
+    # persistent volume claim
+    customPersistentVolumeClaimName: ""
+
+  customCertsFolder:
+    name: "custom-certificate-storage"
+    mountPath: /opt/tibco/tss/tomcat/certs
+    # This value can be used to define already existing
+    # persistent volume claim
+    customPersistentVolumeClaimName: ""
+
+  spotfireDeployments:
+    name: "spotfire-deployments"
+    # This value can be used to define already existing
+    # persistent volume claim
+    customPersistentVolumeClaimName: ""
+
+# ===============================
+# Spotfire application configuration
+# ===============================
+
+logging:
+  # -- Specify logForwarderAddress, if left empty, default log-forwarder will be used in case log-forwarder.enabled=true. Template.
+  logForwarderAddress: ""
+  # -- Spotfire server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info
+  logLevel: ""
+
+# -- Spotfire config tool password to be used for bootstrap.xml. If not provided, this password is automatically generated.
+toolPassword: "toolpassword"
+
+database:
+  # database.url -- The JDBC URL of the database to be used by Spotfire Server, e.g. jdbc:postgresql://host:port/database
+  url: "jdbc:postgresql://HOSTNAME/"
+  # database.driverClass -- The Java class name of the JDBC driver to be used, e.g. org.postgresql.Driver
+  driverClass: "org.postgresql.Driver"
+  # database.name -- Database name to be created to hold the Spotfire Server database schemas
+  name: "spotfire"
+  # database.user -- Username to be created for the Spotfire Server database. If unset, default value spotfire would be used.
+  user: ""
+  # database.password -- Password to be created for the Spotfire Server database
+  # If not provided, this password is automatically generated.
+  password: ""
+
+  # database.create -- Creates a spotfire database instance if one does not already exist. Requires database.admin.url, database.admin.user, database.create.admin.password to be set. If unset, no database instance will be created during helm install.
+  create: true
+  admin:
+    # -- Like database.url but for used for the connection made when creating the spotfire database.
+    url: ""
+    # -- Admin username for the database server to be used as the Spotfire Server database
+    user: "postgres"
+    # -- Admin password for the database server to be used as the Spotfire Server database
+    password: ""
+  # Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed.
+  upgrade: true
+
+configuration:
+  # -- Export existing Spotfire configuration before applying any additional configuration. If false, a default configuration will be created with `config.sh create-default-config`.
+  useExisting: true
+
+  # -- Applies various spotfire application settings recommended for Kubernetes environments
+  applyKubernetesConfiguration: true
+  
+  # -- A list of configuration scripts that will be applied during helm install or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should only operate on a local configuration.xml. configuration.xml will be automatically imported after all configuration steps have been run in the order which they are defined below.
+  configurationScripts: []
+  # - name: my_configuration_script_name
+  #   script: "my configuration script content"
+
+  # -- A list of commands script that will be run during helm install or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on configuration.xml. Operations such as adding/removing users, assigning licenses are such typical administrative commands.
+  commandScripts: []
+  # - name: my_command_script_name
+  #   script: "my confiugration script content"
+
+# spotfireAdminUsername -- User to be created for the Spotfire admin
+spotfireAdminUsername: "admin"
+# spotfireAdminPassword -- Password to be created for the Spotfire admin. If not provided, this password is automatically generated.
+spotfireAdminPassword: ""
+
+cliPod:
+  # Enable or disable the spotfire-cli interactive configuration command line interface
+  enabled: true
+  # -- Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset.
+  logLevel: ""
+
+configJob:
+  # -- Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset.
+  logLevel: ""
+  # -- Keep job and its logs for this long until the job is removed
+  ttlSecondsAfterFinished: 3600
+
+troubleshooting:
+  jvm:
+    heapDumpOnOutOfMemoryError:
+      # -- Enable or disable for heap dump in case of OutOfMemoryError 
+      enabled: true
+      # -- Define a path where generated dump is exported.
+      # By default this gets mounted in EmptyDir: {} internally, which survives container restarts.
+      # In case user wants to persist troubleshooting information to some external location, user can override the default behaviour by specifying PVC in .Values.volumes.troubleshooting. 
+      dumpPath: /opt/tibco/troubleshooting/jvm-heap-dumps
+
+spotfireServerJava:
+  # -- Additional JAVA_OPTS for spotfire-server pods
+  ## Eg.
+    ## extraJavaOpts:
+    ##  - -Dsystem.property=value
+  extraJavaOpts: []
+
+# -- Site settings, see https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html for more information.
+# @default -- Spotfire Server will join the Default site
+site:
+  # -- The name of the site that the spotfire server should belong to. N.B the site needs to be created beforehand, see https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html for more information.
+  name: "Default"
+  displayName: " "
+  # -- The address clients use for connecting to the system and also used for generating absolute URLs.
+  publicAddress: ""
+
+
+# ===============================
+# haproxy
+# ===============================
+haproxy:
+  enabled: true
+  podSecurityPolicy:
+    create: false
+  kind: Deployment
+
+  service:
+    # -- Set the service haproxy service proxies traffic to the spotfire-server service. ClusterIP or LoadBalancer.
+    type: ClusterIP
+
+  # Temporary workaround to address issue in chart version 1.7.0, see
+  # https://github.com/haproxytech/helm-charts/commit/bcb6d2621192d409c00e03db4ca351b26d2dfc01#diff-c1b4de66e84520a1bd950f258cc22cfebe60117c19a4af830b27f15fd7858dad
+  extraVolumeMounts:
+    - name: chart-fix
+      mountPath: /tmp/chart/fix
+  extraVolumes:
+    - name: chart-fix
+      emptyDir: {}
+
+  # -- Prometheus annotations should match the haproxy.config settings
+  podAnnotations:
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "1024"
+    prometheus.io/scrape: "true"
+
+  podLabels:
+    #app.kubernetes.io/name: {{ include "spotfire-node-manager.name" . }}
+    #app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/part-of: spotfire
+    app.kubernetes.io/component: haproxy
+
+  # -- haproxy configuration file template
+  # @default -- The chart will create a configuration automatically
+  config: |
+    global
+      log stdout format raw local0
+      daemon
+      maxconn 1024
+    defaults
+      log global
+      mode http
+      option http-server-close
+      http-reuse safe
+      option forwardfor except 127.0.0.0/8
+      option dontlognull
+      option http-keep-alive
+      option httplog
+      option prefer-last-server
+      option redispatch
+      retries 1
+      timeout client 30m
+      timeout connect 300ms
+      timeout server 30m
+      timeout tunnel 31m
+      timeout http-request 3600s
+    frontend stats
+      bind :1024
+      http-request use-service prometheus-exporter if { path {{ index .Values "podAnnotations" "prometheus.io/path" }} }
+      stats enable
+      stats uri /stats
+      stats refresh 10s
+    frontend spotfire
+      bind :80
+
+      option httplog
+
+      {{- if .Values.spotfireConfig.debug }}
+
+      # For logging purposes
+      capture request header X-Forwarded-Proto len 5
+      {{- end }}      
+
+      {{- if or .Values.spotfireConfig.cleanup.secureCookieAttributeForHttp .Values.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp }}
+
+      # Clean up cookies attributes that work less well in different combinations, relies on correct
+      # value of the ingress to set X-Forwarded-Proto correctly.
+      http-request set-var(txn.x_forwarded_proto) req.hdr(X-Forwarded-Proto),lower
+
+      {{- if .Values.spotfireConfig.cleanup.secureCookieAttributeForHttp }}
+      http-response replace-header Set-Cookie "(.*)(; Secure)(.*)" "\1\3" if !{ var(txn.x_forwarded_proto) -m str "https" }
+      {{- end }}
+
+      {{- if .Values.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp }}
+      http-response replace-header Set-Cookie "(.*)(; SameSite=\S+)(.*)" "\1\3" if !{ var(txn.x_forwarded_proto) -m str "https" }
+      {{- end }}
+
+      {{- end }}
+
+      default_backend spotfire
+
+      {{- if .Values.spotfireConfig.cache.enabled }}
+
+      http-request cache-use tss
+      http-response cache-store tss
+      http-after-response del-header Set-Cookie if { res.cache_hit }
+
+
+      {{- if .Values.spotfireConfig.debug }}
+
+      # For debug purposes
+      http-response set-header X-Cache-Status HIT if { res.cache_hit }
+      http-response set-header X-Cache-Status MISS if !{ res.cache_hit }
+      {{- end }}
+
+      {{- end }}
+
+      {{- if .Values.spotfireConfig.debug }}
+
+      # For logging purposes
+      capture request header X-Forwarded-Proto len 5
+      {{- end }}
+
+
+    {{- if .Values.spotfireConfig.cache.enabled }}
+
+    cache tss
+      # In megabytes
+      total-max-size 100
+
+      # In seconds
+      max-age 10485760
+
+      # In bytes
+      max-object-size 10485760
+
+      process-vary on
+    {{- end }}
+    
+    backend spotfire
+      dynamic-cookie-key {{ .Values.spotfireConfig.loadBalancingCookie.dynamicCookieKey }}
+      cookie {{ .Values.spotfireConfig.loadBalancingCookie.name }} {{ .Values.spotfireConfig.loadBalancingCookie.attributes }}
+      option httpchk GET /spotfire/rest/status/getStatus HTTP/1.0
+
+      {{- if .Values.spotfireConfig.debug }}
+
+      # For debug purposes
+      http-response set-header X-Server %s
+      {{- end }}
+
+      server-template srv 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }}
+    resolvers pcdns
+      parse-resolv-conf
+      resolve_retries       3
+      timeout resolve       1s
+      timeout retry         1s
+      hold other           30s
+      hold refused         30s
+      hold nx              30s
+      hold timeout         30s
+      hold valid           10s
+      hold obsolete        30s
+
+  # -- Spotfire specific configuration related to haproxy
+  # @default -- Caching of static resource and debug response headers enabled
+  spotfireConfig:
+    # -- If debug response headers should be enabled
+    debug: true
+    # -- Cookie related configuration
+    # @default -- stateless load balancing
+    loadBalancingCookie:
+      name: JSESSIONID
+      # -- dynamic-cookie-key value in the haproxy config
+      # @default -- the cookie key
+      dynamicCookieKey: "Sp0tf1re01"
+      # -- Attributes for cookie value in the haproxy config, see https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-cookie for more information
+      attributes: "prefix dynamic"
+    cleanup:
+      # -- If SameSite cookie attribute should be removed for http connections in Set-Cookie response headers, might be needed in cases where both http and https is enabled and upstream servers sets this unconditionally
+      sameSiteCookieAttributeForHttp: true
+      # -- If incorrect Secure cookie attribute should be removed for http connections in Set-Cookie response headers
+      secureCookieAttributeForHttp: true
+
+    # @default --
+    agent:
+      # -- Spotfire Server haproxy agent-port
+      port: 9081
+    # -- Caching of static resources
+    # @default -- enabled 
+    cache:
+      enabled: true
+
+# ===============================
+# fluent-bit aka "log-forwarder"
+# ===============================
+log-forwarder:
+  # -- enables or disables the fluent-bit log-forwarder pod. If enabled it
+  # collects logs from the spotfire-server pods and sends can forward traffic
+  # to any output supported by fluent-bit.
+  enabled: true
+  rbac:
+    # -- Whether to create and rbac for the fluent-bit / log-forwarder. Setting
+    # this to `true` will require additional privileges in the kubernetes
+    # cluster
+    create: false
+  kind: Deployment
+  extraPorts:
+    - port: 5170
+      protocol: TCP
+      name: json
+      containerPort: 5170
+    - port: 24224
+      protocol: TCP
+      name: forward
+      containerPort: 24224
+  image:
+    pullPolicy: IfNotPresent
+  podAnnotations:
+    prometheus.io/path: /api/v1/metrics/prometheus
+    prometheus.io/port: "2020"
+    prometheus.io/scrape: "true"
+  labels:
+    app.kubernetes.io/part-of: spotfire
+    app.kubernetes.io/component: logging
+  service:
+    labels:
+      app.kubernetes.io/part-of: spotfire
+      app.kubernetes.io/component: logging
+  podLabels:
+    app.kubernetes.io/part-of: spotfire
+    app.kubernetes.io/component: logging
+  config:
+    # -- Override this values with a [output configuration](https://docs.fluentbit.io/manual/pipeline/outputs) to send logs to an external system.
+    # @default -- Logs will be written to stdout of the log-forwarder pod.
+    outputs: |
+      [OUTPUT]
+          Name        stdout
+          Match_Regex (tss|tsnm)\..*
+
+    # -- fluent-bit [input configuration](https://docs.fluentbit.io/manual/pipeline/inputs)
+    # @default -- [tcp input](https://docs.fluentbit.io/manual/pipeline/inputs/tcp) on port 5170 and [forward input](https://docs.fluentbit.io/manual/pipeline/inputs/forward) on port 24224
+    inputs: |
+      [INPUT]
+          Name        tcp
+          Listen      0.0.0.0
+          Port        5170
+          Chunk_Size  1M
+          Buffer_Size 6M
+          Format      json
+
+      [INPUT]
+          Name              forward
+          Listen            0.0.0.0
+          Port              24224
+          Buffer_Chunk_Size 1M
+          Buffer_Max_Size   6M
+
+    # -- Add custom fluent-bit [filters configuration](https://docs.fluen tbit.io/manual/pipeline/filters)
+    # @default -- Example that drops specific events using [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep)
+    filters: |
+      [FILTER]
+          Name     grep
+          Alias    tss.actionlog
+          Match    tss.actionlog
+          Exclude  Category node_communication

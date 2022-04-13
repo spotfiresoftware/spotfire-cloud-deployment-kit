@@ -1,0 +1,31 @@
+{{- if .Values.cliPod.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" .Release.Name "cli" | quote }}
+  labels:
+    {{- include "spotfire-server.cli.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "spotfire-server.cli.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "spotfire-server.cli.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      containers:
+        - name: {{ printf "%s-%s" (include "spotfire-server.fullname" .) "cli" | quote }}
+          command: ["/bin/sh", "-c"]
+          args: ["trap 'exit 0' TERM; while true; do sleep 3600 & wait; done"]
+          image: "{{ template "spotfire-server.spotfireConfig.image" . }}"
+          imagePullPolicy: "{{ template "spotfire-server.spotfireConfig.image.pullPolicy" . }}"
+          env:
+            {{- include "spotfire-server.configVars" . | nindent 12 -}}
+            {{- include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{- include "spotfire-server.database.envVars" . | nindent 12 }}
+            - name: LOG_LEVEL
+              value: {{ .Values.cliPod.logLevel | default .Values.logging.logLevel | quote }}
+{{- end -}}
