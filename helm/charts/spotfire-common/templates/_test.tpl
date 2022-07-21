@@ -7,6 +7,7 @@ metadata:
     {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   containers:
     - name: curl

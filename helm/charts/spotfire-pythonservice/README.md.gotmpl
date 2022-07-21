@@ -16,27 +16,27 @@
 
 ## Overview
 
-This chart deploys the [TIBCO Spotfire® Service for Python](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [TIBCO Spotfire® Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/the_tibco_spotfire_service_for_python.html) service (Python service) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- The Python Service pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
+- The Python service pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
 - The chart includes service annotations for [Prometheus](https://prometheus.io/) scrapers.
-The Prometheus server will discover the service endpoint using these specifications and will scrape metrics from the exporter.
+The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
 
-This chart has been tested to work with [Elasticsearch](www.elastic.co/products/elasticsearch) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [Elasticsearch](www.elastic.co/products/elasticsearch) and [Prometheus](https://prometheus.io/).
 
 ## Prerequisites
 
-- A deployed Spotfire Server release, using the [Spotfire Server](../spotfire-server/README.md) chart.
+- A deployed Spotfire Server release using the [Spotfire Server](../spotfire-server/README.md) chart.
 
 ## Usage
 
-### Install
+### Installing
 
 1. Export the `SPOTFIRE_SERVER` value to connect to the `spotfire-server` service:
     ```bash
     export SPOTFIRE_SERVER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=spotfire-server --output=jsonpath={.items..metadata.name})
     ```
-2.  To forward the logs to the `log-forwarder` service:
+2.  Forward the logs to the `log-forwarder` service:
     ```bash
     export LOG_FORWARDER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=log-forwarder --output=jsonpath={.items..metadata.name})
     ```
@@ -50,12 +50,14 @@ This chart has been tested to work with [Elasticsearch](www.elastic.co/products/
         -f my-values.yaml
     ```
 
-**Note**: You need to provide your private registry address where the Spotfire containers are stored.
+**Note**: You must provide your private registry address where the Spotfire containers are stored.
 
-#### Configuration
+See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
-You can override the default configuration settings by setting environment variables with `extraEnvVars`.
-See [docker README](../../../docker/spotfire-pythonservice/README.md#environment-variables) for the complete list.
+#### Configuring
+
+Override the default configuration settings by setting environment variables with `extraEnvVars`.
+See [containers README](../../../containers/spotfire-pythonservice/README.md#environment-variables) for the complete list.
 
 Example:
 ```
@@ -64,14 +66,14 @@ extraEnvVars:
   value: "3600"
 ```
 
-You can also override the default configuration settings by providing a custom configuration file.
+Additionally, you can override the default configuration settings by providing a custom configuration file.
 
 The following configuration keys are available in the chart:
 - config."custom.properties"
 
-**Note**: If a configuration file key is non-emtpy it will override the default service configuration file built in the image.
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
 
-For Spotfire Service for Python configuration, see [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/custom_configuration_properties.html).
+For Python service configuration, see [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/custom_configuration_properties.html).
 
 Example: Using `my-custom.properties` instead of the default `custom.properties`:
 ```bash
@@ -81,40 +83,39 @@ helm install my-release . \
     --set-file config.'custom\.properties'=my-custom.properties
 ```
 
-**Note**: The keys are quoted because they contain periods. When setting them from the command line the periods should be escaped with a `\`.
+**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a `\`.
 
-#### Get container original configuration files
+#### Getting the original container configuration files
 
-It can be useful to get a copy of the default configuration files used in the container image to use them as templates for your custom configuration.
+Copy the default configuration files used in the container image and use them as templates for your custom configuration.
 
 **Note**: The configuration files content can be version dependent.
 
 Example: Use the following command to get a copy of the original configuration file `custom.properties`.
-You can replace the filename to get a copy any of the other container configuration files.
+You can replace the file name to get a copy any of the other container configuration files.
 ```bash
 docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-pythonservice:<imagetag> 5):/opt/tibco/tsnm/nm/services/PYTHON/conf/custom.properties .
 ```
 
-**Note**: The previous command can only copy the contents from a running container instance.
-
-### Uninstall
+### Uninstalling
 
 To uninstall/delete the `my-release` deployment:
 ```bash
-helm delete my-release
+helm uninstall my-release
 ```
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
 
 ### Scaling
 
-For scaling the `my-release` deployment, just do a helm upgrade providing the target number of pod instances in the `replicaCount` variable.
+For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
 ```bash
 helm upgrade --install my-release . --reuse-values --set replicaCount=3
 ```
 
 #### Autoscaling with KEDA
 
-[KEDA](https://keda.sh/docs) can be used for autoscaling.
-For that, KEDA must be installed in the k8s cluster, as well as a Prometheus instance that scrapes metrics from the Spotfire pods.
+To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
 Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
 ```
@@ -130,23 +131,39 @@ kedaAutoscaling:
   maxReplicas: 3
 ```
 
-For the `spotfire-terrservice`, the default autoscaling metric used is the `spotfire_service_queue_engines_inUse`.
-And the default query used is the sum of _service_queue_engines_inUse_ of the Python service instances.
+The `spotfire-pythonservice` has the following defaults:
+- The default autoscaling metric is the `spotfire_service_queue_engines_inUse`.
+- The default query is the sum of _service_queue_engines_inUse_ of the Python service instances.
 
 The counter _serviceQueueEnginesInUse_ provides the total number of engines currently executing.
-By default, the Python service has `number of cores - 1` available slots, which means that `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
-Typically, you want to scale out before all of the available capacity is taken, so the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
-Note that clients requesting a slot will typically wait until a slot is available.
+By default, the Python service has `number of cores - 1` available slots, so `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
+Typically, `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu` so the instance is scaled out before all of the available capacity is taken.
 
-For more information, see [Monitoring the Python service](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/monitoring_spotfire_service_for_python_using_jmx.html).
+**Note**:  Clients requesting a slot typically wait until a slot is available.
 
-**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (e.g., `engine.execution.timeout` and `engine.session.maxtime`, so that long running jobs are not aborted prematurely when scaling in.
-See [Engine Timeout](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/engine_timeout.html) for more details).
+For more information, see [Monitoring Spotfire Service for Python using JMX](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/monitoring_spotfire_service_for_python_using_jmx.html).
+
+**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long running jobs are not aborted prematurely when the instance is scaled in.
+See [Engine Timeout](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
-### Upgrade
+Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
+```
+kedaAutoscaling:
+  triggers:
+  # {list of triggers to activate scaling of the target resource}
+```
 
-_TODO: Provide details on how to upgrade Spotfire using this chart_
+### Upgrading
+
+To upgrade the `my-release` deployment:
+```bash
+helm upgrade --install my-release .
+```
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
 
 {{ template "chart.valuesSection" . }}

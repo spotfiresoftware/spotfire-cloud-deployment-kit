@@ -1,0 +1,11 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:oracle:thin:@//oracle-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:1521/ORCL"
+    driverClass: "oracle.jdbc.OracleDriver"
+    password: "Spotfire123"
+  create-db:
+    adminUsername: admin 
+    adminPassword: Spotfire123
+    databaseUrl: "jdbc:oracle:thin:@//oracle-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:1521/ORCL"
+    spotfiredbDbname: ""
+    variant: "rds"

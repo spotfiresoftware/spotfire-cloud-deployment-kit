@@ -21,6 +21,7 @@ spec:
   {{- toYaml .Values.kedaAutoscaling.advanced | nindent 4 }}
   {{- end }}
   triggers:
+  {{- if empty .Values.kedaAutoscaling.triggers }}
   - type: prometheus
     metadata:
       serverAddress: {{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}
@@ -28,5 +29,9 @@ spec:
       threshold: {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
       query: {{ printf "sum(spotfire_service_queue_engines_inUse{capability=\"PYTHON\", app_kubernetes_io_instance=\"%s\"})" .Release.Name | quote }}
       namespace: {{ .Release.Namespace }}
-
+  {{- else }}
+  {{- with .Values.kedaAutoscaling.triggers }}
+  {{- tpl (. | toYaml ) $ | nindent 4 }}
+  {{- end }}
+  {{- end }}
 {{- end -}}

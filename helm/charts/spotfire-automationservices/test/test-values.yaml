@@ -1,0 +1,67 @@
+nodemanagerConfig:
+  serverBackendAddress: "mytss-spotfire-server"
+  preStopDrainingTimeoutSeconds: 1000
+  terminationGracePeriodSeconds: 180
+
+logging:
+  logForwarderAddress: "mytss-log-forwarder-automationservices"
+  logLevel: "info"
+
+extraEnvVars:
+  - name: automationservices
+    value: VALUE
+
+extraEnvVarsCM: automationservicescm
+extraEnvVarsSecret: automationservicessecret
+
+extraVolumeMounts:
+  - name: asvolume
+    mountPath: /opt/tibco/services
+
+extraVolumes:
+  - name: asvolume
+    persistentVolumeClaim:
+      claimName: as-pvc
+
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command: ['echo', "hey"]
+
+fluentBitSidecar:
+  securityContext:
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+
+kedaAutoscaling:
+  enabled: true
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitoring.svc.cluster.local
+    spotfireServerHelmRelease: tss
+  threshold: 8
+  fallback:                                          # Optional. Section to specify fallback options
+    replicas: 1                                      # Mandatory if fallback section is included
+    failureThreshold: 3                              # Mandatory if fallback section is included
+  advanced:                                          # Optional. Section to specify advanced options
+    restoreToOriginalReplicaCount: true              # Optional. Default: false
+    horizontalPodAutoscalerConfig:                   # Optional. Section to specify HPA related options
+      behavior:                                      # Optional. Use to modify HPA's scaling behavior
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15  

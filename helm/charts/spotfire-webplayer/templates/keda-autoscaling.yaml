@@ -1,0 +1,37 @@
+{{- if .Values.kedaAutoscaling.enabled -}}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ printf "%s-%s-keda" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+spec:
+  scaleTargetRef:
+    apiVersion:    apps/v1
+    kind:          Deployment
+    name:          {{ include "spotfire-common.spotfire-service.fullname" . }}
+  pollingInterval:  {{ .Values.kedaAutoscaling.pollingInterval }}
+  cooldownPeriod:   {{ .Values.kedaAutoscaling.cooldownPeriod }}
+  minReplicaCount:  {{ .Values.kedaAutoscaling.minReplicas }}
+  maxReplicaCount:  {{ .Values.kedaAutoscaling.maxReplicas }}
+  {{- if .Values.kedaAutoscaling.fallback }}
+  fallback:
+  {{- toYaml .Values.kedaAutoscaling.fallback | nindent 4 }}
+  {{- end }}
+  {{- if .Values.kedaAutoscaling.advanced }}
+  advanced:
+  {{- toYaml .Values.kedaAutoscaling.advanced | nindent 4 }}
+  {{- end }}
+  triggers:
+  {{- if empty .Values.kedaAutoscaling.triggers }}
+  - type: prometheus
+    metadata:
+      serverAddress: {{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}
+      metricName: spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status
+      threshold: {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
+      query: {{ printf "sum(spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status{capability=\"WEB_PLAYER\", app_kubernetes_io_instance=\"%s\"})" .Release.Name | quote }}
+      namespace: {{ .Release.Namespace }}
+  {{- else }}
+  {{- with .Values.kedaAutoscaling.triggers }}
+  {{- tpl (. | toYaml ) $ | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end -}}

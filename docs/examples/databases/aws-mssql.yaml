@@ -1,0 +1,10 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:sqlserver://mssql-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:1433;DatabaseName=spotfire"
+    driverClass: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    password: "spotfire1"
+  create-db:
+    adminUsername: admin
+    adminPassword: "Spotfire123"
+    databaseUrl: "jdbc:sqlserver://mssql-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:1433"
+    variant: "rds"

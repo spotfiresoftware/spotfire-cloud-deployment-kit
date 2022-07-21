@@ -21,6 +21,29 @@ extraVolumes:
     persistentVolumeClaim:
       claimName: terr-pvc
 
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command: ['echo', "hey"]
+
+fluentBitSidecar:
+  securityContext:
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+
 kedaAutoscaling:
   enabled: true
   spotfireConfig:

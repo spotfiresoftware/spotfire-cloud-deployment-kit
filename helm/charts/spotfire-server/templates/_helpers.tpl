@@ -53,10 +53,17 @@ labels for cli pod
 */}}
 {{- define "spotfire-server.cli.labels" -}}
 helm.sh/chart: {{ include "spotfire-server.chart" . }}
+{{ include "spotfire-server.cli.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels for cli pod
+*/}}
+{{- define "spotfire-server.cli.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "spotfire-server.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/part-of: spotfire
@@ -85,27 +92,31 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Database info needed to bootstrap server
+Database info needed to bootstrap and upgrade server
 */}}
 {{- define "spotfire-server.database.envVars" -}}
 - name: SPOTFIREDB_URL
-  value: {{ required "database.url must be set" .Values.database.url | quote }}
-- name: SPOTFIREDB_DBNAME
-  value: {{ required "database.name" .Values.database.name | quote }}
+  value: {{ required "database.bootstrap.databaseUrl must be set" .Values.database.bootstrap.databaseUrl | quote }}
 - name: SPOTFIREDB_USERNAME
   valueFrom:
     secretKeyRef:
       name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
       key: SPOTFIREDB_USERNAME
+      optional: false
 - name: SPOTFIREDB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
       key: SPOTFIREDB_PASSWORD
+      optional: false
 - name: SPOTFIREDB_CLASS
-  value: {{ .Values.database.driverClass | quote }}
+  value: {{ required "driver class must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: TOOL_PASSWORD
   value: {{ .Values.toolPassword | quote }}
+{{- if .Values.encryptionPassword }}
+- name: ENCRYPTION_PASSWORD
+  value: {{ .Values.encryptionPassword | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -126,15 +137,26 @@ Configuration job environment variables
 Database admin credentials environment variables needed to create a Spotfire schema
 */}}
 {{- define "spotfire-server.database.adminEnvVars" -}}
-{{- if .Values.database.create -}}
+{{- $values := (index .Values "database" "create-db") -}}
+- name: SPOTFIREDB_DBNAME
+  value: {{ $values.spotfiredbDbname | quote }}
+{{- if index $values.enabled }}
 - name: DBSERVER_ADMIN_USERNAME
-  value: {{ required "database.admin.user must be set" .Values.database.admin.user | quote }}
+  value: {{ required "database.create-db.adminUsername must be set" $values.adminUsername | quote }}
 - name: DBSERVER_ADMIN_PASSWORD
-  value: {{ required "database.admin.password must be set" .Values.database.admin.password | quote }}
+  value: {{ required "database.create-db.adminPassword must be set" $values.adminPassword | quote }}
 - name: DBSERVER_CLASS
-  value: {{ required "database.driverClass must be set" .Values.database.driverClass | quote }}
+  value: {{ required "database.bootstrap.driverClass must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: DBSERVER_URL
-  value: {{ required "database.admin.url must be set" .Values.database.admin.url | quote }}
+  value: {{ required "database.create-db.databaseUrl must be set" $values.databaseUrl | quote }}
+- name: DO_NOT_CREATE_USER
+  value: {{ $values.doNotCreateUser | quote }}
+- name: VARIANT
+  value: {{ $values.variant | quote }}
+- name: ORACLE_TABLESPACE_PREFIX
+  value: {{ $values.oracleTablespacePrefix | quote }}
+- name: ORACLE_ROOT_FOLDER
+  value: {{ $values.oracleRootfolder | quote }}
 {{- end -}}
 {{- end -}}
 
@@ -186,81 +208,24 @@ jvm heap dump path
 {{- end -}}
 
 {{/*
-Return the proper image name (for spotfireServer image)
+Get PVC name for persistent volume
 */}}
-{{- define "spotfire-server.image" -}}
-{{- include "spotfire-common.images.image" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Return the proper image name (for spotfireConfig image)
-*/}}
-{{- define "spotfire-server.spotfireConfig.image" -}}
-{{- include "spotfire-common.images.image" (dict "image" .Values.spotfireConfig.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Return the proper Docker Image Registry Secret Names (for spotfireServer image)
-*/}}
-{{- define "spotfire-server.imagePullSecrets" -}}
-{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Return the proper Docker Image Registry Secret Names (for spotfireConfig image)
-*/}}
-{{- define "spotfire-server.spotfireConfig.imagePullSecrets" -}}
-{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.spotfireConfig.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Return the proper image pullPolicy (for spotfireServer image)
-*/}}
-{{- define "spotfire-server.image.pullPolicy" -}}
-{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Return the proper image pullPolicy (for spotfireConfig image)
-*/}}
-{{- define "spotfire-server.spotfireConfig.image.pullPolicy" -}}
-{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.spotfireConfig.image "globalPath" .Values.global.spotfire) -}}
-{{- end -}}
-
-{{/*
-Spotfire custom-ext pvc name
-*/}}
-{{- define "spotfire-server.volumes.custom-ext.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.customExt.customPersistentVolumeClaimName) -}}
-{{- end -}}
-
-{{/*
-Spotfire library import/export pvc name
-*/}}
-{{- define "spotfire-server.volumes.library-import-export.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.libraryImportExport.customPersistentVolumeClaimName "releaseName" ( include "spotfire-server.fullname" . ) "volumeName" .Values.volumes.libraryImportExport.name ) -}}
-{{- end -}}
-
-{{/*
-Spotfire deployment pvc name
-*/}}
-{{- define "spotfire-server.volumes.deployments.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.spotfireDeployments.customPersistentVolumeClaimName) -}}
-{{- end -}}
-
-
-{{/*
-Spotfire custom certificate storage folder pvc name
-*/}}
-{{- define "spotfire-server.volumes.custom-certificate-storage.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.customCertsFolder.customPersistentVolumeClaimName ) -}}
+{{- define "spotfire-server.persistentVolumeClaim.claimName" -}}
+{{- .existingClaim | default (printf "%s-%s" .releaseName .volumeName) -}}
 {{- end -}}
 
 {{/*
 Spotfire troubleshooting storage folder pvc name
 */}}
 {{- define "spotfire-server.troubleshooting.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.troubleshooting.customPersistentVolumeClaimName "releaseName" ( include "spotfire-server.fullname" . ) "volumeName" .Values.volumes.troubleshooting.name ) -}}
+{{- include "spotfire-server.persistentVolumeClaim.claimName" (dict "existingClaim" .Values.volumes.troubleshooting.existingClaim "releaseName" ( include "spotfire-server.fullname" . ) "volumeName" "troubleshooting" ) -}}
+{{- end -}}
+
+{{/*
+Spotfire library import/export pvc name
+*/}}
+{{- define "spotfire-server.volumes.library-import-export.pvc.name" -}}
+{{- include "spotfire-server.persistentVolumeClaim.claimName" (dict "existingClaim" .Values.volumes.libraryImportExport.existingClaim "releaseName" ( include "spotfire-server.fullname" . ) "volumeName" "library-import-export" ) -}}
 {{- end -}}
 
 {{/*
@@ -275,7 +240,79 @@ Emulates spotfire-server.fullname the spotfire-server parent chart
 {{- end }}
 {{- end -}}
 
-{{- define "spotfire-server.spotfireConfig.fullname" -}}
-{{- $name := .Chart.Name }}
-{{- printf "%s-%s-%d" .Release.Name "config-job" .Release.Revision }}
-{{- end }}
+{{/*
+Return the proper Container Image Registry Secret Names (for configJob Job)
+*/}}
+{{- define "spotfire-server.configJob.fullname" -}}
+{{ printf "%s-%s-%d" .Release.Name "config-job" .Release.Revision }}
+{{- end -}}
+{{/*
+
+======
+IMAGES
+======
+*/}}
+
+{{/*
+Return the proper image name (for spotfireServer image)
+*/}}
+{{- define "spotfire-server.image" -}}
+{{- include "spotfire-common.images.image" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper image pullPolicy (for spotfireServer image)
+*/}}
+{{- define "spotfire-server.image.pullPolicy" -}}
+{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper Container Image Registry Secret Names (for spotfire server deployment)
+*/}}
+{{- define "spotfire-server.imagePullSecrets" -}}
+{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper image name (for cliPod image)
+*/}}
+{{- define "spotfire-server.cliPod.image" -}}
+{{- include "spotfire-common.images.image" (dict "image" .Values.cliPod.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper image pullPolicy (for cliPod image)
+*/}}
+{{- define "spotfire-server.cliPod.image.pullPolicy" -}}
+{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.cliPod.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper Container Image Registry Secret Names (for cliPod deployment)
+*/}}
+{{- define "spotfire-server.cliPod.imagePullSecrets" -}}
+{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.cliPod.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+
+{{/*
+Return the proper image name (for configJob image)
+*/}}
+{{- define "spotfire-server.configJob.image" -}}
+{{- include "spotfire-common.images.image" (dict "image" .Values.configJob.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper image pullPolicy (for configJob image)
+*/}}
+{{- define "spotfire-server.configJob.image.pullPolicy" -}}
+{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.configJob.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper Container Image Registry Secret Names (for configJob Job)
+*/}}
+{{- define "spotfire-server.configJob.imagePullSecrets" -}}
+{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.configJob.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}

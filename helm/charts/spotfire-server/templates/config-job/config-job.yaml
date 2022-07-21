@@ -1,0 +1,144 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "spotfire-server.configJob.fullname" . | quote }}
+  labels:
+    app.kubernetes.io/component: configurator
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+  annotations:
+spec:
+  ttlSecondsAfterFinished: {{ .Values.configJob.ttlSecondsAfterFinished }} 
+  template:
+    metadata:
+      {{- with .Values.configJob.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "spotfire-server.configJob.imagePullSecrets" . | nindent 6}}
+      restartPolicy: Never
+      {{- if .Values.configJob.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.configJob.extraInitContainers) $ | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      containers:
+        - name: config-job
+          command: ["/bin/sh","-c"]
+          args: ["/opt/tibco/scripts/main.sh"]
+          image: {{ include "spotfire-server.configJob.image" . }}
+          imagePullPolicy: {{ include "spotfire-server.configJob.image.pullPolicy" . }}
+          envFrom:
+          - secretRef:
+              name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
+          - secretRef:
+              name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+          {{- if .Values.configJob.extraEnvVarsSecret }}
+          - secretRef:
+              name: {{ tpl .Values.configJob.extraEnvVarsSecret $ }}
+          {{- end }}
+          {{- if .Values.configJob.extraEnvVarsCM }}
+          - configMapRef:
+              name: {{ tpl .Values.configJob.extraEnvVarsCM $ }}
+          {{- end }}
+          env:
+            {{- if .Values.configJob.extraEnvVars }}
+            {{ tpl (toYaml .Values.configJob.extraEnvVars) $ | nindent 12 }}
+            {{- end }}
+            {{ include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{ include "spotfire-server.database.envVars" . | nindent 12 }}
+            {{ include "spotfire-server.configVars" . | nindent 12 }}
+            {{ include "spotfire-server.database.adminEnvVars" . | nindent 12}}
+            - name: LOG_APPENDER
+              value: "console"
+            - name: LOG_LEVEL
+              value: {{ .Values.configJob.logLevel | quote }}
+            - name: JOB_INSTALL
+              value: {{ if (index .Values "database" "create-db" "enabled") }}"true"{{ else }}"false"{{ end }}
+            - name: JOB_DATABASE_UPGRADE
+              value: {{ .Values.database.upgrade | quote }}
+            - name: JOB_USE_EXISTING_CONFIGURATION
+              value: {{ .Values.configuration.useExisting | quote }}
+            - name: JOB_DEFAULT_CONFIGURE
+              value: {{ .Values.configuration.applyKubernetesConfiguration | quote }}
+            - name: JOB_CONFIGURATION_COMMENT
+              value: {{ printf "Helm configuration update - release=%s revision=%s" .Release.Name .Release.Revision }}
+          resources: {}
+          volumeMounts:
+            - name: config-job-scripts-volume
+              mountPath: /opt/tibco/scripts/
+            {{- if .Values.configuration.commandScripts }}
+            - name: command-scripts-volume
+              mountPath: /opt/tibco/command-scripts/
+            {{- end }}
+            {{- if .Values.configuration.configurationScripts }}
+            - name: configuration-scripts-volume
+              mountPath: /opt/tibco/configuration-scripts/
+            {{- end }}
+            {{- if .Values.volumes.deployments.existingClaim }}
+            - name: deployments-volume
+              mountPath: /opt/tibco/spotfireconfigtool/deployments
+            {{- end }}
+            {{- if .Values.volumes.certificates.existingClaim }}
+            - name: certificates-volume
+              mountPath: /opt/tibco/spotfireconfigtool/certs
+            {{- end }}
+            {{- if .Values.volumes.customExt.existingClaim }}
+            - name: custom-ext
+              mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+            {{- end }}
+            {{- with .Values.configJob.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+      # use sh txt
+      volumes:
+        {{- with .Values.configJob.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: config-job-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-config-job-scripts
+            defaultMode: 0755
+        {{- if .Values.configuration.commandScripts }}
+        - name: command-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-command-scripts
+            defaultMode: 0755
+        {{- end -}}
+        {{- if .Values.configuration.configurationScripts }}
+        - name: configuration-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-configuration-scripts
+            defaultMode: 0755
+        {{- end -}}
+        {{- if .Values.volumes.deployments.existingClaim }}
+        - name: deployments-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.deployments.existingClaim }}
+        {{- end }}
+        {{- if .Values.volumes.certificates.existingClaim }}
+        - name: certificates-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.certificates.existingClaim }}
+        {{- end }}
+        {{ if .Values.volumes.customExt.existingClaim -}}
+        - name: custom-ext
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.customExt.existingClaim }}
+        {{- end }}
+      {{- with .Values.configJob.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.configJob.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.configJob.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

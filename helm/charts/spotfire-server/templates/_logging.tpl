@@ -1,21 +1,3 @@
-{{/*
-Logging environment environment variables needed by spotfire
-*/}}
-{{- define "spotfire-server.logging.serverEnvVars" -}}
-{{- if .Values.logging.logLevel -}}
-- name: LOGGING_LOGLEVEL
-  value: {{ .Values.logging.logLevel | quote }}
-{{- end -}}
-{{/*
-{{- if (index .Values "log-forwarder").enabled  }}
-- name: LOGGING_JSON_HOST
-  value: {{ include "spotfire.log-forwarder.fullname" . | quote }}
-- name: LOGGING_JSON_PORT
-  value: "5170"
-{{- end }}
-*/}}
-{{- end -}}
-
 {{/* Variables used by sidecar logging container to annotate log entries with POD information */}}
 {{- define "spotfire-server.logging.podAnnotationsEnvVars" -}}
 - name: POD_NAME

@@ -1,17 +1,22 @@
-1. To get login credentials for spotfire admin run:
 
-    Username:
-      export SPOTFIREADMIN_USERNAME=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfireadmin.secret.name" . }} -o jsonpath="{.data.SPOTFIREADMIN_USERNAME}" | base64 --decode)
+- Login credentials for spotfire admin user
+   
+  # Admin username:
+  export SPOTFIREADMIN_USERNAME=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfireadmin.secret.name" . }} -o jsonpath="{.data.SPOTFIREADMIN_USERNAME}" | base64 --decode)
+  
+  # Admin password:
+  export SPOTFIREADMIN_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfireadmin.secret.name" . }} -o jsonpath="{.data.SPOTFIREADMIN_PASSWORD}" | base64 --decode)
 
-    Password:
-      export SPOTFIREADMIN_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfireadmin.secret.name" . }} -o jsonpath="{.data.SPOTFIREADMIN_PASSWORD}" | base64 --decode)
+- Spotfire database credentials
 
-2. To get database password for user {{ .Values.database.user }} run:
+  # Database username:
+  export SPOTFIREDB_USERNAME=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfiredatabase.secret.name" . }} -o jsonpath="{.data.SPOTFIREDB_USERNAME}" | base64 --decode)
 
-      export SPOTFIREDB_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfiredatabase.secret.name" . }} -o jsonpath="{.data.SPOTFIREDB_PASSWORD}" | base64 --decode)
+  # Database password:
+  export SPOTFIREDB_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfiredatabase.secret.name" . }} -o jsonpath="{.data.SPOTFIREDB_PASSWORD}" | base64 --decode)
 
-3. Application URL:
-{{- if .Values.ingress.enabled }}
+- Application URL
+{{ if .Values.ingress.enabled }}
 {{- range $host := .Values.ingress.hosts }}
   {{- range .paths }}
   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
@@ -32,13 +37,35 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
+
+  # The server backend address is {{ include "spotfire-server.fullname" . }}
+
 {{- if .Values.cliPod.enabled }}
 
-To log in to the always on configuration pod use this command:
+- Configuration tool
+
+  # To get a shell on the always on configuration pod use this command:
   kubectl --namespace {{ .Release.Namespace }} exec -it $(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/component=cli, app.kubernetes.io/instance={{ .Release.Name }}, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}" ) -- bash
 
-  # Run ./bootstrap.sh to create a bootstrap.xml file
+  # Run './bootstrap.sh' to create a bootstrap.xml before starting to use config.sh.
 {{- end }}
 
-In the event of a failure, to view the logs of configuration job:
-  kubectl --namespace {{ .Release.Namespace }} logs jobs.batch/{{ include "spotfire-server.spotfireConfig.fullname" . }}
+- Accessing and viewing logs
+  
+  # To view the logs of configuration job:
+  kubectl --namespace {{ .Release.Namespace }} logs jobs.batch/{{ include "spotfire-server.configJob.fullname" . }} -c config-job
+
+{{- if (index .Values "log-forwarder").enabled }}
+  
+  # Application logs are sent to default address {{ template "spotfire-server.log-forwarder.fullname" . }}. To view the logs on the log-forwarder run:
+  export LOG_FORWARDER_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name=log-forwarder,app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} logs "${LOG_FORWARDER_NAME}" -c log-forwarder
+{{- else if (tpl .Values.logging.logForwarderAddress $) }}
+
+  # Application logs are sent to non-default address {{ template "spotfire-server.log-forwarder.fullname" . }}
+{{- else }}
+  
+  # Log forwarding is disabled. To view logs for spotfire server pods, run:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "spotfire-server.name" . }}, app.kubernetes.io/instance={{ .Release.Name }}, app.kubernetes.io/component=server, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}")
+    kubectl --namespace {{ .Release.Namespace }} logs "${POD_NAME}" -c fluent-bit
+{{- end }}

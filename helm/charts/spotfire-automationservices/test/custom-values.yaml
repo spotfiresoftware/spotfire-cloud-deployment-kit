@@ -1,0 +1,11 @@
+nodemanagerConfig:
+    serverBackendAddress: "mytss-spotfire-server"
+
+logging:
+    logLevel: INFO
+
+fullNameOverride: myautomationservices
+
+serviceAccount:
+    create: true
+    name: my-service-account-name

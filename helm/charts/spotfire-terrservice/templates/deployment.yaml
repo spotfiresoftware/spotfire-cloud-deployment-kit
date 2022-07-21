@@ -10,7 +10,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "spotfire-common.spotfire-service.labels" . | nindent 6 }}
+      {{- include "spotfire-common.spotfire-service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -26,6 +26,10 @@ spec:
       serviceAccountName: {{ include "spotfire-common.spotfire-service.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.extraInitContainers) $ | nindent 10 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -40,7 +44,7 @@ spec:
           {{- if .Values.extraEnvVarsCM }}
           - configMapRef:
               name: {{ tpl .Values.extraEnvVarsCM $ }}
-          {{- end }}          
+          {{- end }}
           env:
           - name: NODEMANAGER_IP_ADDRESS
             valueFrom:
@@ -49,13 +53,15 @@ spec:
           - name: SERVER_BACKEND_ADDRESS
             value: {{ required "The spotfire server service address must be set for spotfire nodemanager configuration" (tpl .Values.nodemanagerConfig.serverBackendAddress $) }}
           {{- include "spotfire-common.spotfire-service.logging.serverEnvVars" . | nindent 10 }}
+          {{- include "spotfire-common.spotfire-service.logging.podAnnotationsEnvVars" . | nindent 10 }}
           {{- if .Values.extraEnvVars }}
           {{ tpl (toYaml .Values.extraEnvVars) $ | nindent 10 }}
           {{- end }}
           volumeMounts:
           - name: logs-volume
             mountPath: /opt/tibco/tsnm/nm/logs
-          {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.customPersistentVolumeClaimName }}
+          {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
+          {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
           - name: {{ .Values.volumes.packages.name }}
             mountPath: {{ .Values.volumes.packages.mountPath }}
           {{- end }}
@@ -73,7 +79,7 @@ spec:
             - name: service
               containerPort: 9501
               protocol: TCP
-            - name: backend 
+            - name: backend
               protocol: TCP
               containerPort: 9443
             - name: registration
@@ -98,8 +104,10 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: fluent-bit
-          image: "{{ .Values.fluentBit.image.repository }}:{{ .Values.fluentBit.image.tag }}"
-          imagePullPolicy: "{{ .Values.fluentBit.image.pullPolicy }}"
+          securityContext:
+            {{- toYaml .Values.fluentBitSidecar.securityContext | nindent 12 }}
+          image: "{{ .Values.fluentBitSidecar.image.repository }}:{{ .Values.fluentBitSidecar.image.tag }}"
+          imagePullPolicy: "{{ .Values.fluentBitSidecar.image.pullPolicy }}"
           ports:
             - name: http
               containerPort: 2020
@@ -119,14 +127,15 @@ spec:
           - name: CONTAINER_NAME
             value: {{ .Chart.Name }}
           volumeMounts:
-          {{- include "spotfire-fluentbit-configuration.volume.mount" . | indent 10}}
+          {{- include "spotfire-common.fluenbit-configuration.volume.mount" . | indent 10 }}
       volumes:
-      {{- with .Values.extraVolumes }}
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- with .Values.extraVolumes }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- include "spotfire-common.volumes.troubleshooting.volume" . | indent 8 }}
         - name: logs-volume
           emptyDir: {}
-        {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.customPersistentVolumeClaimName }}
+        {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
         - name: {{ .Values.volumes.packages.name }}
           persistentVolumeClaim:
             claimName: {{ include "spotfire-common.spotfire-service.volumes.packages.pvc.name" . }}
@@ -136,7 +145,7 @@ spec:
             name: {{ .Release.Name }}-{{ .Chart.Name }}-serviceconfig
         - name: fluent-bit-config
           configMap:
-            name: {{ include "spotfire-fluentbit-configuration.name" . }}
+            name: {{ include "spotfire-common.fluenbit-configuration.configmapName" . }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

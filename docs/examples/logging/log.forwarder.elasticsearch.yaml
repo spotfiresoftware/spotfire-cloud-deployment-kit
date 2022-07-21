@@ -1,0 +1,16 @@
+log-forwarder:
+  config:
+    outputs: |
+      [OUTPUT]
+          Name            es
+          Match_Regex     (tss|tsnm)\..*
+          Host            elasticsearch-master
+          Port            9200
+          Retry_Limit     false
+          Type            _doc
+          Time_Key        @timestamp
+          Logstash_Format On
+          Logstash_Prefix spotfire
+          Index           spotfire
+          Include_Tag_Key On
+          Tag_Key         log.type

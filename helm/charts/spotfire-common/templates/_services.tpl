@@ -31,6 +31,25 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Service NOTES.txt
+*/}}
+{{- define "spotfire-common.spotfire-service.notes" -}}
+Service of type {{ include "spotfire-common.spotfire-service.component.name"  . }} with name {{ include "spotfire-common.spotfire-service.fullname" . }} has been {{ if .Release.IsInstall }}installed{{ else }}upgraded{{ end }}.
+
+The {{ include "spotfire-common.spotfire-service.component.name"  . }} is connected to spotfire server on backend address {{ tpl .Values.nodemanagerConfig.serverBackendAddress $ }}.
+
+{{ if (tpl .Values.logging.logForwarderAddress $) -}}
+Log are being forwarded to {{ (tpl .Values.logging.logForwarderAddress $) }}
+{{- else -}}
+
+Log forwarding is disabled. To view logs for the service pod run:
+
+    export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "spotfire-common.spotfire-service.name" . }}, app.kubernetes.io/instance={{ .Release.Name }}, app.kubernetes.io/component={{ include "spotfire-common.spotfire-service.component.name" . }}, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}")
+    kubectl --namespace {{ .Release.Namespace }} logs "${POD_NAME}" -c fluent-bit
+{{- end }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "spotfire-common.spotfire-service.labels" -}}
@@ -49,7 +68,7 @@ Selector labels
 app.kubernetes.io/name: {{ include "spotfire-common.spotfire-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/part-of: spotfire
-app.kubernetes.io/component: {{ include "spotfire-service.component.name" . }}
+app.kubernetes.io/component: {{ include "spotfire-common.spotfire-service.component.name"  . }}
 {{- end }}
 
 {{/*
@@ -78,16 +97,8 @@ Return the proper image pullPolicy (for spotfire-service image)
 {{- end -}}
 
 {{/*
-Return the proper Docker Image Registry Secret Names (for spotfire-service image)
+Return the proper Container Image Registry Secret Names (for spotfire-service image)
 */}}
 {{- define "spotfire-common.spotfire-service.imagePullSecrets" -}}
 {{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.image "globalPath" .Values.global.spotfire) -}}
 {{- end -}}
-
-{{/*
-Spotfire service packages pvc name
-*/}}
-{{- define "spotfire-common.spotfire-service.volumes.packages.pvc.name" -}}
-{{- include "spotfire-common.persistentVolumeClaim.claimName" (dict "customClaimName" .Values.volumes.packages.customPersistentVolumeClaimName "releaseName" ( include "spotfire-common.spotfire-service.fullname" . ) "volumeName" .Values.volumes.packages.name ) -}}
-{{- end -}}
-

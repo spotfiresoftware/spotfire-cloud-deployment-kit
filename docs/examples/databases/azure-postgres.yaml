@@ -1,0 +1,10 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:postgresql://postgres-helm.postgres.database.azure.com:5432/spotfire"
+    driverClass: "org.postgresql.Driver"
+    password: 'Sp0tf1r3!'
+  create-db:
+    adminUsername: spotfire
+    adminPassword: 'Sp0tf1r3!'
+    databaseUrl: "jdbc:postgresql://postgres-helm.postgres.database.azure.com:5432/postgres"
+    doNotCreateUser: true

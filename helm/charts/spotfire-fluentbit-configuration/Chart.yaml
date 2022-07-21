@@ -1,6 +1,0 @@
-apiVersion: v2
-name: spotfire-fluentbit-configuration
-description: A Helm chart with fluent-bit configuration map used in TIBCO Spotfire Services charts.
-type: application
-version: 0.1.0
-appVersion: 12.0.0

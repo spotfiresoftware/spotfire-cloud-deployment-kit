@@ -1,0 +1,200 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Overview
+
+This chart deploys the [TIBCO Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+
+- The Spotfire Web Player pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
+- The chart includes service annotations for [Prometheus](https://prometheus.io/) scrapers.
+The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+
+This chart is tested to work with [Elasticsearch](www.elastic.co/products/elasticsearch) and [Prometheus](https://prometheus.io/).
+
+## Prerequisites
+
+- A deployed Spotfire Server release using the [Spotfire Server](../spotfire-server/README.md) chart.
+- A Spotfire distribution file (`Spotfire.Dxp.sdn`) with client packages deployed to a deployment area (so that the required licenses are in place for the service to start).
+
+## Usage
+
+### Installing
+
+1. Export the `SPOTFIRE_SERVER` value to connect to the `spotfire-server` service:
+    ```bash
+    export SPOTFIRE_SERVER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=spotfire-server --output=jsonpath={.items..metadata.name})
+    ```
+2.  Forward the logs to the `log-forwarder` service:
+    ```bash
+    export LOG_FORWARDER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=log-forwarder --output=jsonpath={.items..metadata.name})
+    ```
+3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
+    ```bash
+    helm install my-release . \
+        --set global.spotfire.image.registry="127.0.0.1:32000" \
+        --set global.spotfire.image.pullPolicy="Always" \
+        --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
+        --set logging.logForwarderAddress="$LOG_FORWARDER" \
+        -f my-values.yaml
+    ```
+
+**Note**: You must provide your private registry address where the Spotfire containers are stored.
+
+See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+
+#### Configuring
+
+Override the default configuration settings by providing a custom configuration file.
+
+The following example configuration keys are available in the chart:
+- config."Spotfire.Dxp.Worker.Core.config"
+- config."Spotfire.Dxp.Worker.Web.config"
+- config."Spotfire.Dxp.Worker.Host.dll.config"
+- config."log4net.config"
+
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+
+See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html)
+ and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html).
+
+Example: Use `my-Spotfire.Dxp.Worker.Web.config` instead of the default `Spotfire.Dxp.Worker.Web.config`:
+```bash
+helm install my-release . \
+    --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
+    --set logging.logForwarderAddress="$LOG_FORWARDER" \
+    --set-file config.'Spotfire\.Dxp\.Worker\.Web\.config'=my-Spotfire.Dxp.Worker.Web.config
+```
+
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+
+#### Getting container original configuration files
+
+Copy the default configuration files used in the container image and use them as templates for your custom configuration.
+
+**Note**: The configuration files content can be version dependent.
+
+Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
+You can replace the filename to get a copy any of the other container configuration files.
+```bash
+docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
+```
+
+#### Credentials profiles for connectors
+A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
+
+#### Adding a credentials profile to services as a file
+1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See the example [here.](https://got-gitlab01.emea.tibco.com/sf-engr/spotfire-container-edition/-/tree/main/helm/charts/spotfire-webplayer#get-container-original-configuration-files))
+
+2. Update the connector's authentication mode to `WebConfig`.
+
+3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
+  ```
+  <entry profile="credentials_profile_name">
+    <allowed-usages>
+        <entry server-regex="database\.example\.com" />
+        <entry connector-id="Spotfire.GoogleAnalyticsAdapter" />
+    </allowed-usages>
+    <username>my_username</username>
+    <password>my_password</password>
+  </entry>
+  ```
+
+4. Using extraVolumeMounts, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
+5. See the [configuration section](https://got-gitlab01.emea.tibco.com/sf-engr/spotfire-container-edition/-/tree/main/helm/charts/spotfire-webplayer#configuration) to upgrade the deployment.  
+
+For more information, see [Credentials profiles for connectors](https://docs.tibco.com/emp/spotfire_server/12.0.0/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
+
+### Uninstalling
+
+To uninstall/delete the `my-release` deployment:
+```bash
+helm uninstall my-release
+```
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+### Scaling
+
+For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
+```bash
+helm upgrade --install my-release . --reuse-values --set replicaCount=3
+```
+
+#### Autoscaling with KEDA
+
+To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
+
+Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
+```
+kedaAutoscaling:
+  enabled: true
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
+  threshold: 4
+  minReplicas: 1
+  maxReplicas: 3
+```
+
+The `spotfire-webplayer` has the following defaults:
+- The default autoscaling metric is the `spotfire_Jobs_QueueSize`.
+- The default query used is the max _Jobs Queue Size_ of the Web Player instances.
+
+For any Web Player instance, _Memory health status_ can present one of the following values:
+- 0: OK. Indicates that the instance is under no pressure.
+- 5: Strained. Indicates that the instance is under pressure but is not a problem.
+- 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance. Current users can keep working in this instance.
+
+If one Web Player instance is strained or exhausted, then another instance is scaled out (if you are above your minimum replicas). If most of them are OK, then the instance is scaled in.
+
+For more information, see [Web Player service
+     performance
+     counters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/web_player_service_performance_counters.html).
+
+**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` to allow time for draining sessions when scaling in.
+
+In some scenarios, to mitigate toggling scenarios, you can add something like the following to scale down only one pod per hour, or similar :
+```
+kedaAutoscaling:
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          policies:
+          - type: Pods
+            value: 1
+            periodSeconds: 3600
+```
+
+For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
+
+Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
+```
+kedaAutoscaling:
+  triggers:
+  # {list of triggers to activate scaling of the target resource}
+```
+### Upgrading
+
+To upgrade the `my-release` deployment:
+```bash
+helm upgrade --install my-release .
+```
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+{{ template "chart.valuesSection" . }}

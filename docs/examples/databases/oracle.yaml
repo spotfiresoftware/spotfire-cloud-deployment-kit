@@ -1,0 +1,12 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:oracle:thin:@//sf-af-w2k22-k8s.pun.qclab.test:1521/orclpdb.pun.qclab.test"
+    driverClass: "oracle.jdbc.OracleDriver"
+    password: 'Spotfire123'
+  create-db:
+    adminUsername: adminUser 
+    adminPassword: adminPassword
+    databaseUrl: "jdbc:oracle:thin:@//sf-af-w2k22-k8s.pun.qclab.test:1521/orclpdb.pun.qclab.test"
+    oracleTablespacePrefix: "spotfire"
+    oracleRootfolder: 'C:\Oracle19c'
+  upgrade: true

@@ -1,4 +1,4 @@
-{{/* 
+{{/*
 Return the proper image name
 {{ include "spotfire-common.images.image" ( dict "image" .Values.path.to.the.spotfire.image "globalPath" .Values.global) }}
 */}}
@@ -22,12 +22,12 @@ Return the proper image name
 
 
 {{/*
-Return the proper Docker Image Registry Secret Names evaluating values as templates
+Return the proper Container Image Registry Secret Names evaluating values as templates
 {{ include "spotfire-common.images.imagePullSecrets" ( dict "image" .Values.path.to.the.image1 "globalPath" $) }}
 */}}
 {{- define "spotfire-common.images.imagePullSecrets" -}}
   {{- $pullSecrets := list }}
-  
+
   {{- if .image.pullSecrets -}}
     {{- range .image.pullSecrets -}}
       {{- $pullSecrets = append $pullSecrets . -}}
@@ -50,7 +50,7 @@ imagePullSecrets:
   {{- end }}
 {{- end -}}
 
-{{/* 
+{{/*
 Return the proper image pullPolicy
 {{ include "spotfire-common.images.imagePullPolicy" ( dict "image" .Values.path.to.the.spotfire.image "globalPath" $) }}
 */}}

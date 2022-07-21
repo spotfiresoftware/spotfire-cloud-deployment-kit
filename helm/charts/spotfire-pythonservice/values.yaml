@@ -1,97 +1,117 @@
 # Default values for pythonservice.
 # This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Declare variables to pass into your templates.
 
-## @param global.spotfire.image.registry Global Docker image registry
-## @param global.spotfire.image.pullSecrets Global Docker registry secret names as an array
+## @param global.spotfire.image.registry Global Container image registry
+## @param global.spotfire.image.pullSecrets Global Container registry secret names as an array
 ##
 global:
   spotfire:
     image:
       # global.spotfire.image.registry -- Global container image registry, this will be used for tibco/spotfire container images unless overridden.
       registry:
-      # global.spotfire.image.pullPolicy -- Global container image pull policy
+      # global.spotfire.image.pullPolicy -- Global container image pull policy.
       pullPolicy: IfNotPresent
-      # global.spotfire.image.pullSecrets -- Global container image pull secrets
+      # global.spotfire.image.pullSecrets -- Global container image pull secrets.
       ## E.g.
       ## pullSecrets:
       ##   - myRegistryKeySecretName
-      ##  
+      ##
       pullSecrets: []
   serviceName: pythonservice
 
 nodemanagerConfig:
-  # -- This should be the spotfire-server service name. This value will be evaluated as a helm template.
+  # -- The spotfire-server service name. This value is evaluated as a helm template.
   serverBackendAddress: ""
-  # -- The draining timeout which after the service is forcefully shutdown
+  # -- The draining timeout after which the service is forcefully shut down.
   preStopDrainingTimeoutSeconds: 610
 
 replicaCount: 1
 
 image:
-  # image.registry -- image registry for spotfire-server, it overrides global.spotfire.image.registry value.
+  # image.registry -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
   registry:
-  # image.repository -- spotfire-server image repository
+  # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-pythonservice
-  # image.tag -- The container image tag to be used.
-  tag: "1.11.1-v0.1.0"
-  # image.pullPolicy -- spotfire-server image pull policy, It overrides global.spotfire.image.pullPolicy
+  # image.tag -- The container image tag to use.
+  tag: "1.12.0-0.2.0"
+  # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy
   pullPolicy:
-  ## Optionally specify an array of imagePullSecrets.
-  # image.pullSecrets -- spotfire-server image pull secrets
+  ## Optionally specifies an array of imagePullSecrets.
+  # image.pullSecrets -- The spotfire-server image pull secrets.
   pullSecrets: []
 
-fluentBit:
+fluentBitSidecar:
   image:
-    # -- image repository for fluent-bit logging sidecar.
+    # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
-    # -- image tag to be used for fluent-bit logging sidecar
-    tag: "1.8.12"
-    # -- image pull policy for the fluent-bit logging sidecar image.
+    # -- The image tag to use for fluent-bit logging sidecar.
+    tag: "1.9.4"
+    # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
+
+  # -- The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
+  securityContext: {}
+    # # -- Enable this if running as privileged.
+    # privileged: false
+    # # -- Enable this if running as NonRoot User.
+    # runAsNonRoot: true
+    # # -- User ID for the Container.
+    # runAsUser: 1000
+    # # -- Group ID for the Container.
+    # runAsGroup: 0
 
 nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # Specifies whether a service account should be created.
   create: false
-  # Annotations to add to the service account
+  # Annotations to add to the service account.
   annotations: {}
   # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # If not set and create is true, then a name is generated using the fullname template.
   name: ""
 
-podAnnotations: 
+podAnnotations:
   prometheus.io/path: /spotfire/metrics
   prometheus.io/port: "9080"
   prometheus.io/scrape: "true"
 
+# --  The Pod securityContext setting applies to all of the containers inside the Pod.
 podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
+  # # -- Owner User ID for the volume and any file created in that volume.
+  # fsGroup: 1000
+  # # -- User ID for the Pod.
   # runAsUser: 1000
+  # # -- Group ID for the Pod.
+  # runAsGroup: 0
+
+# -- The securityContext setting for the spotfire-pythonservice container. Overrides any securityContext setting on the Pod level.
+securityContext: {}
+  # # -- Enable this if running as privileged.
+  # privileged: false
+  # # -- Enable this if running as NonRoot User.
+  # runAsNonRoot: true
+  # # -- User ID for the Container.
+  # runAsUser: 1000
+  # # -- Group ID for the Container.
+  # runAsGroup: 0
 
 service:
   type: ClusterIP
   port: 9501
 
-## Spotfire Nodemanager startup, readiness and liveness probe initial delay and timeout
+## The Spotfire node manager startup, readiness, and liveness probe initial delay and timeout.
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 startupProbe:
   enabled: true
   httpGet:
     path: /spotfire/started
     port: registration
-  initialDelaySeconds: 10
+  initialDelaySeconds: 60
   periodSeconds: 3
-  failureThreshold: 30
+  failureThreshold: 20
 livenessProbe:
   enabled: true
   httpGet:
@@ -99,7 +119,7 @@ livenessProbe:
     port: registration
   initialDelaySeconds: 60
   periodSeconds: 3
-  failureThreshold: 3
+  failureThreshold: 10
 readinessProbe:
   enabled: false
   httpGet:
@@ -107,18 +127,18 @@ readinessProbe:
     port: registration
   initialDelaySeconds: 60
   periodSeconds: 3
-  failureThreshold: 3
+  failureThreshold: 10
 
 logging:
-  # -- This should be the spotfire-server log-forwarder name. Template.
+  # -- The spotfire-server log-forwarder name. Template.
   logForwarderAddress: ""
-  ## -- set to `debug`, `trace`, `minimal` or leave empty for info
+  ## -- Set to `debug`, `trace`, `minimal`, or leave empty for info.
   logLevel: "debug"
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # choice for the user. This increases chances that charts can run on environments with few 
+  # resources, such as Minikube. If you do want to specify resources, then uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
@@ -127,24 +147,24 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- KEDA autoscaling configuration, see https://keda.sh/docs/2.6/concepts/scaling-deployment for more details.
+# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details.
 # @default -- Disabled
 kedaAutoscaling:
   enabled: false
-  # -- This is the interval to check each trigger on.
+  # -- The interval to check each trigger on.
   pollingInterval: 30
   # -- The period to wait after the last trigger reported active before scaling the resource back to 0.
   cooldownPeriod: 300
-  # -- Minimum number of replicas KEDA will scale the resource down to.
+  # -- The minimum number of replicas KEDA scales the resource down to.
   minReplicas: 1
-  # -- This setting is passed to the HPA definition that KEDA will create for a given resource and holds the maximum number of replicas of the target resource.
+  # -- This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource.
   maxReplicas: 4
   # threshold: 8
-  # fallback: 
-  # advanced: 
+  # fallback:
+  # advanced:
   # -- Spotfire specific settings
   spotfireConfig:
-    # -- REQUIRED The url to the Prometheus server where metrics should be fetched from
+    # -- REQUIRED. The URL for the Prometheus server where metrics are fetched from.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
 
 nodeSelector: {}
@@ -154,38 +174,31 @@ tolerations: []
 affinity: {}
 
 config:
-  # -- A custom [Spotfire.Dxp.Worker.Automation.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.automation.config_file.html)
+  # -- If set, it will override the default [custom.properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/custom_configuration_properties.html) file.
   conf/custom.properties: ""
-
-  # -- A custom Spotfire.Dxp.Worker.Host.dll.config. See [Spotfire.Dxp.Worker.Host.exe.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.host.exe.config_file.html)
+  # --
   log4j2.xml: ""
 
-  # --
-  # appsettings.json:
-
-  # --
-  # log4net.config:
-
-# -- Additional environment variables
+# -- Additional environment variables.
 extraEnvVars: []
 #  - name: NAME
 #    value: value
 
-# Name of ConfigMap containing additional environment variables
+# The name of the ConfigMap containing additional environment variables.
 extraEnvVarsCM: ""
 
-# Name of Secret containing extra additional environment variables
+# The name of the Secret containing extra additional environment variables.
 extraEnvVarsSecret: ""
 
 # -- Extra volumeMounts for the spotfire-pythonservice container.
-# More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`
+# More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`.
 extraVolumeMounts: []
   # - name: example
   #   mountPath: /opt/tibco/example.txt
   #   subPath: example.txt
 
 # -- Extra volumes for the spotfire-pythonservice container.
-# More info: `kubectl explain deployment.spec.template.spec.volumes`
+# More info: `kubectl explain deployment.spec.template.spec.volumes`.
 extraVolumes: []
   # - name: example
   #   persistentVolumeClaim:
@@ -193,23 +206,40 @@ extraVolumes: []
 
 volumes:
   packages:
-    name: "packages"
     mountPath: /opt/packages
     persistentVolumeClaim:
-      # -- If 'true', then a 'PersistentVolumeClaim' will be created.
+      # -- If 'true', then a 'PersistentVolumeClaim' is created.
       create: false
-
-      # -- Specify the name of the 'StorageClass' that should be used for the customExt volume-claim.
+      # -- Specifies the name of the 'StorageClass' to use for the customExt volume-claim.
       storageClassName: ""
-
       # -- Specifies the standard K8s resource requests and/or limits for the customExt volume claims.
       resources:
         requests:
           storage: 1Gi
-
-      # -- Specify the name of the persistent volume that should be used for the customExt volume-claim.
+      # -- Specifies the name of the persistent volume to use for the customExt volume-claim.
       volumeName:
-
-    # When 'persistentVolumeClaim.create' is 'false', then this value can be used to define already existing
+    # When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing 
     # persistent volume claim
-    customPersistentVolumeClaimName: ""
+    existingClaim: ""
+
+  troubleshooting:
+    persistentVolumeClaim:
+       # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      create: false
+      # -- Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim.
+      storageClassName: ""
+      # -- Specifies the standard Kubernetes resource requests and/or the limits for the volumes.troubleshooting claims.
+      resources:
+        requests:
+          storage: 2Gi
+      # -- Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim.
+      volumeName:
+    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing
+    # persistent volume claim.
+    existingClaim: ""
+
+# -- Additional init containers to add to the pythonservice pod.
+extraInitContainers: []
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', "hey"]

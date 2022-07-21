@@ -1,10 +1,10 @@
 {{- if .Values.volumes.packages.persistentVolumeClaim.create }}
-{{- $pvcCheck :=  (lookup "v1" "PersistentVolumeClaim" .Release.Namespace ( include "spotfire-common.spotfire-service.volumes.packages.pvc.name" . )) }}
+{{- $pvcCheck := (lookup "v1" "PersistentVolumeClaim" .Release.Namespace ( include "spotfire-common.volumes.packages.pvc.name" . )) }}
 {{- if not $pvcCheck }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "spotfire-common.spotfire-service.volumes.packages.pvc.name" . }}
+  name: {{ include "spotfire-common.volumes.packages.pvc.name" . }}
   labels:
   {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
   annotations:

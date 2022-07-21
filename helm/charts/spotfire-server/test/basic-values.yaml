@@ -1,9 +1,12 @@
 database:
-  url: "jdbc://server/"
-  password: "mypassword"
-  admin:
-    password: "adminpassword"
-    url: "jdbc://server/"
-
+  bootstrap:
+    databaseUrl: "jdbc://server/"
+    driverClass: "org.postgresql.Driver"
+    password: 'mypassword'
+  create-db:
+    enabled: true
+    adminUsername: postgres 
+    adminPassword: adminpassword
+    databaseUrl: "jdbc://server/"
 site:
   publicAddress: "http://localhost/"

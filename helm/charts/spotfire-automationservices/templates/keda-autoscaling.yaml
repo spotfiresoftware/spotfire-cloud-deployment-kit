@@ -1,0 +1,43 @@
+{{- if .Values.kedaAutoscaling.enabled -}}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ printf "%s-%s-keda" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+spec:
+  scaleTargetRef:
+    apiVersion:    apps/v1
+    kind:          Deployment
+    name:          {{ include "spotfire-common.spotfire-service.fullname" . }}
+  pollingInterval:  {{ .Values.kedaAutoscaling.pollingInterval }}
+  cooldownPeriod:   {{ .Values.kedaAutoscaling.cooldownPeriod }}
+  minReplicaCount:  {{ .Values.kedaAutoscaling.minReplicas }}
+  maxReplicaCount:  {{ .Values.kedaAutoscaling.maxReplicas }}
+  {{- if .Values.kedaAutoscaling.fallback }}
+  fallback:
+  {{- toYaml .Values.kedaAutoscaling.fallback | nindent 4 }}
+  {{- end }}
+  {{- if .Values.kedaAutoscaling.advanced }}
+  advanced:
+  {{- toYaml .Values.kedaAutoscaling.advanced | nindent 4 }}
+  {{- end }}
+  triggers:
+  {{- if empty .Values.kedaAutoscaling.triggers }}
+  - type: prometheus
+    metadata:
+      serverAddress: {{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}
+      metricName: spotfire_Jobs_QueueSize
+      threshold: {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
+      # Note that his queries a metric from the Spotfire Servers, currently assumed that there is only one Spotfire Server release
+      # installed in the same namespace as Automation Services are deployed.
+      {{- if .Values.kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease }}
+      query: {{ printf "max(spotfire_Jobs_QueueSize{counter_instance=\"AUTOMATION_SERVICES\", app_kubernetes_io_instance=\"%s\"})" .Values.kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease | quote }}
+      {{ else }}''
+      query: {{ printf "max(spotfire_Jobs_QueueSize{counter_instance=\"AUTOMATION_SERVICES\"})" | quote }}
+      {{ end -}}
+      namespace: {{ .Release.Namespace }}
+  {{- else }}
+  {{- with .Values.kedaAutoscaling.triggers }}
+  {{- tpl (. | toYaml ) $ | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end -}}

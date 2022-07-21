@@ -7,10 +7,7 @@ PACKAGE_DIR                ?= packages
 REPO_URL				   ?= # http://example.com/helm-repo/
 
 # Charts to package
-CHARTS                      = spotfire-common spotfire-fluentbit-configuration spotfire-server spotfire-terrservice spotfire-pythonservice
-
-# See https://github.com/helm/helm/issues/4463
-.NOTPARALLEL :
+CHARTS                      = spotfire-common spotfire-server spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice
 
 # Include additional makefile rules, if any
 -include *.mk
@@ -30,8 +27,8 @@ clean :
 	find charts/ -name tmpcharts -type d -exec rm -rf -- {} \;
 	find charts/ -wholename charts/*.tgz -exec rm -- {} \;
 
-.PHONY: package $(PACKAGE_DIR)/index.yaml clean $(CHARTS)
+.PHONY: repo-update package $(PACKAGE_DIR)/index.yaml clean $(CHARTS)
 	
 # Chart dependencies
 spotfire-server : spotfire-common
-spotfire-terrservice spotfire-pythonservice : spotfire-common spotfire-fluentbit-configuration
+spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice : spotfire-common

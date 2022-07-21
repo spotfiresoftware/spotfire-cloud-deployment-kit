@@ -1,0 +1,9 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:sqlserver://10.98.163.73:1433;DatabaseName=spotfire"
+    driverClass: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    password: 'Spotfire123'
+  create-db:
+    adminUsername: sa 
+    adminPassword: Aug@2021
+    databaseUrl: "jdbc:sqlserver://10.98.163.73:1433"

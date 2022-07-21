@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  creationTimestamp: null
+  labels:
+    {{- include "spotfire-server.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-config-job-scripts
+data:
+{{ (.Files.Glob "config-job-scripts/*").AsConfig | indent 2 }}

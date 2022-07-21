@@ -1,7 +1,7 @@
 # Partial listing of third party software and licenses
 
-The following is a partial listing of some core third party software components that are used in this project.
-Please note that this is not a complete list and instead is offered simply to identify some of the better-known components.
+This table displays a partial listing of some core third party software components that are used in this project.
+**Note**: This is not a complete list; it is provided to identify some of the better-known components.
 
 | Third Party Software | Required |   License   | License URL                                                   |
 |:---------------------|----------|:-----------:|:--------------------------------------------------------------|

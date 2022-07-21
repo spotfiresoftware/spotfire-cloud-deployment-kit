@@ -1,0 +1,11 @@
+database:
+  bootstrap:
+    databaseUrl: "jdbc:postgresql://postgres-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:5432/spotfire"
+    driverClass: "org.postgresql.Driver"
+    username: "postgres"
+    password: 'Spotfire123'
+  create-db:
+    adminUsername: postgres
+    adminPassword: "Spotfire123"
+    databaseUrl: "jdbc:postgresql://postgres-helm.c53wgektlmlz.us-east-1.rds.amazonaws.com:5432/postgres"
+    doNotCreateUser: true

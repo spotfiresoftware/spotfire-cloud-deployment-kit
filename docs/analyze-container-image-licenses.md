@@ -1,4 +1,4 @@
-# Analyze container image licenses
+# Analyze container images and their associated licenses
 
 This document describes how to analyze container images for software artifacts and associated licenses.
 
@@ -9,7 +9,7 @@ This project uses a [Debian](https://www.debian.org/) [official container]( http
 See the [license information](https://www.debian.org/legal/licenses/) for details on Debian licenses and software package types.
 See also the Debian notes on the [Debian official images](https://wiki.debian.org/Docker).
 
-As with all container images, the Debian container image likely also contains other software (such as `bash`, `glibc`, `zlib`, etc. from the base distribution, along with any direct or indirect dependencies of the primary software included in the built image) which may be subject to other licenses.
+As with all container images, the Debian container image can contain other software (such as `bash`, `glibc`, `zlib`, and others from the base distribution, along with any direct or indirect dependencies of the primary software included in the built image) that might be subjected to other licenses.
 
 The following links provide auto-detected license information for the Debian official images:
 
@@ -17,32 +17,36 @@ The following links provide auto-detected license information for the Debian off
     - [local](https://github.com/docker-library/repo-info/blob/master/repos/debian/local/)
     - [remote](https://github.com/docker-library/repo-info/blob/master/repos/debian/remote/)
 
-For example, you can find the information of the artifacts of the [debian:bullseye-20220328-slim](https://github.com/docker-library/repo-info/blob/018ba0596bc427655726665ad8fb59c45fa4d9b3/repos/debian/local/bullseye-20220328-slim.md) official image.
+For example, you can find information about the artifacts of the [debian:bullseye-20220328-slim](https://github.com/docker-library/repo-info/blob/018ba0596bc427655726665ad8fb59c45fa4d9b3/repos/debian/local/bullseye-20220328-slim.md) official image.
 
-As with any image, it is the image user's responsibility to ensure that any use of the image complies with all relevant licenses for all software contained within.
+**Note**: The image user has the responsibility to ensure that any use of the image complies with all relevant licenses for all software contained within.
 
 ## Additional software packages
 
-Building images often installs additional software packages (fetched from the official distro software repositories, from other user added repositories or from specific locations) in addition to the packages already provided by the base image.
+Building images often installs additional software packages (fetched from the official distribution software repositories, from other user-added repositories, or from specific locations), in addition to installing the packages provided by the base image.
 You can inspect the Dockerfiles to identify these additional packages.
 
-For example, inspecting the [spotfire-workerhost Dockerfile](../../docker/spotfire-workerhost/Dockerfile) 
-provides a list of packages that will be installed in the image as specified in the Dockerfile. 
-Please note that each such specified package may, in turn, automatically install other software packages as dependencies.
+For example, when you inspect the [spotfire-workerhost Dockerfile](../../containers/spotfire-workerhost/Dockerfile), you see 
+a list of packages that are installed in the image, as specified in the Dockerfile. 
+
+**Note**:  Each such specified package can, in turn, install other software packages as dependencies.
 
 ### Manually retrieve installed packages information
 
-You can inspect a container image and retrieve its contents with standard container and package management tools.
+The following tasks are outside the scope of this document. 
+- Providing instructions for using specialized tools for analyzing software licenses.
+- Retrieving information about software artifacts, other than software packages installed with the package manager tools.
 
-**Note**: There are different ways to extract the list of installed packages and other installed artifacts.
-Providing detailed instructions on software license analysis specialized tools is outside the scope of this document.
-Retrieving information on software artifacts other than software packages installed with the package manager tools is also outside the scope of this document.
+You can inspect a container image and retrieve its contents with standard container and package management tools. 
 
-You can retrieve the full list of installed packages in a container image using the `dpkg-query` command.
+- Use the command `dpkg-query` to retrieve the full list of installed packages in a container image.
 
-For example, to retrieve the installed packages in the `debian:bullseye-20220328-slim` image:
+**Example**: To retrieve the list of installed packages in the `debian:bullseye-20220328-slim` image, run the following command:
 ```bash
 $ docker run --rm debian:bullseye-20220328-slim dpkg-query -l
+```
+**Result**:
+```
 Unable to find image 'debian:bullseye-20220328-slim' locally
 bullseye-20220328-slim: Pulling from library/debian
 c229119241af: Pull complete
@@ -68,11 +72,14 @@ ii  debian-archive-keyring  2021.1.1                     all          GnuPG arch
 
 ### Manually retrieve installed packages licenses
 
-You can retrieve the license for any package using the `dpkg` command.
+- Use the command `dpkg` to  retrieve the license for any package.
 
-For example, to retrieve license information for the installed package `apt`:
+**Example**: To retrieve the license for the installed package `apt`, run the following command:
 ```bash
-$ docker run --rm debian:bullseye-20220328-slim sh -c 'cat `dpkg -L bash | grep copyright`'
+$ docker run --rm debian:bullseye-20220328-slim sh -c 'cat `dpkg -L apt | grep copyright`'
+```
+**Result**:
+```
 Apt is copyright 1997, 1998, 1999 Jason Gunthorpe and others.
 Apt is currently developed by APT Development Team <deity@lists.debian.org>.
 
@@ -99,51 +106,59 @@ of the GNU General Public License.
 
 ### Manually retrieve installed packages sources
 
-You can retrieve the source for any package using the `apt-get` command.
+- Use the command `apt-get` to retrieve the source for any package.
 
-For example, to retrieve the apt source for the installed package `apt`:
+**Example**: To retrieve the source for the installed package `apt`, run the following command:
 ```bash
 $ docker run --rm debian:bullseye-20220328-slim sh -c "find /etc/apt/sources.list* -type f -exec sed -i -e 'p; s/^deb /deb-src /' '{}' + && apt-get update -qq && apt-get source -qq --print-uris apt=2.2.4"
+```
+**Result**:
+```
 'http://deb.debian.org/debian/pool/main/a/apt/apt_2.2.4.dsc' apt_2.2.4.dsc 2780 SHA256:750079533300bc3a4f3e10a9c8dbffaa0781b92e3616a12d7e18ab1378ca4466
 'http://deb.debian.org/debian/pool/main/a/apt/apt_2.2.4.tar.xz' apt_2.2.4.tar.xz 2197424 SHA256:6eecd04a4979bd2040b22a14571c15d342c4e1802b2023acb5aa19649b1f64ea
 ```
 
 ### Manually retrieve installed files
 
-It is possible to extract the contents of a container for further inspection using the `docker` command.
+1. Use the command `docker` to extract the contents of a container for further inspection.
 
-One way is creating a temporal container, called `temp-container` that will be based on the `unknown-image:latest` image.
+**Note**: If you create a new container from an image, you can inspect it without running the container. 
+
+**Example**: To create a temporal container called `temp-container`, which is based on the `unknown-image:latest` image, run the following command:
 ```bash
 docker create --name temp-container unknown-image:latest
 ```
 
-**Note**: Creating a new container from an image allows to inspect it without running the container. 
+2. Extract the container file system as a TAR file.
 
-Now it is possible to extract the container filesystem as a tar file:
+**Example**:
 ```bash
 docker export temp-container > temp-container.tar
 ```
 
-If you prefer to directly extract the files list without creating a tar archive:
+Or you can directly extract the files list without creating a TAR archive. 
+
+**Example**:
 ```bash
 docker export temp-container | tar t > temp-container-files.txt
 ```
 
-Another way to inspect the image contents is to use the docker image save command: 
+The above commands create and export the contents of a stopped container. Both commands are direct ways to extract the image’s final file system, which is a composite view of a container instance.
+
+Alternatively, to create an image TAR file, run the command `docker image save`.
+
+**Example**:
 ```bash
 docker image save unknown-image:latest > temp-image.tar
 ```
 
-For more information, see the [Docker CLI](https://docs.docker.com/engine/reference/commandline/docker/) documentation.
+The above command produces an archive that exposes the image format, not the containers created from it.
+The TAR file includes a `manifest.json` file, which describes the image’s layers and a set of separate directories containing the content of each of the individual layers.
+This method is helpful when you want to evaluate each layer’s role in building the image.
 
-The first method, creating and exporting the contents of a stopped container, is a direct way to extract the image’s final filesystem, the composite view of a container instance.
+- For more information, see the [Docker CLI](https://docs.docker.com/engine/reference/commandline/docker/) documentation.
+- For more information on the container image format, see the [OCI image format specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
 
-The second method produces an archive that exposes the image format, not the containers created from it.
-The tar will include a `manifest.json` file, describing the image’s layers, and a set of separate directories containing the content of each of the individual layers.
-This is helpful when you’re evaluating each layer’s role in building the image.
-
-For details on the container image format, see the [OCI image format specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
-
-The diagram below illustrates the differences between the layered view and the composite view of a container image.
+The following diagram illustrates the differences between the layered view and the composite view of a container image.
 
 ![](container-image-views.png)

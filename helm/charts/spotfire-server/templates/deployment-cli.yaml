@@ -9,23 +9,85 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "spotfire-server.cli.labels" . | nindent 6 }}
+      {{- include "spotfire-server.cli.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.cliPod.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "spotfire-server.cli.labels" . | nindent 8 }}
     spec:
+      {{- include "spotfire-server.cliPod.imagePullSecrets" . | nindent 6}}
       serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      {{- if .Values.cliPod.extraInitContainers }}
+      initContainers:
+        {{- tpl (toYaml .Values.cliPod.extraInitContainers) $ | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ printf "%s-%s" (include "spotfire-server.fullname" .) "cli" | quote }}
           command: ["/bin/sh", "-c"]
           args: ["trap 'exit 0' TERM; while true; do sleep 3600 & wait; done"]
-          image: "{{ template "spotfire-server.spotfireConfig.image" . }}"
-          imagePullPolicy: "{{ template "spotfire-server.spotfireConfig.image.pullPolicy" . }}"
+          image: {{ include "spotfire-server.cliPod.image" . }}
+          imagePullPolicy: {{ include "spotfire-server.cliPod.image.pullPolicy" . }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            {{- if .Values.volumes.certificates.existingClaim }}
+            - name: certificates-volume
+              mountPath: /opt/tibco/tss/tomcat/certs
+            {{- end }}
+            {{- if .Values.volumes.customExt.existingClaim }}
+            - name: custom-ext
+              mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+            {{- end }}
+            {{- with .Values.cliPod.extraVolumeMounts }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          envFrom:
+            - secretRef:
+                name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+            {{- if .Values.cliPod.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ tpl .Values.cliPod.extraEnvVarsSecret $ }}
+            {{- end }}
+            {{- if .Values.cliPod.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ tpl .Values.cliPod.extraEnvVarsCM $ }}
+            {{- end }}
           env:
+            {{- if .Values.cliPod.extraEnvVars }}
+            {{ tpl (toYaml .Values.cliPod.extraEnvVars) $ | nindent 12 }}
+            {{- end }}
             {{- include "spotfire-server.configVars" . | nindent 12 -}}
             {{- include "spotfire-server.site.envVars" . | nindent 12 }}
             {{- include "spotfire-server.database.envVars" . | nindent 12 }}
             - name: LOG_LEVEL
-              value: {{ .Values.cliPod.logLevel | default .Values.logging.logLevel | quote }}
+              value: {{ .Values.cliPod.logLevel | quote }}
+      volumes:
+        {{- if .Values.volumes.certificates.existingClaim }}
+        - name: certificates-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.certificates.existingClaim }}
+        {{- end }}
+        {{ if .Values.volumes.customExt.existingClaim -}}
+        - name: custom-ext
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.customExt.existingClaim }}
+        {{- end }}
+      {{- with .Values.cliPod.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cliPod.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.cliPod.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end -}}

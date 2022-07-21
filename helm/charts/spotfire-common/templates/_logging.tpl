@@ -2,9 +2,9 @@
 Logging environment environment variables needed by spotfire
 */}}
 {{- define "spotfire-common.spotfire-service.logging.serverEnvVars" -}}
-{{- if .Values.logging.logLevel -}}
+{{- if .Values.logLevel -}}
 - name: LOGGING_LOGLEVEL
-  value: {{ .Values.logging.logLevel | quote }}
+  value: {{ .Values.logLevel | quote }}
 {{- end -}}
 {{/*
 {{- if (index .Values "log-forwarder").enabled  }}

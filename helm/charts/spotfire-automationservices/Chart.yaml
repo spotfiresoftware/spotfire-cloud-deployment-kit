@@ -1,0 +1,31 @@
+apiVersion: v2
+name: spotfire-automationservices
+description: A Helm chart for TIBCO Spotfire Automation Services.
+
+type: application
+
+version: 0.1.1
+
+appVersion: "12.0.0"
+
+kubeVersion: ">=1.23.0"
+
+home: https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+sources:
+ - https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+
+keywords:
+  - spotfire
+  - automation
+  - analytics
+  - data visualization
+  - workflow
+
+dependencies:
+  - name: spotfire-common
+    repository: file://../spotfire-common
+    version: 0.1.1
+
+annotations:
+  license: Apache 2.0
+  licenseUrl: https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/blob/main/LICENSE
