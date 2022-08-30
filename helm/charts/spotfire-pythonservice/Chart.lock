@@ -1,6 +1,6 @@
 dependencies:
 - name: spotfire-common
   repository: file://../spotfire-common
-  version: 0.1.1
-digest: sha256:890a0104f46687f5c616d5c3c5cccfea675d1d32c4189c01cab310b6d9a32eab
-generated: "2022-06-03T18:24:08.302982692+02:00"
+  version: 0.1.2
+digest: sha256:b8237b6b73cb0d8bdbd0585c8907b5c73c811286a9f3d676dc9a171bd04f8707
+generated: "2022-08-29T14:21:35.653416555+02:00"

@@ -49,8 +49,6 @@ You can start an instance of the **TIBCO Spotfire Web Player** container with:
 docker run -d --rm -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-webplayer
 ```
 
-The `spotfire-webplayer` will start with the default configuration from `/opt/tibco/tsnm/nm/config/default.conf` in the container image.
-
 ### Starting with a custom configuration
 
 You can also start the `spotfire-webplayer` with a custom configuration by providing a Spotfire services configuration file:
@@ -66,5 +64,7 @@ and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/late
 
 - `TSWP_RESOURCEPOOL` - Set to the name of the resource pool the `spotfire-webplayer` instance should belong to. 
   Default value: *Unset*
+- `LOGGING_SERVICELOG_MAX` - Maximum number of web player service log files to save. Default `2`
+- `LOGGING_SERVICELOG_SIZE` - Maximum size for web player service service log files. Default `10MB`
 
 **Note**: See also the Spotfire Node manager [environment variables](../spotfire-node-manager/README.md#environment-variables).

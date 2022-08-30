@@ -42,8 +42,6 @@ You can start an instance of the **TIBCO Spotfire Automation Services** containe
 docker run -d --rm -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-automationservices
 ```
 
-The `spotfire-automationservices` will start with the default configuration from `/opt/tibco/tsnm/nm/config/default.conf` in the container image.
-
 ### Starting with a custom configuration
 
 You can also start the `spotfire-automationservices` with a custom configuration by providing a Spotfire services configuration file:
@@ -56,5 +54,8 @@ For more information, see [Service configuration files](https://docs.tibco.com/p
 and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html). 
 
 ### Environment variables
+
+- `LOGGING_SERVICELOG_MAX` - Maximum number of automation services log files to save. Default `2`
+- `LOGGING_SERVICELOG_SIZE` - Maximum size for automation services service log files. Default `10MB`
 
 See the common Spotfire Node manager [environment variables](../spotfire-node-manager/README.md#environment-variables).

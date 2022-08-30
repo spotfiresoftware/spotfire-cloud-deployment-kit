@@ -167,6 +167,20 @@ spec:
             subPath: tss.parsers.fluentbit.conf
           - name: logs-volume
             mountPath: /tss/logs
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /fluent-bit/bin/fluent-bit
+                - "-v"
+                - "-i"
+                - "tail"
+                - "-p"
+                - path=/tss/logs/tss-terminated
+                - "-o"
+                - "exit"
+                - "-p"
+                - "flush_count=1"
       volumes:
       {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}

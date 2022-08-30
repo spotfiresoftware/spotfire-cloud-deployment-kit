@@ -52,3 +52,14 @@ COPY custom.properties /tmp/custom.properties
 RUN cat /tmp/custom.properties >> /opt/tibco/tsnm/nm/services/TERR/conf/custom.properties
 
 USER spotfire
+
+# Configure logging
+ENV LOGGING_SERVICELOG_SIZE=10MB
+ENV LOGGING_SERVICELOG_MAX=2
+RUN cp nm/services/TERR/log4j2.xml log4j2.xml.orig \
+    && sed -i 's~<DefaultRolloverStrategy max=".*" fileIndex="min"/>~<DefaultRolloverStrategy max="${env:LOGGING_SERVICELOG_MAX}" fileIndex="min"/>~g' nm/services/TERR/log4j2.xml \
+    && ! cmp nm/services/TERR/log4j2.xml log4j2.xml.orig \
+    && cp nm/services/TERR/log4j2.xml log4j2.xml.orig \
+    && sed -i 's~<SizeBasedTriggeringPolicy size=".*"/>~<SizeBasedTriggeringPolicy size="${env:LOGGING_SERVICELOG_SIZE}"/>~g' nm/services/TERR/log4j2.xml \
+    && ! cmp nm/services/TERR/log4j2.xml log4j2.xml.orig \
+    && rm log4j2.xml.orig

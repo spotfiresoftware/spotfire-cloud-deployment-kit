@@ -19,7 +19,9 @@ copyGlobIfExist "/opt/tibco/tsnm/nm/logs/*.mdmp"
 copyGlobIfExist "/opt/tibco/tsnm/nm/services/*/hs_err_pid*.log"
 
 # Core dump will be written to /opt/tibco/tsnm/nm/services/{TERR,PYTHON}/core if ENGINE_DISABLE_JAVA_CORE_DUMPS=FALSE
-timestamp=$(date +%Y-%m-%d-%H%M%S | xargs)
-for corefile in /opt/tibco/tsnm/nm/services/*/core; do
-    test -e "${corefile}" && mv "${corefile}" "/opt/tibco/troubleshooting/core_${timestamp}"
-done
+if compgen -G "/opt/tibco/tsnm/nm/services/*/core" > /dev/null; then
+    timestamp=$(date +%Y-%m-%d-%H%M%S | xargs)
+    for corefile in /opt/tibco/tsnm/nm/services/*/core; do
+        mv -v "${corefile}" "/opt/tibco/troubleshooting/core_${timestamp}"
+    done
+fi

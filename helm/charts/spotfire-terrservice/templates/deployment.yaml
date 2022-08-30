@@ -128,6 +128,9 @@ spec:
             value: {{ .Chart.Name }}
           volumeMounts:
           {{- include "spotfire-common.fluenbit-configuration.volume.mount" . | indent 10 }}
+          lifecycle:
+            preStop:
+            {{- include "spotfire-common.fluenbit-configuration.tsnm.prestop.exec" . | indent 14 }}
       volumes:
         {{- with .Values.extraVolumes }}
           {{- toYaml . | nindent 8 }}

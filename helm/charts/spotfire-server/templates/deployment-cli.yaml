@@ -38,7 +38,7 @@ spec:
           volumeMounts:
             {{- if .Values.volumes.certificates.existingClaim }}
             - name: certificates-volume
-              mountPath: /opt/tibco/tss/tomcat/certs
+              mountPath: /opt/tibco/spotfireconfigtool/certs
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
             - name: custom-ext

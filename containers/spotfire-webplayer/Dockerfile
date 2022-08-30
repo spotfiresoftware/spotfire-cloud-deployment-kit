@@ -52,3 +52,14 @@ COPY --from=extract --chown=spotfire:spotfire /tmp/tsnm-install/nm/services /opt
 COPY --from=extract --chown=spotfire:spotfire /tmp/tsnm-install/nm/config/default.conf /opt/tibco/tsnm/nm/config/default.conf
 
 USER spotfire
+
+# Configure logging
+ENV LOGGING_SERVICELOG_SIZE=10MB
+ENV LOGGING_SERVICELOG_MAX=2
+RUN cp nm/services/WEB_PLAYER/log4net.config log4net.config.orig \
+    && sed -i 's~<maxSizeRollBackups value=".*" />~<maxSizeRollBackups value="${LOGGING_SERVICELOG_MAX}" />~g' nm/services/WEB_PLAYER/log4net.config \
+    && ! cmp nm/services/WEB_PLAYER/log4net.config log4net.config.orig \
+    && cp nm/services/WEB_PLAYER/log4net.config log4net.config.orig \
+    && sed -i 's~<maximumFileSize value=".*" />~<maximumFileSize value="${LOGGING_SERVICELOG_SIZE}" />~g' nm/services/WEB_PLAYER/log4net.config \
+    && ! cmp nm/services/WEB_PLAYER/log4net.config log4net.config.orig \
+    && rm log4net.config.orig

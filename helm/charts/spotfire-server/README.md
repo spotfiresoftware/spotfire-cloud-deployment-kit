@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.0.0](https://img.shields.io/badge/AppVersion-12.0.0-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.0.0](https://img.shields.io/badge/AppVersion-12.0.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Server.
 
@@ -12,13 +12,11 @@ A Helm chart for TIBCO Spotfire Server.
 
 ## Requirements
 
-Kubernetes: `>=1.23.0`
-
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.1 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.20.2 |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.14.0 |
+| file://../spotfire-common | spotfire-common | 0.1.2 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.20.5 |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.15.0 |
 
 ## Overview
 
@@ -34,7 +32,7 @@ The Spotfire Server pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
 - Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
 
-This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](www.elastic.co/products/elasticsearch) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](https://www.elastic.co/elasticsearch/) and [Prometheus](https://prometheus.io/).
 
 ## Prerequisites
 
@@ -455,7 +453,7 @@ extraEnvVars:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.0.0-0.2.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"12.0.0-1.0.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
 | cliPod.podSecurityContext | object | `{}` | The podSecurityContext setting for cliPod More info: `kubectl explain deployment.spec.template.spec.securityContext` |
@@ -470,7 +468,7 @@ extraEnvVars:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.0.0-0.2.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"12.0.0-1.0.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
@@ -508,7 +506,7 @@ extraEnvVars:
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.4"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"1.9.7"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
@@ -545,7 +543,7 @@ extraEnvVars:
 | image.pullSecrets | list | `[]` | spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.0.0-0.2.0"` | The container image tag to use. |
+| image.tag | string | `"12.0.0-1.0.0"` | The container image tag to use. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |

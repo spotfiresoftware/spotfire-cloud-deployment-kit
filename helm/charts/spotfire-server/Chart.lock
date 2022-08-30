@@ -1,12 +1,12 @@
 dependencies:
 - name: fluent-bit
   repository: https://fluent.github.io/helm-charts
-  version: 0.20.2
+  version: 0.20.5
 - name: haproxy
   repository: https://haproxytech.github.io/helm-charts
-  version: 1.14.0
+  version: 1.15.0
 - name: spotfire-common
   repository: file://../spotfire-common
-  version: 0.1.1
-digest: sha256:2bf1261a95fffb9ada6bc7417f14978c6df2c19fcae99d901fa65fe1b584634c
-generated: "2022-06-13T10:24:23.2036591+02:00"
+  version: 0.1.2
+digest: sha256:5756c7f7ea202113537d05d139e7d7237ef76315ba8126e860751fb443b634b2
+generated: "2022-08-29T14:21:21.647278421+02:00"

@@ -72,6 +72,8 @@ For more information, see [Configuring the TERR service](https://docs.tibco.com/
 - `ENGINE_PACKAGE_PATH` - See [Package library location](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/package_library_location.html). Defaults to `/opt/packages`
 - `ENGINE_DISABLE_JAVA_CORE_DUMPS` - See [disable.java.core.dump](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/manage_java_options.html). Defaults to `TRUE`
 - `ENGINE_JAVA_OPTIONS` - See [javaOptions](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/manage_java_options.html).
+- `LOGGING_SERVICELOG_MAX` - Maximum number of terr service log files to save. Defaults to `2`
+- `LOGGING_SERVICELOG_SIZE` - Maximum size for terr service service log files. Defaults to `10MB`
 
 **Note**: These environment variables can only be used if the default configuration is used.
 

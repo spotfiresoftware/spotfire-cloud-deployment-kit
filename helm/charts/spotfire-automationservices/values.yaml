@@ -34,7 +34,7 @@ image:
   # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-automationservices
   # image.tag -- The container image tag to use.
-  tag: "12.0.0-0.2.0"
+  tag: "12.0.0-1.0.0"
   # image.pullPolicy -- spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -46,7 +46,7 @@ fluentBitSidecar:
     # -- image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- image tag to use for fluent-bit logging sidecar
-    tag: "1.9.4"
+    tag: "1.9.7"
     # -- image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 

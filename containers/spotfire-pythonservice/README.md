@@ -68,7 +68,8 @@ For more information, see [Configuring Spotfire Service for Python](https://docs
 - `ENGINE_PACKAGE_PATH` - See [Package library location](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/package_library_location.html). Defaults to `/opt/packages`
 - `ENGINE_DISABLE_JAVA_CORE_DUMPS` - See [disable.java.core.dump](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/manage_java_options.html). Defaults to `TRUE`
 - `ENGINE_JAVA_OPTIONS` - See [javaOptions](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/manage_java_options.html)
-
+- `LOGGING_SERVICELOG_MAX` - Maximum number of python service log files to save. Defaults to `2`
+- `LOGGING_SERVICELOG_SIZE` - Maximum size for python service log files. Defaults to `10MB`
 
 **Note**: These environment variables can only be used if the default configuration is used.
 

@@ -30,3 +30,21 @@ Volume mount configuration for fluent-bit.
 - name: logs-volume
   mountPath: /tsnm/logs
 {{- end }}
+
+{{/*
+preStop hook for spotfire-nodemanager based services
+*/}}
+{{- define "spotfire-common.fluenbit-configuration.tsnm.prestop.exec" }}
+exec:
+  command:
+  - /fluent-bit/bin/fluent-bit
+  - "-v"
+  - "-i"
+  - "tail"
+  - "-p"
+  - path=/tsnm/logs/tsnm-terminated
+  - "-o"
+  - "exit"
+  - "-p"
+  - "flush_count=1"
+  {{- end }}

@@ -9,6 +9,9 @@ stop() {
     exit
 }
 
+# Clean out any previous marker files
+rm -f /opt/tibco/tsnm/nm/logs/tsnm-terminated
+
 # Default to host ip address
 hostname=$(hostname -i)
 

@@ -57,7 +57,7 @@ When running in containers, we recommend creating only one Spotfire service and 
 
 You can also automatically add the Spotfire service in the container on startup by providing a default Spotfire services configuration file: 
 ```bash
-docker run --rm -v "$(pwd)/webplayer.default.conf:/opt/tibco/tsnm/nm/config/default.conf" \
+docker run --rm -v "$(pwd)/default.conf:/opt/tibco/tsnm/nm/config/default.conf" \
   -e SERVER_BACKEND_ADDRESS=spotfire-server \
   tibco/spotfire-node-manager
 ```
