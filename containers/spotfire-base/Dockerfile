@@ -22,7 +22,8 @@ RUN apt-get update \
      openjdk-17-jre-headless \
      unzip \
      cabextract \
-  && apt-get clean all
+  && apt-get clean all \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 1000 spotfire \
   && useradd --uid 1000 --gid 1000 --home /opt/tibco/ --shell=/bin/bash spotfire \
