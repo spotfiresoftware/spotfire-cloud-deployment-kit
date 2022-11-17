@@ -24,7 +24,7 @@ image:
   # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-server
   # image.tag -- The container image tag to use.
-  tag: "12.0.0-1.0.0"
+  tag: "12.1.1-1.1.0"
   # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -36,7 +36,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "1.9.7"
+    tag: "1.9.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -229,7 +229,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.0.0-1.0.0"
+    tag: "12.1.1-1.1.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -275,7 +275,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.0.0-1.0.0"
+    tag: "12.1.1-1.1.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -332,6 +332,11 @@ volumes:
     # Defines an already-existing persistent volume claim.
     existingClaim: ""
 
+  # The volume with mountPath: /opt/tibco/tss/tomcat/custom-ext-informationservices
+  customExtInformationservices:
+    # Defines an already-existing persistent volume claim.
+    existingClaim: ""    
+
   # The volume with mountPath: /opt/tibco/tss/tomcat/certs
   certificates:
     # Defines an already-existing persistent volume claim.
@@ -367,15 +372,29 @@ database:
     # -- Password to be created for the Spotfire Server database
     # If not provided, this password is automatically generated.
     password: ""
-  # -- For details related to create-db cli properties, visit the product documentation [here](https://docs.tibco.com/emp/spotfire_server/12.0.0/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html)
+    # -- Read username and password from an existing secret instead of from values. Keys must be 'SPOTFIREDB_USERNAME' and 'SPOTFIREDB_PASSWORD'.
+    # If not set, a secret will be created.
+    existingSecret: ""
+  # -- For details related to create-db cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html)
   # create-db cli also uses properties from database.bootstrap section.
   create-db:
     # -- if set to true, Spotfire server schema will also get deployed with other installation
     enabled: true
     # -- Admin username for the database server to be used as the Spotfire Server database
     adminUsername: "postgres"
-    # -- Admin password for the database server to be used as the Spotfire Server database
+    # -- Instead of adminUsername. If set, read username from an existing secret and key
+    adminUsernameExistingSecret:
+      ## -- Name of the kubernetes secret containing the administrator username
+      name: ""
+      ## -- Name of the key to read the administrator password from
+      key: DBSERVER_ADMIN_USERNAME
     adminPassword: ""
+    # -- Instead of adminPassword. If set, read password from an existing secret and key
+    adminPasswordExistingSecret:
+      ## -- Name of the kubernetes secret containing the administrator password
+      name: ""
+      ## -- Name of the key to read the administrator password from
+      key: DBSERVER_ADMIN_PASSWORD
     # -- Like database.bootstrap.databaseUrl but is used for the connection when creating the spotfire database.
     databaseUrl: ""
     # -- Database name to be created to hold the Spotfire Server database schemas
@@ -412,10 +431,13 @@ configuration:
 # -- The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command.
 encryptionPassword: ""
 
-# spotfireAdminUsername -- The user to create for the Spotfire admin.
-spotfireAdminUsername: "admin"
-# spotfireAdminPassword -- The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire adminstrative user interace because the password is reset to this value on every helm installation or upgrade.
-spotfireAdminPassword: ""
+# -- The user to create for the Spotfire admin.
+spotfireAdmin:
+  username: "admin"
+  # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire adminstrative user interace because the password is reset to this value on every helm installation or upgrade.
+  password: ""
+  # -- Read admin username and password from an existing secret instead of from values. Keys should be 'SPOTFIREADMIN_USERNAME' and 'SPOTFIREADMIN_PASSWORD'.
+  existingSecret: ""
 
 troubleshooting:
   jvm:
@@ -517,6 +539,9 @@ haproxy:
       bind :80
 
       option httplog
+
+      # Deny all non-spotfire requests
+      http-request deny status 403 content-type text/html string "403 Forbidden" unless { path -m beg /spotfire/ } || { path / } || { path /spotfire }
 
       # Deny external access to Spotfire Server health check url
       http-request deny deny_status 404 if { path /spotfire/rest/status/getStatus }

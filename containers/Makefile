@@ -3,6 +3,8 @@
 #
 # Run `make` to build all linux container images
 # Run `make spotfire-server` to build just spotfire-sever
+SHELL                       = /bin/bash
+.SHELLFLAGS                 = -o pipefail -c
 
 DOCKER_CLI ?= docker
 #DOCKER_CLI := podman
@@ -25,7 +27,7 @@ BUILD_FILES = spotfire-config/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz
               spotfire-node-manager/build/tsnm-$(SPOTFIRE_NODEMANAGER_VERSION).x86_64.tar.gz \
               spotfire-server/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
               spotfire-webplayer/build/Spotfire.Dxp.netcore-linux.sdn \
-              spotfire-webplayer/build/TIB_sfire_server_$(SPOTFIRE_NETCORE_VERSION)_languagepack-multi.zip \
+              spotfire-webplayer/build/TIB_sfire_server_$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)_languagepack-multi.zip \
               spotfire-automationservices/build/Spotfire.Dxp.netcore-linux.sdn \
               spotfire-terrservice/build/Spotfire.Dxp.TerrServiceLinux.sdn \
               spotfire-pythonservice/build/Spotfire.Dxp.PythonServiceLinux.sdn
@@ -46,6 +48,7 @@ spotfire-pythonservice spotfire-terrservice spotfire-node-manager spotfire-worke
 spotfire-pythonservice :                                                                IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
 spotfire-terrservice :                                                                  IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
 spotfire-webplayer spotfire-automationservices :                                        IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
+spotfire-webplayer :                                                                    IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
 spotfire-server spotfire-config :                                                       IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
 
 # TAGS -
@@ -89,17 +92,9 @@ push-% :
 	$(DOCKER_CLI) tag $(IMAGE_REPOSITORY_PREFIX)/$*:$(LOCAL_IMAGE_TAG) $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
 	$(DOCKER_CLI) push $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
 
-promote : DEST_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
-promote : DEST_IMAGE_TAG = $(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
-promote : $(addprefix promote-,$(IMAGES))
-promote-% :
-	$(DOCKER_CLI) pull $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG)
-	$(DOCKER_CLI) tag $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG) $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
-	$(DOCKER_CLI) push $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
-
 clean :
 	$(info Cleaning build directories)
 	rm -f $(BUILD_FILES)
 	rm -f **/build/*
 
-.PHONY : build push push-% $(IMAGES) clean build-files promote
+.PHONY : build push push-% $(IMAGES) clean build-files

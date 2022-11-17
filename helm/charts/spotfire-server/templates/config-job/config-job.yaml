@@ -31,10 +31,6 @@ spec:
           image: {{ include "spotfire-server.configJob.image" . }}
           imagePullPolicy: {{ include "spotfire-server.configJob.image.pullPolicy" . }}
           envFrom:
-          - secretRef:
-              name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
-          - secretRef:
-              name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
           {{- if .Values.configJob.extraEnvVarsSecret }}
           - secretRef:
               name: {{ tpl .Values.configJob.extraEnvVarsSecret $ }}
@@ -48,6 +44,7 @@ spec:
             {{ tpl (toYaml .Values.configJob.extraEnvVars) $ | nindent 12 }}
             {{- end }}
             {{ include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{ include "spotfire-server.spotfireadmin.envVars" . | nindent 12 }}
             {{ include "spotfire-server.database.envVars" . | nindent 12 }}
             {{ include "spotfire-server.configVars" . | nindent 12 }}
             {{ include "spotfire-server.database.adminEnvVars" . | nindent 12}}
@@ -89,6 +86,10 @@ spec:
             - name: custom-ext
               mountPath: /opt/tibco/spotfireconfigtool/custom-ext
             {{- end }}
+            {{- if .Values.volumes.customExtInformationservices.existingClaim }}
+            - name: custom-ext-informationservices
+              mountPath: /opt/tibco/spotfireconfigtool/custom-ext-informationservices
+            {{- end }}
             {{- with .Values.configJob.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -129,6 +130,11 @@ spec:
         - name: custom-ext
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.customExt.existingClaim }}
+        {{- end }}
+        {{ if .Values.volumes.customExtInformationservices.existingClaim -}}
+        - name: custom-ext-informationservices
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
         {{- end }}
       {{- with .Values.configJob.nodeSelector }}
       nodeSelector:

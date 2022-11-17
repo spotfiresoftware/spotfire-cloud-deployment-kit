@@ -44,6 +44,10 @@ spec:
             - name: custom-ext
               mountPath: /opt/tibco/spotfireconfigtool/custom-ext
             {{- end }}
+            {{- if .Values.volumes.customExtInformationservices.existingClaim }}
+            - name: custom-ext-informationservices
+              mountPath: /opt/tibco/spotfireconfigtool/custom-ext-informationservices
+            {{- end }}
             {{- with .Values.cliPod.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -77,6 +81,11 @@ spec:
         - name: custom-ext
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.customExt.existingClaim }}
+        {{- end }}
+        {{ if .Values.volumes.customExtInformationservices.existingClaim -}}
+        - name: custom-ext-informationservices
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
         {{- end }}
       {{- with .Values.cliPod.nodeSelector }}
       nodeSelector:

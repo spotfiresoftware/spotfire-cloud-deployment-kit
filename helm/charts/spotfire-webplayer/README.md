@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.0.0](https://img.shields.io/badge/AppVersion-12.0.0-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.1.1](https://img.shields.io/badge/AppVersion-12.1.1-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Web Player.
 
@@ -8,9 +8,11 @@ A Helm chart for TIBCO Spotfire Web Player.
 
 ## Requirements
 
+Kubernetes: `>=1.23.0-0`
+
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.2 |
+| file://../spotfire-common | spotfire-common | 0.1.3 |
 
 ## Overview
 
@@ -113,7 +115,7 @@ A credentials profile is a method for storing data source credentials to log in 
 4. Using extraVolumeMounts, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
 5. See the [configuration section](https://got-gitlab01.emea.tibco.com/sf-engr/spotfire-container-edition/-/tree/main/helm/charts/spotfire-webplayer#configuration) to upgrade the deployment. 
 
-For more information, see [Credentials profiles for connectors](https://docs.tibco.com/emp/spotfire_server/12.0.0/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
+For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
 
 ### Uninstalling
 
@@ -211,7 +213,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-webplayer container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for the fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.7"` | The image tag to use for the fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"1.9.8"` | The image tag to use for the fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for the fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"webplayer"` |  |
@@ -222,7 +224,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server, it overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"12.0.0-1.0.0"` | The container image tag to use. |
+| image.tag | string | `"12.1.1-1.1.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

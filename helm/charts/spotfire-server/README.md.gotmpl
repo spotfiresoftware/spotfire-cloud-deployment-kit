@@ -216,6 +216,17 @@ helm upgrade --install my-release .
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
+#### Upgrading helm chart version
+
+##### Version 0.1.3
+
+The following parameters have new names and must be taken into consideration when upgrading the release.
+
+| Old name | New name |
+| -------- | -------- |
+| _spotfireAdminUsername_ | _spotfireAdmin.username_ |
+| _spotfireAdminPassword_ | _spotfireAdmin.password_ |
+
 #### Upgrading the Spotfire Server version
 
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
@@ -306,6 +317,7 @@ You can mount a number of Spotfire specific volumes. If a volume is not configur
 
 - `volumes.certificates` - Used by spotfire-server, configJob, cliPod
 - `volumes.customExt` - Used by configJob, spotfire-server, cliPod
+- `volumes.customExtInformationservices` - Used by configJob, spotfire-server, cliPod
 - `volumes.deployments` - Used by configJob
 - `volumes.libraryImportExport` - Used by spotfire-server
 - `volumes.troubleshooting` - Used by spotfire-server
@@ -314,7 +326,11 @@ You can mount a number of Spotfire specific volumes. If a volume is not configur
 
 **Note**: The `spotfire` user needs read and write permissions for the volume.
 
-*mountPath*: /opt/tibco/tss/tomcat/custom-ext (spotfire-server) or /opt/tibco/spotfireconfigtool/custom-ext (configJob, cliPod)
+*mountPath*:
+- /opt/tibco/tss/tomcat/custom-ext (spotfire-server)
+- /opt/tibco/tss/tomcat/custom-ext-informationservices (spotfire-server)
+- /opt/tibco/spotfireconfigtool/custom-ext (configJob, cliPod)
+- /opt/tibco/spotfireconfigtool/custom-ext-informationservices (configJob, cliPod)
 
 You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, and other features.
 

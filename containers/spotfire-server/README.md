@@ -183,16 +183,26 @@ For more information on importing and exporting, see:
 ### Using custom jar files
 
 You can add additional jar files to the Spotfire server.
-For example, additional JDBC drivers to be used by Spotfire Server Information Services.
-For that, you can add them into the following directory: `/opt/tibco/tss/tomcat/custom-ext`.
 
-You can do this by mounting a volume into that path.
-For example: 
-```bash
-docker run ... -v /local/path/to/custom-ext:/opt/tibco/tss/tomcat/custom-ext/
-```
+For example 
+- Additional JDBC drivers to be used by Spotfire Server can be added into the following folder.: `/opt/tibco/tss/tomcat/custom-ext`.
 
-For more information about using extra jar files and `custom-ext` see:
+   You can do this by mounting a volume into that path.
+   For example: 
+   ```bash
+   docker run ... -v /local/path/to/custom-ext:/opt/tibco/tss/tomcat/custom-ext/
+   ```
+
+- Additional JDBC drivers to be used by Information Services can be 
+added into the following folder: `/opt/tibco/tss/tomcat/custom-ext-informationservices`.
+
+   You can do this by mounting a volume into that path.
+   For example: 
+   ```bash
+   docker run ... -v /local/path/to/custom-ext-informationservices:/opt/tibco/tss/tomcat/custom-ext-informationservices/
+   ```
+
+For more information about using extra jar files, `custom-ext` and `custom-ext-informationservices` see:
 
 - [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
 - [Authentication towards a custom JAAS module](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)

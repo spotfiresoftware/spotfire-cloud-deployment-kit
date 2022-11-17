@@ -19,14 +19,23 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+
+/*
+Spotfire database secrets
+*/
 {{- define "spotfire-server.spotfiredatabase.secret.name" -}}
-{{ $value := include "spotfire-server.fullname" . }}
-{{- printf "%s-%s" $value "database" -}}
+{{- if .Values.database.bootstrap.existingSecret -}}
+{{- .Values.database.bootstrap.existingSecret }}
+{{- else -}}
+{{- printf "%s-%s" (include "spotfire-server.fullname" .) "database" -}}
+{{- end -}}
 {{- end -}}
 
+/*
+Spotfire administrator secrets
+*/
 {{- define "spotfire-server.spotfireadmin.secret.name" -}}
-{{ $value := include "spotfire-server.fullname" . }}
-{{- printf "%s-%s" $value "spotfireadmin" -}}
+{{- or .Values.spotfireAdmin.existingSecret (printf "%s-%s" (include "spotfire-server.fullname" .) "spotfireadmin") -}}
 {{- end -}}
 
 {{/*
@@ -120,6 +129,24 @@ Database info needed to bootstrap and upgrade server
 {{- end -}}
 
 {{/*
+Spotfire administration username and password
+*/}}
+{{- define "spotfire-server.spotfireadmin.envVars" -}}
+- name: SPOTFIREADMIN_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
+      key: SPOTFIREADMIN_USERNAME
+      optional: false
+- name: SPOTFIREADMIN_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
+      key: SPOTFIREADMIN_PASSWORD
+      optional: false
+{{- end -}}
+
+{{/*
 Configuration job environment variables
 */}}
 {{- define "spotfire-server.configVars" -}}
@@ -137,26 +164,42 @@ Configuration job environment variables
 Database admin credentials environment variables needed to create a Spotfire schema
 */}}
 {{- define "spotfire-server.database.adminEnvVars" -}}
-{{- $values := (index .Values "database" "create-db") -}}
+{{- $createdb := (index .Values "database" "create-db") -}}
 - name: SPOTFIREDB_DBNAME
-  value: {{ $values.spotfiredbDbname | quote }}
-{{- if index $values.enabled }}
+  value: {{ $createdb.spotfiredbDbname | quote }}
+{{- if index $createdb.enabled }}
+{{- if (and $createdb.adminPasswordExistingSecret.name $createdb.adminPasswordExistingSecret.key) }}
 - name: DBSERVER_ADMIN_USERNAME
-  value: {{ required "database.create-db.adminUsername must be set" $values.adminUsername | quote }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ $createdb.adminUsernameExistingSecret.name | quote }}
+      key: {{ $createdb.adminUsernameExistingSecret.key | quote }}
+{{- else }}
+- name: DBSERVER_ADMIN_USERNAME
+  value: {{ required "database.create-db.adminUsername must be set" $createdb.adminUsername | quote }}
+{{- end }}
+{{- if (and $createdb.adminPasswordExistingSecret.name $createdb.adminPasswordExistingSecret.key) }}
 - name: DBSERVER_ADMIN_PASSWORD
-  value: {{ required "database.create-db.adminPassword must be set" $values.adminPassword | quote }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ $createdb.adminPasswordExistingSecret.name | quote }}
+      key: {{ $createdb.adminPasswordExistingSecret.key | quote }}
+{{- else }}
+- name: DBSERVER_ADMIN_PASSWORD
+  value: {{ required "database.create-db.adminPassword must be set" $createdb.adminPassword | quote }}
+{{- end }}
 - name: DBSERVER_CLASS
   value: {{ required "database.bootstrap.driverClass must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: DBSERVER_URL
-  value: {{ required "database.create-db.databaseUrl must be set" $values.databaseUrl | quote }}
+  value: {{ required "database.create-db.databaseUrl must be set" $createdb.databaseUrl | quote }}
 - name: DO_NOT_CREATE_USER
-  value: {{ $values.doNotCreateUser | quote }}
+  value: {{ $createdb.doNotCreateUser | quote }}
 - name: VARIANT
-  value: {{ $values.variant | quote }}
+  value: {{ $createdb.variant | quote }}
 - name: ORACLE_TABLESPACE_PREFIX
-  value: {{ $values.oracleTablespacePrefix | quote }}
+  value: {{ $createdb.oracleTablespacePrefix | quote }}
 - name: ORACLE_ROOT_FOLDER
-  value: {{ $values.oracleRootfolder | quote }}
+  value: {{ $createdb.oracleRootfolder | quote }}
 {{- end -}}
 {{- end -}}
 

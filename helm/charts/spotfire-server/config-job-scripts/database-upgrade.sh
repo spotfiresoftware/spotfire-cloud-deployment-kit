@@ -47,7 +47,10 @@ java -Xms256m -Xmx4096m -classpath "spotfireconfigtool/lib/*:spotfireconfigtool/
     -Dlog.dir=/opt/tibco/spotfireconfigtool/logs/ \
     -Dlog4j.configurationFile=/opt/tibco/spotfireconfigtool/log4j2-tools.xml \
     -Dtool.remote=true \
-    com.spotfire.server.tools.upgrade.UpgradeLauncher -silent=upgrade.properties
+    com.spotfire.server.tools.upgrade.UpgradeLauncher ${ENCRYPTION_PASSWORD:+--encryptionpassword="${ENCRYPTION_PASSWORD}"} \
+    -silent=upgrade.properties
+
+
 
 upgrade_status=$?
 

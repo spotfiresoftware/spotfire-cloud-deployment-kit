@@ -78,8 +78,8 @@
 
 [FILTER]
     Name                parser
-    Alias               tsnm.serviceconfig
-    Match               tsnm.serviceconfig
+    Alias               tsnm.worker.serviceconfig
+    Match               tsnm.worker.serviceconfig
 
     Reserve_Data        on
     Parser              filename.serviceid

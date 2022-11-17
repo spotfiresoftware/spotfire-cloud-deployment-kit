@@ -192,8 +192,10 @@ spotfireConfig:
       enabled: true
 
 encryptionPassword: "encryption/password"
-spotfireAdminUsername: "spotfireadmin"
-spotfireAdminPassword: "secretpassword101"
+
+spotfireAdmin:
+  username: "spotfireadmin"
+  password: "secretpassword101"
 
 database:
   bootstrap:

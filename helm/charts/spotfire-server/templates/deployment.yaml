@@ -116,6 +116,10 @@ spec:
           - name: custom-ext
             mountPath: /opt/tibco/tss/tomcat/custom-ext
           {{- end }}
+          {{- if .Values.volumes.customExtInformationservices.existingClaim }}
+          - name: custom-ext-informationservices
+            mountPath: /opt/tibco/tss/tomcat/custom-ext-informationservices
+          {{- end }}
           {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.existingClaim }}
           - name: library-import-export
             mountPath: /opt/tibco/tss/tomcat/application-data/library
@@ -199,6 +203,11 @@ spec:
         - name: custom-ext
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.customExt.existingClaim }}
+        {{- end }}
+        {{- if .Values.volumes.customExtInformationservices.existingClaim }}
+        - name: custom-ext-informationservices
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
         {{- end }}
         {{- if .Values.volumes.certificates.existingClaim }}
         - name: certificates-volume
