@@ -27,14 +27,14 @@ ARG SPOTFIRE_TERRSERVICE_VERSION
 LABEL org.opencontainers.image.title="tibco/spotfire-terrservice" \
     org.opencontainers.image.description="TIBCO® Enterprise Runtime for R (TERR) Server Edition is a high-performance, enterprise-quality statistical engine to provide predictive analytic capabilities" \
     org.opencontainers.image.version="${SPOTFIRE_TERRSERVICE_VERSION}" \
-    org.opencontainers.image.vendor='TIBCO Software Inc.' \
     org.opencontainers.image.url='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
     org.opencontainers.image.documentation='https://docs.tibco.com/products/tibco-spotfire/' \
     org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
-    org.opencontainers.image.licenses='TIBCO EULA' \
+    org.opencontainers.image.vendor='Cloud Software Group, Inc.' \
+    org.opencontainers.image.licenses='Cloud Software Group, Inc. End User Agreement' \
     com.tibco.image.product.name="TIBCO Spotfire® Statistics Services" \
     com.tibco.image.component.name="TIBCO® Enterprise Runtime for R - Server Edition" \
-    com.tibco.image.license.url='https://terms.tibco.com/#end-user-license-agreement' \
+    com.tibco.image.license.url='https://terms.tibco.com/#end-user-agreement' \
     com.tibco.image.type="commercial" \
     com.tibco.image.distribution-scope="private"
 

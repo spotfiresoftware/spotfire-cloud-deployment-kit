@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.13.0](https://img.shields.io/badge/AppVersion-1.13.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.14.0](https://img.shields.io/badge/AppVersion-1.14.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire® Service for Python
 
@@ -16,17 +16,18 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.3 |
+| file://../spotfire-common | spotfire-common | 0.1.4 |
 
 ## Overview
 
 This chart deploys the [TIBCO Spotfire® Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/the_tibco_spotfire_service_for_python.html) service (Python service) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- The Python service pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
-- The chart includes service annotations for [Prometheus](https://prometheus.io/) scrapers.
-The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+The Python service pod includes:
+- A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
+- Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+- Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
@@ -60,7 +61,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Configuring
 
-Override the default configuration settings by setting environment variables with `extraEnvVars`.
+You can override the default configuration settings by setting environment variables with `extraEnvVars`.
 See [containers README](../../../containers/spotfire-pythonservice/README.md#environment-variables) for the complete list.
 
 Example:
@@ -75,7 +76,7 @@ Additionally, you can override the default configuration settings by providing a
 The following configuration keys are available in the chart:
 - config."custom.properties"
 
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the container image.
 
 For Python service configuration, see [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/custom_configuration_properties.html).
 
@@ -87,11 +88,11 @@ helm install my-release . \
     --set-file config.'custom\.properties'=my-custom.properties
 ```
 
-**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a `\`.
+**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a '\'.
 
-#### Getting the original container configuration files
+#### Getting the container default configuration files
 
-Copy the default configuration files used in the container image and use them as templates for your custom configuration.
+You can copy the default configuration files from the container image to use them as templates for your custom configuration.
 
 **Note**: The configuration files content can be version dependent.
 
@@ -135,19 +136,19 @@ kedaAutoscaling:
   maxReplicas: 3
 ```
 
-The `spotfire-pythonservice` has the following defaults:
-- The default autoscaling metric is the `spotfire_service_queue_engines_inUse`.
+The `spotfire-pythonservice` has the following autoscaling defaults:
+- The default metric is the `spotfire_service_queue_engines_inUse`.
 - The default query is the sum of _service_queue_engines_inUse_ of the Python service instances.
 
 The counter _serviceQueueEnginesInUse_ provides the total number of engines currently executing.
-By default, the Python service has `number of cores - 1` available slots, so `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
-Typically, `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu` so the instance is scaled out before all of the available capacity is taken.
+By default, the Python service has `number of cores - 1` available slots, which means that `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
+Typically, you want to scale out before all the available capacity is taken. Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
 
 **Note**:  Clients requesting a slot typically wait until a slot is available.
 
 For more information, see [Monitoring Spotfire Service for Python using JMX](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/monitoring_spotfire_service_for_python_using_jmx.html).
 
-**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long running jobs are not aborted prematurely when the instance is scaled in.
+**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
 See [Engine Timeout](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
@@ -185,7 +186,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-pythonservice container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.8"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"pythonservice"` |  |
@@ -196,7 +197,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.13.0-1.1.0"` | The container image tag to use. |
+| image.tag | string | `"1.14.0-1.2.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

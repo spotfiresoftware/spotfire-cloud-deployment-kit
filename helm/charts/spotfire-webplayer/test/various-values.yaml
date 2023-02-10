@@ -1,0 +1,137 @@
+nodemanagerConfig:
+  serverBackendAddress: mytss-spotfire-server
+  preStopDrainingTimeoutSeconds: 610
+affinity: {}
+config:
+  Spotfire.Dxp.Worker.Core.config: <xml></xml>
+  Spotfire.Dxp.Worker.Host.dll.config: <xml></xml>
+  Spotfire.Dxp.Worker.Web.config: <xml></xml>
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+fluentBitSidecar:
+  securityContext:
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+  image:
+    pullPolicy: IfNotPresent
+    repository: fluent/fluent-bit
+    tag: 1.9.9
+fullnameOverride: ""
+global:
+  serviceName: webplayer
+  spotfire:
+    image:
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - pullsecret
+      registry: my.reg.com
+image:
+  pullPolicy: Never
+  pullSecrets:
+    - pullsecret
+  registry: my.registry.com
+  repository: tibco/spotfire-webplayer
+  tag: 12.1.0-1.2.0
+livenessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/liveness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+nameOverride: nameoverride
+nodeSelector: {}
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+readinessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/readiness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+replicaCount: 1
+resources: {}
+service:
+  port: "9501"
+  type: ClusterIP
+serviceAccount:
+  annotations:
+    annotationA: a
+    annotationB: b
+  create: false
+  name: ""
+startupProbe:
+  failureThreshold: 20
+  httpGet:
+    path: /spotfire/started
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+tolerations: ""
+kedaAutoscaling:
+  enabled: true
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitoring.svc.cluster.local
+  threshold: 4
+  fallback:
+    replicas: 2
+    failureThreshold: 3
+  advanced:
+    restoreToOriginalReplicaCount: true
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 600
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 300
+  pollingInterval: 90
+  cooldownPeriod: 100
+  minReplicas: 2
+  maxReplicas: 10
+  triggers: []
+webplayerConfig:
+  resourcePool: myResourcePool
+extraEnvVars:
+  - name: WEBPLAYER
+    value: VALUE
+extraEnvVarsCM: webplayercm
+extraEnvVarsSecret: webplayersecret
+extraVolumeMounts:
+  - name: webplayervolume
+    mountPath: /opt/tibco/services
+extraVolumes:
+  - name: webplayervolume
+    persistentVolumeClaim:
+      claimName: webplayer-pvc
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command:
+      - echo
+      - hey
+logging:
+  logLevel: info
+  logForwarderAddress: mytss-log-forwarder
+volumes:
+  troubleshooting:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename

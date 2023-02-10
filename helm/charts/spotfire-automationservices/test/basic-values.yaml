@@ -1,11 +1,10 @@
 nodemanagerConfig:
-    serverBackendAddress: "mytss-spotfire-server"
-
-startupProble:
+  serverBackendAddress: mytss-spotfire-server
+startupProbe:
   enabled: false
-
 livenessProbe:
   enabled: false
-
 readinessProbe:
+  enabled: false
+kedaAutoscaling:
   enabled: false

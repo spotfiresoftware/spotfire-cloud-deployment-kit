@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.1.1](https://img.shields.io/badge/AppVersion-12.1.1-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.2.0](https://img.shields.io/badge/AppVersion-12.2.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Server.
 
@@ -16,9 +16,9 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.3 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.20.7 |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.17.0 |
+| file://../spotfire-common | spotfire-common | 0.1.4 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.21.2 |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.17.3 |
 
 ## Overview
 
@@ -28,23 +28,24 @@ Using this chart, you can also deploy the following:
 - The required Spotfire Server database schemas on a supported database server (for example, Postgres).
 - A reverse proxy ([HAProxy](https://www.haproxy.org/)) for accessing the Spotfire Server cluster service, with session affinity for external HTTP access.
 - An ([Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)) with routing rules for accessing the configured reverse proxy.
-- Shared storage locations ([Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)) for the Spotfire library import and export, custom jars, deployment packages, and other features.
+- Shared storage locations ([Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)) for the Spotfire library import and export, custom jars, deployment packages, and other purposes.
 
 The Spotfire Server pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
 - Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+- Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](https://www.elastic.co/elasticsearch/) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
-- Familiarity with kubernetes, containers and helm concepts and usage
+- Familiarity with Kubernetes, containers and Helm chart concepts and usage
 - Helm 3+
 - Ingress controller (optional)
 - PV (Persistent Volume) provisioner support in the underlying infrastructure (optional)
-- A supported database server for use as the Spotfire database (For information on supported databases, see [Spotfire Server requirements](https://docs.tibco.com/pub/spotfire/general/sr/sr/topics/system_requirements_for_spotfire_products.html).)
+- A supported database server for use as the Spotfire database. For information on supported databases, see [Spotfire Server requirements](https://docs.tibco.com/pub/spotfire/general/sr/sr/topics/system_requirements_for_spotfire_products.html).
 
-**Note**: You can install the database server in the same kubernetes cluster or on premises. Alternatively, you can use a cloud database service.
+**Note**: You can install the database server in the same Kubernetes cluster or on premises. Alternatively, you can use a cloud database service.
 
 ## Usage
 
@@ -58,30 +59,60 @@ helm install my-release -f my-values.yml .
 **Note**: The Spotfire Server chart requires some variables to start (such as database server connection details).
 See examples and variables description below.
 
+**Note**: You can use any of the Spotfire supported databases with these recipes, and you can choose to run the database on containers, VMs, bare metal servers, or use a cloud database service.
+
+For more information on how to configure the different supported databases using this Helm chart,
+see the [Supported databases configuration table](#supported-databases-configuration) and the [Values table](#values).
+
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
-#### Installing with a new database
+#### Example: Installing with an existing database
 
-This example shows how to deploy a Spotfire Server and a PostgreSQL database in a kubernetes cluster using helm charts.
-The database is deployed as a container that, by default, creates its own PVC for storage.
-You can use any of the supported databases as a container, a VM, a bare metal server, or as cloud database service.
+This example shows how to deploy a Spotfire Server using an already existing supported database.
 
-More information related to supported databases and their configuration can be found [here](#supported-databases-configuration)
+Deploy the Spotfire Server using an existing database:
+```bash
+helm install my-release . \
+    --set database.bootstrap.databaseUrl="$DB_BOOTSTRAP_URL" \
+    --set database.create-db.databaseUrl="$DB_URL" \
+    --set database.create-db.adminUsername="$DB_ADMIN" \
+    --set database.create-db.adminPassword="$DB_PASSWORD" \
+    --set database.create-db.enabled=true \
+    -f my-values.yml
+```
+
+**Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
+
+For more information, see:
+- [create-db](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html) command documentation.
+- [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command documentation.
+- and the [Values table](#values) section
+
+Additional database connection configuration is typically done through the JDBC connection properties in the connection url and varies between different database and driver vendors.
+For example, for PostgreSQL, see [Postgres JDBC](https://jdbc.postgresql.org/documentation/head/connect.html).
+
+In some specific cases there is also a need to place additional files in the container and supply the absolute path of these files in the connection url.
+See [Volumes](#volumes) section for details.
+
+#### Example: Installing with a new database
+
+This example shows how to deploy a Spotfire Server using a PostgreSQL database in a Kubernetes cluster using Helm charts.
+The database is deployed as a container and, by default, the PostgreSQL Helm chart creates its own PVC for persistent data storage.
 
 Steps:
 
-1. Add the bitnami charts repository and install a postgresql database using [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql):
+1. Add the Bitnami charts repository and install a Postgresql database using the [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql):
     ```bash
     helm repo add bitnami https://charts.bitnami.com/bitnami
     helm install vanilla-tssdb bitnami/postgresql
     ```
 
-2. Export the postgresql autogenerated random password:
+2. Export the Postgresql autogenerated random password:
     ```bash
     export POSTGRES_PASSWORD=$(kubectl get secret --namespace default vanilla-tssdb-postgresql -o jsonpath="{.data.postgres-password}" | base64 --decode)
     ```
 
-3. Install the Spotfire Server chart using the release name `my-release`:
+3. Install the Spotfire Server chart using the release name `vanilla-tss`:
     ```bash
     helm upgrade --install vanilla-tss . \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
@@ -91,47 +122,30 @@ Steps:
         --set database.create-db.adminUsername=postgres \
         --set database.create-db.adminPassword="$POSTGRES_PASSWORD" \
         --set database.create-db.enabled=true \
-        --set site.publicAddress=http://localhost/
+        --set configuration.site.publicAddress=http://localhost/
     ```
 
    **Note**: You must provide your private registry address where the Spotfire containers are stored.
 
    **Note**: This example assumes that your Spotfire container images are located in a configured registry at 127.0.0.1:32000.
    See the Kubernetes documentation for how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/),
-   or how to configure a local registry in your Kubernetes distribution (for example, [microk8s built-in registry](https://microk8s.io/docs/registry-built-in)).
+   and how to configure a local registry in your Kubernetes distribution (for example, [microk8s built-in registry](https://microk8s.io/docs/registry-built-in)).
 
 4. Export the autogenerated Spotfire admin password:
     ```bash
-    export SPOTFIREADMIN_PASSWORD=$(kubectl get secrets vanilla-tss-spotfire-server-spotfireadmin -o jsonpath="{.data.SPOTFIREADMIN_PASSWORD}" | base64 --decode)
+    export SPOTFIREADMIN_PASSWORD=$(kubectl get secrets vanilla-tss-spotfire-server -o jsonpath="{.data.SPOTFIREADMIN_PASSWORD}" | base64 --decode)
     ```
 
-5. Export the autogenerated Spotfire database password for user spotfire:
+5. Export the autogenerated Spotfire database password:
     ```bash
-    export SPOTFIREDB_PASSWORD=$(kubectl get secrets vanilla-tss-spotfire-server-database -o jsonpath="{.data.SPOTFIREDB_PASSWORD}" | base64 --decode)
+    export SPOTFIREDB_PASSWORD=$(kubectl get secrets vanilla-tss-spotfire-server -o jsonpath="{.data.SPOTFIREDB_PASSWORD}" | base64 --decode)
     ```
 
-6. Access the Spotfire Server web interface.
+6. After some minutes, you can access the Spotfire Server web interface in `configuration.site.publicAddress`.
 
-For more information on Spotfire, see [TIBCO Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation
+For more information on Spotfire, see the [TIBCO Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation.
 
-For more information on PostgreSQL deployment using the chart in the example, see [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql) documentation.
-
-#### Installing with an existing database
-
-Deploy Spotfire Server using an existing database
-**Note**: Before running the following command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
-
-```bash
-helm install my-release . \
-    --set database.create-db.adminUsername="$DB_ADMIN" \
-    --set database.create-db.adminPassword="$DB_PASSWORD" \
-    --set database.bootstrap.databaseUrl="$DB_DRIVER_URL" \
-    --set database.bootstrap.password="$SPOTFIREDB_PASSWORD"
-```
-
-Additional database connection configuration is typically done through the JDBC connection properties in the connection url and varies between different database and driver vendors, e.g [Postgres JDBC](https://jdbc.postgresql.org/documentation/head/connect.html).
-
-In some specific cases there are also a need to place files in the container (e.g for TLS connections) and supply the absolute path of these files in the connection url, use `extraVolumes`, `extraVolumeMounts`, `cliPod.extraVolumes`, `cliPod.extraVolumeMounts`, `configJob.extraVolumes`, `configJob.extraVolumeMounts` in [Volumes](#volumes) for this.
+For more information on PostgreSQL deployment using the chart in the example, see the [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql) documentation.
 
 ### Uninstalling
 
@@ -144,29 +158,33 @@ See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command docu
 
 #### Deleting any remaining resources
 
-Normally, all services and pods are deleted using `helm uninstall`, but occasionally you might need to manually delete existing Spotfire persistence volume claims
-or jobs that are uncompleted due to interrupted operation or incorrect setup.
+Normally, all services and pods are deleted using `helm uninstall`, but occasionally you might need to manually delete existing Spotfire persistent volume claims or not completed jobs due to interrupted operation or incorrect setup.
 
-- To free up the storage, manually deleting all persistent volume claims:
+To delete unused persistent volume claims, you can first list the persistent volume claims:
 ```bash
 kubectl get pvc
 ```
 
-- To delete only the persistent volume claims that you do not want to keep:
+And then, delete only the persistent volume claims that you do not want to keep. For example:
 ```bash
-kubectl delete pvc <PVC ids here>
+kubectl delete pvc data-my-release-postgresql-0
 ```
 
-- To delete the release-related jobs:
+To delete old release jobs, you can first list the jobs:
+```bash
+kubectl get jobs
+```
+
+And then, delete the ones that you do not want to keep. For example:
 ```bash
 kubectl delete job.batch/my-release-spotfire-server-basic-config-job
 ```
 
-Alternatively, delete the kubernetes namespace that contains these resources.
+Alternatively, delete the Kubernetes namespace that contains these resources.
 
 ### Scaling
 
-For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
+For scaling the `my-release` deployment, you can do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
 ```bash
 helm upgrade --install my-release . --reuse-values --set replicaCount=3
 ```
@@ -192,14 +210,14 @@ The `spotfire-server` has the following defaults:
 - The default autoscaling metric is the `spotfire_OS_OperatingSystem_ProcessCpuLoad`.
 - The default query is the sum of CPU usage (in percent) of all of the Spotfire Server instances.
 
-With these settings, if the total CPU usage for all instances is greater than the threshold, then another instance is scaled out;
-If the total CPU usage for all instances falls under the threshold, then the instance is scaled in.
+With these default settings, if the total CPU usage for all instances is greater than the threshold, then another instance is started to scale out the service.
+If the total CPU usage for all instances falls under the threshold, then the service scales in.
 
 For each multiple of the `kedaAutoscaling.threshold`, another instance is scaled out.
 - With 1 replica, if the query value is at >60% CPU, another replica is created.
 - With 2 replicas, if the query value is at >120%, another replica is created, and so on.
 
-See [HPA algorithm details](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details).
+For more information, see the [HPA algorithm details](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details).
 
 **Note**: To allow time for draining sessions when scaling in, tune the values for `draining.minimumSeconds` and `draining.timeoutSeconds`.
 
@@ -223,43 +241,61 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 #### Upgrading helm chart version
 
+The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
+
+##### Version 0.1.4
+
+| New key (v0.1.4) | Old key (0.1.3) | Comment |
+| - | - | - |
+| `configuration.draining.*` | `draining.*` | Moved |
+| `configuration.encryptionPassword` | `encryptionPassword` | Moved |
+| `configuration.preferExistingConfig` | `configuration.useExisting` | Moved |
+| `configuration.site.*` | `site.*` | Moved |
+| `configuration.spotfireAdmin.*` | `spotfireAdmin.*` | Moved |
+| `configuration.spotfireAdmin.passwordExistingSecret.{key,name}` | `spotfireAdmin.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
+| `database.bootstrap.passwordExistingSecret.{name,key}` | `database.bootstrap.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
+| `configuration.applyKubernetesConfiguration` | Removed |
+
 ##### Version 0.1.3
 
-The following parameters have new names and must be taken into consideration when upgrading the release.
-
-| Old name | New name |
-| -------- | -------- |
-| _spotfireAdminUsername_ | _spotfireAdmin.username_ |
-| _spotfireAdminPassword_ | _spotfireAdmin.password_ |
+| New key (0.1.3) | Old key (0.1.2) |
+| - | - |
+| _spotfireAdmin.username_ | _spotfireAdminUsername_ |
+| _spotfireAdmin.password_ | _spotfireAdminPassword_ |
 
 #### Upgrading the Spotfire Server version
 
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
 
-By default, when you upgrade or install to a helm chart that deploys a newer version of TIBCO Spotfire Server,
+By default, when you upgrade or install with a Helm chart that deploys a newer version of TIBCO Spotfire Server,
 the Spotfire database is upgraded to the schema version required by the newer Spotfire Server version.
 
-- To disable the automatic Spotfire database schema upgrade, set the value `database.upgrade` to `false`. In this case, you must manually upgrade the database.
-- To enable rolling back an upgrade, before you upgrade to a newer Spotfire Server version, first back up the Spotfire database.
+**Note**: To disable the automatic Spotfire database schema upgrade, set the value `database.upgrade` to `false`. In this case, you must manually upgrade the database.
 
-If you use an external library storage, create a snapshot corresponding to the database backup.
+**Note**: To be able to rollback an upgrade, you must backup the Spotfire database before upgrading to a newer Spotfire Server version.
+If you use an external library storage, you need to create also a snapshot of the external library storage corresponding to the database backup state.
 
-The Kubernetes job `config-job' upgrades the Spotfire database schema. To make sure the upgrade is successful, check the `config-job' logs.
+The Kubernetes job `config-job` upgrades the Spotfire database schema. To verify if the upgrade is successful, check the `config-job` logs.
 
-The job `config-job` uses the Spotfire Server Upgrade Tool.
+The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool.
 For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
 
-#### Running custom spotfire-config tool tasks during helm release upgrade / installation
+## Configuration
 
-During a helm release upgrade and installation, you can run the custom spotfire-config tool tasks to add a custom configuration or to run custom tasks.
-There are two types of config.sh scripts that you can run.
+#### Running custom spotfire-config tool tasks during helm install / upgrade
 
-- `configuration.configurationScripts` - Scripts that modify the Spotfire server configuration (configuration.xml).
+During a helm release upgrade or install, you can run a custom `spotfire-config` tool tasks to add a custom configuration or to run custom tasks.
+There are three types of `config.sh` scripts that you can run:
+
+- `configuration.configurationScripts` - Scripts that modify the Spotfire server configuration (`configuration.xml`).
 - `configuration.commandScripts` - Scripts that do not modify the Spotfire server configuration (for example, for creating users, assigning licenses, and so on).
+- `configuration.preConfigCommandScripts` - Same as commandScripts but these command will be run before the configuration is imported.
 
-**Note**: To deploy SDN files during a helm release upgrade or installation, see [Using persistent volumes for deploying SDNs/SPKs](#Using-persistent-volumes-for-deploying-SDNs/SPKs).
+See the [Values](#values) section below for more details.
 
-Example yaml file to use with `helm upgrade` or `helm install`:
+**Note**: To deploy SDN files during helm upgrade or install, see [Using persistent volumes for deploying SDNs/SPKs](#volume-for-deploying-sdnsspks).
+
+Example: A `values.yml` snippet configuration for running custom `spotfire-config` tool tasks:
 ```yaml
 configuration:
   configurationScripts:
@@ -279,30 +315,70 @@ configuration:
 
 You can use environment variables in the scripts. These include, but are not limited to, `CONFIGURATION_FILE`, `BOOTSTRAP_FILE` and `TOOL_PASSWORD`.
 
-For more information about config.sh scripts, see the Spotfire Server documentation about [scripting a configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
+For more information about `config.sh` scripts, see the Spotfire Server documentation about [scripting a configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
 
-If your scripts require additional environment variables, to add environment variables from existing secrets or configmaps, use `extraEnvVarsSecret` or `extraEnvVarsCM`.
+If your scripts require additional environment variables, to add environment variables from existing secrets or configmaps, use the `extraEnvVarsSecret` or `extraEnvVarsCM` chart variables.
+
+#### Managing configuration on helm install / upgrade
+
+The key `configuration.apply` controls when to apply the values under the `configuration` key level.
+See the following table for a summary of the possible values, descriptions, and when to use each of them.
+
+| Value | Description | When it is useful |
+|-------|-------------|-------------------|
+| always | Apply on every `helm install` or `helm upgrade`| When you prefer to manage the configuration always using `configuration` keys |
+| initialsetup | Apply only on new Spotfire server installationn, if there is no configuration in the database | When you want to use `configuration` keys for the initial setup of the system, but you prefer to manage the configuration using an external tool |
+| never | Do not apply | When you prefer to manage the configuration externally, without using `configuration` keys |
+
+**Note**: When set to `always`, the configuration made from tools other than helm might be overwritten when doing a helm upgrade.
+
+**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt](config-job-scripts/default-kubernetes-config.txt). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
+
+**Note**: If you prefer to manage the configuration externally, you can also set `configuration.preferExistingConfig` to true.
+See the [Values](#values) section for more details.
+
+## Additional / custom environment variables
+
+You can use the following chart keys to add additional environment variables to the pods:
+- `extraEnvVars`, `extraEnvVarsCM`, `extraEnvVarsSecret` - Extra environment variables for the `spotfire-server` pod
+- `cliPod.extraEnvVars`, `cliPod.extraEnvVarsCM`, `cliPod.extraEnvVarsSecret` - Extra environment variables for the `cli` pod
+- `configJob.extraEnvVars`, `configJob.extraEnvVarsCM`, `configJob.extraEnvVarsSecret` - Extra environment variables for the `config-job` pod
+
+Use these keys to inject environment variables for usage in custom initialization and configuration scripts, or to set options for the Spotfire Server JVM and Tomcat.
+
+Use `extraEnvVarsSecret` or `extraEnvVarsCM` to add environment variables from existing secrets or configMaps.
+
+Example: A `values.yml` snippet configuration for JVM settings for the Spotfire Server:
+```yaml
+extraEnvVars:
+  - name: CATALINA_INITIAL_HEAPSIZE
+    value: 1024m
+  - name: CATALINA_MAXIMUM_HEAPSIZE
+    value: 2048m
+  - name: CATALINA_OPTS
+    value: "-Djava.net.preferIPv4Stack=true"
+```
 
 ## Volumes
 
-The spotfire-server chart uses volumes to mount external files into the containers file system to make them available to the containers. You can also use volumes to persist data that is written by the application
-to an external volume.
+You can use volumes to mount external files into the containers file system to make them available to the containers.
+You can also use volumes to persist data that is written by the application to an external volume.
 
-Setting up permission is usually handled by the Kubernetes administrators. See the Kubernetes documentation for best practices.
+Setting up volumes permissions is usually handled by the Kubernetes administrators. See the Kubernetes documentation for best practices.
 
 **Note**: You can create a pod running as the user `root` that uses a PersistentVolume or PersistentVolumeClaim to set the right permissions or to pre-populate the volume with jar files or library import files.
 
 - For more information on volumes, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) and [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
 - For more information using PersistentVolumes and PersistentVolumeClaims in a Pod, see [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/).
 
-### extraVolumes and extraVolumesMounts
+### Spotfire generic volumes
 
-A general way use additional volumes is with `extraVolumeMounts` and `extraVolumes`.
+A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables.
 
-For extra volumes:
-- In the spotfire-server pod, use `extraVolumeMounts` and `extraVolumes`.
-- In the cliPod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`.
-- In the configJob, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
+There are specific variables for using these generic volumes on each pod:
+- For the `spotfire-server` pod, use `extraVolumeMounts` and `extraVolumes`.
+- For the `cli` pod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`.
+- For the `config-job` pod, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
 
 Example:
 ```yaml
@@ -318,88 +394,113 @@ extraVolumes:
 
 ### Spotfire specific volumes
 
-You can mount a number of Spotfire specific volumes. If a volume is not configured, it is not used, or the mountPath uses an emptyDir volume.
+You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, certificates, and other purposes.
 
-- `volumes.certificates` - Used by spotfire-server, configJob, cliPod
-- `volumes.customExt` - Used by configJob, spotfire-server, cliPod
-- `volumes.customExtInformationservices` - Used by configJob, spotfire-server, cliPod
-- `volumes.deployments` - Used by configJob
-- `volumes.libraryImportExport` - Used by spotfire-server
-- `volumes.troubleshooting` - Used by spotfire-server
+You can use predefined chart values for the most common needed Spotfire volumes.
+See the table below.
 
-#### Volume for library exporting and importing
+| Chart values                           | Purpose                                                                      |
+|----------------------------------------|------------------------------------------------------------------------------|
+| `volumes.certificates`                 | Use self-signed or custom certificates                                       |
+| `volumes.customExt`                    | Use additional Java library files in the Spotfire Server                     |
+| `volumes.customExtInformationservices` | Use additional Java library files for Information Services                   |
+| `volumes.deployments`                  | Automatically deploy SDNs/SPKs files into a _Spotfire deployment area_       |
+| `volumes.libraryImportExport`          | Common storage for Spotfire library import and export operations             |
+| `volumes.troubleshooting`              | Persist `spotfire-server` JVM head dumps and information for troubleshooting |
 
-**Note**: The `spotfire` user needs read and write permissions for the volume.
+**Note**: If a volume is not configured, it will not be used or the mountPath will use an emptyDir volume.
+
+#### Volume for certificates
+
+To use self-signed or custom certificates for connecting to LDAPS (such as `.jks` keystore files),
+you can create a volume with the desired files to mount on container start
+and use `volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
-- /opt/tibco/tss/tomcat/custom-ext (spotfire-server)
-- /opt/tibco/tss/tomcat/custom-ext-informationservices (spotfire-server)
-- /opt/tibco/spotfireconfigtool/custom-ext (configJob, cliPod)
-- /opt/tibco/spotfireconfigtool/custom-ext-informationservices (configJob, cliPod)
+- `/opt/tibco/tss/tomcat/certs` (spotfire-server pod)
+- `/opt/tibco/spotfireconfigtool/certs` (config-job and cli pods)
 
-You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, and other features.
+**Note**: The `spotfire` user needs read permissions to the volume.
 
-When [importing to library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_importing_to_library.htm&rhsearch=export&rhsyns=%20)
-or [exporting from library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_exporting_from_library.htm&rhsearch=export&rhsyns=%20),
-you can use `volumes.libraryImportExport.persistentVolumeClaim` or `volumes.libraryImportExport.persistentVolumeClaim.existingClaim` to control which PersistentVolume or PersistentVolumeClaim to use.
+For more information on using self-signed certificates for LDAPS with the Spotfire Server, see [Configuring LDAPS](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/configuring_ldaps.html).
 
-*mountPath*: /opt/tibco/tss/tomcat/application-data/library on spotfire-server
+#### Volume for custom Java library files
 
-#### Volume for custom jar files
+To use custom jar files in the `spotfire-server` container,
+you can create a PersistentVolume with the desired files to mount on container start
+and use `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
+
+*mountPath*:
+- `/opt/tibco/tss/tomcat/custom-ext` (spotfire-server pod)
+- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
+- `/opt/tibco/spotfireconfigtool/custom-ext` (config-job and cli pods)
+- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
-To use custom jar files in the `spotfire-server` container, you can create a volume with the desired files to mount on container start. Use `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
-
 For information on using additional Java library files for Spotfire Server, see:
- - [Installing database drivers for Information Designer
-](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
- - [Authentication towards a custom JAAS module
-](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)
- - [Post-authentication filter](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/post-authentication_filter.html)
+- [Installing database drivers for Information Designer
+  ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
+- [Authentication towards a custom JAAS module
+  ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)
+- [Post-authentication filter](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/post-authentication_filter.html)
 
-#### Deployment volume for deploying SDNs/SPKs
+#### Volume for deploying SDNs/SPKs
 
-*mountPath*: /opt/tibco/spotfireconfigtool/deployments on configJob
+**Note**: By default, the deployment configuration job creates a deployment area using the release's `Spotfire.Dxp.sdn`, contained in the spotfire-deployment image.
+If this is sufficient for your use case, you can skip this section.
+However, if you want to customize the Spotifre deployment areas structure and the packages to be deployed on each of them, you can follow instead the steps in this section.
+For more information, see the keys under `configuration.deployment`.
 
-To deploy SDNs/SPKs files in _Spotfire deployment area_, you can create a volume with the desired files to mount on container start.
+To automatically deploy SDNs/SPKs files into a _Spotfire deployment area_,
+you can create a PersistentVolume with the desired files to mount on container start
+and use `volumes.deployments.existingClaim` to set the PersistentVolumeClaim to use.
 
-1. Copy the desired SDNs/SPKs in a folder (such as `Test/`) in the volume.
-The helm configuration job creates a _Spotfire deployment area_ with the folder name (if it does not exist), and the packages are deployed in that area.
-2. Set the PersistentVolumeClaim to use with `volumes.deployments.existingClaim`.
+Steps:
+1. Copy the desired SDNs/SPKs in a folder (such as `Test/`) in the PersistentVolume.
+2. On helm install/upgrade, the `config-job` creates a _Spotfire deployment area_ with the folder name (if it does not exist), and the packages are deployed into that area.
 
-Example: The following volume file structure creates the deployment areas "Production" and "Test" and deploys the provided SDN files in these deployment areas:
+Example: The following volume file structure creates the deployment areas "Production" and "Test", and deploys the provided SDN files in these respective deployment areas:
 ```txt
 Production/Spotfire.Dxp.sdn
 Test/Spotfire.Dxp.sdn
 Test/Spotfire.Dxp.PythonServiceLinux.sdn
 ```
 
-**Note**: The Spotfire deployment area names are case insensitive and have a maximum length of 25 characters. These are the valid characters:
+*mountPath*: `/opt/tibco/spotfireconfigtool/deployments` (config-job pod)
+
+**Note**: The `spotfire` user needs read permissions for the volume.
+
+**Note**: The Spotfire deployment area names are case-insensitive and have a maximum length of 25 characters. These are the valid characters:
 * [a-z]
 * [0-9]
 * The underline character `_`
 * The dash character `-`
 
-For more information, see [Spotfire Deployments and deployment areas](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html)
+For more information, see [Spotfire Deployments and deployment areas](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html).
 
-#### Certificates volume
+#### Volume for library export and import
 
-**Note**: The `spotfire` user needs read permissions to the volume.
+To use a common storage for Spotfire library import and export operations,
+you can use `volumes.libraryImportExport.persistentVolumeClaim` or `volumes.libraryImportExport.existingClaim`
+to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: /opt/tibco/tss/tomcat/certs (spotfire-server) or /opt/tibco/spotfireconfigtool/certs (configJob, cliPod)
+*mountPath*: `/opt/tibco/tss/tomcat/application-data/library` (spotfire-server pod)
 
-If you use self-signed or custom certificates for connecting to LDAPS (such as `.jks` keystore files), you can create a volume with the desired files to mount on container start.
+**Note**: The `spotfire` user needs read and write permissions for the volume.
 
-To control which PersistentVolumeClaim to use, use `volumes.certifacates.existingClaim`.
+For more information, see [importing to library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_importing_to_library.htm&rhsearch=export&rhsyns=%20)
+and [exporting from library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_exporting_from_library.htm&rhsearch=export&rhsyns=%20).
 
-For more information on using self-signed certificates for LDAPS with the Spotfire Server, see [Configuring LDAPS](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/configuring_ldaps.html).
+#### Volume for troubleshooting files
 
-#### Troubleshooting volume
+To persist `spotfire-server` JVM head dumps and information for troubleshooting when pods are removed,
+you can use `volumes.troubleshooting.persistentVolumeClaim` or `volumes.troubleshooting.existingClaim`
+to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: /opt/tibco/troubleshooting/jvm-heap-dumps on spotfire-server
+*mountPath*: `/opt/tibco/troubleshooting/jvm-heap-dumps` (spotfire-server pod)
 
-spotfire-server uses the volume to write troubleshooting information such as heap dumps to this path. To persist this information, set `volumes.troubleshooting.existingClaim`.
+**Note**: The `spotfire` user needs write permissions for the volume.
 
 ## Always-on Spotfire configuration CLI pod
 
@@ -413,53 +514,27 @@ my-release-cli-859fdc8cdf-d58rf $
 
 For more information, see [Configuration using the command line](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/configuration_using_the_command_line.html).
 
-## Additional / custom environment variables
-
-You can use the following value keys to add additional environment variables to the pods.
-
-- `extraEnvVars`, `extraEnvVarsCM`, `extraEnvVarsSecret` - Extra environment variables for Spotfire Server
-- `cliPod.extraEnvVars`, `cliPod.extraEnvVarsCM`, `cliPod.extraEnvVarsSecret` - Extra environment variables for cliPod
-- `configJob.extraEnvVars`, `configJob.extraEnvVarsCM`, `configJob.extraEnvVarsSecret` - Extra environment variables for configJob
-
-Use these to set options such as having custom initialization and configuration scripts consume variables, or setting options for the Spotfire Server JVM and Tomcat.
-
-Use `extraEnvVarsSecret` or `extraEnvVarsCM` to add environment variables from existing secrets or configmaps.
-
-Example: Set JVM settings for Spotfire Server release:
-```bash
-helm install my-release -f my-values.yml .
-```
-
-my-values.yaml:
-```yaml
-extraEnvVars:
-  - name: CATALINA_INITIAL_HEAPSIZE
-    value: 1024m
-  - name: CATALINA_MAXIMUM_HEAPSIZE
-    value: 2048m
-  - name: CATALINA_OPTS
-    value: "-Djava.net.preferIPv4Stack=true"
-```
 ## Supported databases configuration
 
-| Database | driver class | create-db.databaseUrl | bootstrap.databaseUrl | Additional parameters |
-|----------|--------------|-----------------------|-----------------------|-----------------------|
-| Postgres | org.postgresql.Driver | jdbc:postgresql://databasehost:databaseport/ | jdbc:postgresql://databasehost:databaseport/ |  |
-| Oracle | oracle.jdbc.OracleDriver | jdbc:oracle:thin:@//databasehost:databaseport/service | jdbc:oracle:thin:@//databasehost:databaseport/service | oracleRootfolder, oracleTablespacePrefix |
-| MSSQL | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename | |
-| AWS Postgres | org.postgresql.Driver | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename | doNotCreateUser = true |
-| Aurora Postgres | org.postgresql.Driver | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename | doNotCreateUser = true |
-| AWS Oracle | oracle.jdbc.OracleDriver | jdbc:oracle:thin:@databasehost:databaseport/ORCL | jdbc:oracle:thin:@databasehost:databaseport/ORCL | variant = rds |
-| AWS MSSQL | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = rds |
-| Azure Postgres | org.postgresql.Driver | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename | doNotCreateUser = true |
-| Azure MSSQL | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure |
-| Google Cloud Postgres | org.postgresql.Driver | jdbc:postgresql://databasehost:databaseport/ | jdbc:postgresql://databasehost:databaseport/databasename | doNotCreateUser = true |
+| Database              | driver class                                 | create-db.databaseUrl                                    | bootstrap.databaseUrl                                                | Additional parameters                    |
+|-----------------------|----------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------|------------------------------------------|
+| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/                         |                                          |
+| Oracle                | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@//databasehost:databaseport/service    | jdbc:oracle:thin:@//databasehost:databaseport/service                | oracleRootfolder, oracleTablespacePrefix |
+| MSSQL                 | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename |                                          |
+| AWS Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Aurora Postgres       | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| AWS Oracle            | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@databasehost:databaseport/ORCL         | jdbc:oracle:thin:@databasehost:databaseport/ORCL                     | variant = rds                            |
+| AWS MSSQL             | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = rds                            |
+| Azure Postgres        | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Azure MSSQL           | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure                          |
+| Google Cloud Postgres | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` |  |
+| cliPod.affinity | object | `{}` |  |
 | cliPod.enabled | bool | `true` |  |
 | cliPod.extraEnvVars | list | `[]` | Additional environment variables all spotfire-server pods use.  - name: NAME    value: value |
 | cliPod.extraEnvVarsCM | string | `""` |  |
@@ -471,53 +546,74 @@ extraEnvVars:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.1.1-1.1.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"12.2.0-1.2.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
+| cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
 | cliPod.podSecurityContext | object | `{}` | The podSecurityContext setting for cliPod More info: `kubectl explain deployment.spec.template.spec.securityContext` |
 | cliPod.securityContext | object | `{}` | The securityContext setting for cliPod. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
+| cliPod.tolerations | list | `[]` |  |
+| configJob.affinity | object | `{}` |  |
 | configJob.extraEnvVars | list | `[]` | Additional environment variables for all spotfire-server pods to use.  - name: NAME    value: value |
 | configJob.extraEnvVarsCM | string | `""` |  |
 | configJob.extraEnvVarsSecret | string | `""` |  |
 | configJob.extraInitContainers | list | `[]` | Additional init containers to add to the Spotfire server configuration pod. More info: `kubectl explain job.spec.template.spec.initContainers` |
 | configJob.extraVolumeMounts | list | `[]` | Extra volumeMounts for the configJob Job. More info: `kubectl explain job.spec.template.spec.containers.volumeMounts` |
 | configJob.extraVolumes | list | `[]` | Extra volumes for the configJob Job. More info: `kubectl explain job.spec.template.spec.volumes` |
-| configJob.image.pullPolicy | string | `nil` | The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy. |
+| configJob.image.pullPolicy | string | `nil` | The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value. |
 | configJob.image.pullSecrets | list | `[]` |  |
-| configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
+| configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.1.1-1.1.0"` | The spotfireConfig container image tag to use. |
-| configJob.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
+| configJob.image.tag | string | `"12.2.0-1.2.0"` | The spotfireConfig container image tag to use. |
+| configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
+| configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
 | configJob.securityContext | object | `{}` | The securityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.containers.securityContext` |
+| configJob.tolerations | list | `[]` |  |
 | configJob.ttlSecondsAfterFinished | int | `3600` | Set the length of time in seconds to keep job and its logs until the job is removed. |
-| configuration.applyKubernetesConfiguration | bool | `true` | Applies various Spotfire application settings recommended for Kubernetes environments. |
-| configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on configuration.xml. Operations such as adding/removing users and assigning licenses are such typical administrative commands. |
-| configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local configuration.xml. configuration.xml is automatically imported after all configuration steps run in the order in which they are defined below. |
-| configuration.useExisting | bool | `true` | Export the existing Spotfire configuration before applying any additional configuration. If false, then a default configuration is created with `config.sh create-default-config`. |
-| database.bootstrap | object | `{"databaseUrl":"jdbc:postgresql://HOSTNAME/","driverClass":"org.postgresql.Driver","existingSecret":"","password":"","username":"spotfire"}` | For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) |
-| database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | The JDBC URL of the database to be used by Spotfire Server |
-| database.bootstrap.existingSecret | string | `""` | Read username and password from an existing secret instead of from values. Keys must be 'SPOTFIREDB_USERNAME' and 'SPOTFIREDB_PASSWORD'. If not set, a secret will be created. |
-| database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database If not provided, this password is automatically generated. |
-| database.bootstrap.username | string | `"spotfire"` | Username to be created for the Spotfire Server database. If unset, default value spotfire would be used. |
-| database.create-db | object | `{"adminPassword":"","adminPasswordExistingSecret":{"key":"DBSERVER_ADMIN_PASSWORD","name":""},"adminUsername":"postgres","adminUsernameExistingSecret":{"key":"DBSERVER_ADMIN_USERNAME","name":""},"databaseUrl":"","doNotCreateUser":false,"enabled":true,"oracleRootfolder":"","oracleTablespacePrefix":"","spotfiredbDbname":"spotfire","variant":""}` | For details related to create-db cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html) create-db cli also uses properties from database.bootstrap section. |
-| database.create-db.adminPasswordExistingSecret | object | `{"key":"DBSERVER_ADMIN_PASSWORD","name":""}` | Instead of adminPassword. If set, read password from an existing secret and key |
-| database.create-db.adminUsername | string | `"postgres"` | Admin username for the database server to be used as the Spotfire Server database |
-| database.create-db.adminUsernameExistingSecret | object | `{"key":"DBSERVER_ADMIN_USERNAME","name":""}` | Instead of adminUsername. If set, read username from an existing secret and key |
-| database.create-db.databaseUrl | string | `""` | Like database.bootstrap.databaseUrl but is used for the connection when creating the spotfire database. |
-| database.create-db.doNotCreateUser | bool | `false` | Set this to true, in case supported databases(AWS Postgre, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation |
-| database.create-db.enabled | bool | `true` | if set to true, Spotfire server schema will also get deployed with other installation |
-| database.create-db.oracleRootfolder | string | `""` | Specify the value in case of Oracle database, otherwise keep it blank |
-| database.create-db.oracleTablespacePrefix | string | `""` | Specify the value in case of Oracle database, otherwise keep it blank |
-| database.create-db.spotfiredbDbname | string | `"spotfire"` | Database name to be created to hold the Spotfire Server database schemas |
-| database.create-db.variant | string | `""` | For connecting to MS SQL or Oracle on Amazon RDS, specify 'rds', for MS SQL on Azure, specify 'azure', otherwise omit the option. |
+| configuration.apply | string | `"initialsetup"` | When to apply configurationScripts, commandScripts and admin user creation. Possible values: * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release. * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool. * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database. |
+| configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation. These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
+| configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
+| configuration.deployment.defaultDeployment.deploymentAreaName | string | `"Production"` | The name of the deployment area to create or update |
+| configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image.  Set to false to not overwrite the persistent deployments volume with the Spotfire.Dxp.sdn from spotfire-deployment container image. |
+| configuration.deployment.defaultDeployment.image.pullPolicy | string | `nil` | The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
+| configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
+| configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
+| configuration.deployment.defaultDeployment.image.repository | string | `"tibco/spotfire-deployment"` | The spotfire-deployment image repository. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
+| configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
+| configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
+| configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
+| configuration.draining.minimumSeconds | int | `90` | The minimum time in seconds that the server should be draining, even if it is considered idle. |
+| configuration.draining.timeoutSeconds | int | `180` | The draining timeout in seconds after which the service is forcibly shut down. |
+| configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
+| configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these command will be run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
+| configuration.preferExistingConfig | bool | `false` | Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`). If no current active configuration exists, the default config is used. Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade. |
+| configuration.site | object | Spotfire Server joins the Default site. | Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information. |
+| configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand.  See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
+| configuration.site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
+| configuration.spotfireAdmin.create | bool | `true` | Whether to create an admin user or not. |
+| configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated.  Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade. |
+| configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read password from an existing secret instead of from values. If set, 'password' above is not used. |
+| configuration.spotfireAdmin.username | string | `"admin"` | The user to create for the Spotfire admin. |
+| database.bootstrap | object | - | For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html). |
+| database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | The JDBC URL of the database to be used by Spotfire Server. |
+| database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. If not provided, this password is automatically generated. |
+| database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read spotfire database password from an existing secret. If set, 'password' above is not used. |
+| database.bootstrap.username | string | `"spotfire"` | Username to be created for the Spotfire Server database. If unset, the default value `spotfire` is used. |
+| database.create-db | object | - | For details related to `create-db` cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html). create-db cli also uses properties from database.bootstrap section. |
+| database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. |
+| database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read admin password from an existing secret. If set, 'password' above is not used. |
+| database.create-db.adminUsername | string | `"postgres"` | Admin username for the database server to be used as the Spotfire Server database. |
+| database.create-db.databaseUrl | string | `""` | Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. |
+| database.create-db.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation |
+| database.create-db.enabled | bool | `true` | if set to true, Spotfire server schema will also get deployed with other installation. |
+| database.create-db.oracleRootfolder | string | `""` | Specify the value in case of Oracle database, otherwise keep it blank. |
+| database.create-db.oracleTablespacePrefix | string | `""` | Specify the value in case of Oracle database, otherwise keep it blank. |
+| database.create-db.spotfiredbDbname | string | `"spotfire"` | Database name to be created to hold the Spotfire Server database schemas. |
+| database.create-db.variant | string | `""` | For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option. |
 | database.upgrade | bool | `true` | Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed. |
-| draining | object | `{"enabled":true,"minimumSeconds":30,"timeoutSeconds":60}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
-| draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
-| draining.minimumSeconds | int | `30` | The minimum time in seconds that the server should be draining, even if it is considered idle. |
-| draining.timeoutSeconds | int | `60` | The draining timeout in seconds after which the service is forcibly shut down. |
-| encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
 | extraEnvVars | list | `[]` | Additional environment variables that all spotfire-server pods use. |
 | extraEnvVarsCM | string | `""` |  |
 | extraEnvVarsSecret | string | `""` |  |
@@ -526,11 +622,11 @@ extraEnvVars:
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.8"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
-| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for TIBCO/Spotfire container images unless overridden. |
+| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for TIBCO Spotfire container images unless overridden. |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. |
 | haproxy.enabled | bool | `true` |  |
 | haproxy.extraVolumeMounts[0].mountPath | string | `"/tmp/chart/fix"` |  |
@@ -550,20 +646,22 @@ extraEnvVars:
 | haproxy.spotfireConfig.cleanup.secureCookieAttributeForHttp | bool | `true` | If incorrect, then the secure cookie attribute should be removed for HTTP connections in the Set-Cookie response headers. |
 | haproxy.spotfireConfig.debug | bool | `false` | Specifies if debug response headers should be enabled. |
 | haproxy.spotfireConfig.loadBalancingCookie | object | stateless load balancing | Cookie-related configuration. |
-| haproxy.spotfireConfig.loadBalancingCookie.attributes | string | `"prefix dynamic"` | Attributes for the cookie value in the haproxy config. See https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-cookie for more information. |
+| haproxy.spotfireConfig.loadBalancingCookie.attributes | string | `"prefix dynamic"` | Attributes for the cookie value in the haproxy config. See [haproxy cookie](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-cookie) for more information. |
 | haproxy.spotfireConfig.loadBalancingCookie.dynamicCookieKey | string | the cookie key | dynamic-cookie-key value in the haproxy config. |
+| haproxy.spotfireConfig.serverTemplate.additionalParams | string | `"on-marked-down shutdown-sessions"` | Additional parameters, see [haproxy server](https://cbonte.github.io/haproxy-dconv/2.6/snapshot/configuration.html#server%20%28Alphabetically%20sorted%20keywords%20reference%29) |
 | haproxy.spotfireConfig.timeouts | object | haproxy timeouts | haproxy related timeouts |
-| haproxy.spotfireConfig.timeouts.client | string | `"30m"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20client |
-| haproxy.spotfireConfig.timeouts.connect | string | `"300ms"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20connect |
-| haproxy.spotfireConfig.timeouts.httpRequest | string | `"3600s"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20http-request |
-| haproxy.spotfireConfig.timeouts.queue | string | `"60s"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4-timeout%20queue |
-| haproxy.spotfireConfig.timeouts.server | string | `"30m"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20server |
-| haproxy.spotfireConfig.timeouts.tunnel | string | `"31m"` | https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20tunnel |
-| image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
-| image.pullSecrets | list | `[]` | spotfire-server image pull secrets. |
-| image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
+| haproxy.spotfireConfig.timeouts.client | string | `"30m"` | See [haproxy timeout client](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20client). |
+| haproxy.spotfireConfig.timeouts.connect | string | `"300ms"` | See [haproxy timeout connect](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20connect). |
+| haproxy.spotfireConfig.timeouts.httpRequest | string | `"3600s"` | See [haproxy timeout http-request](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20http-request). |
+| haproxy.spotfireConfig.timeouts.queue | string | `"60s"` | See [haproxy timeout queue](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4-timeout%20queue). |
+| haproxy.spotfireConfig.timeouts.server | string | `"30m"` | See [haproxy timeout server](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20server). |
+| haproxy.spotfireConfig.timeouts.tunnel | string | `"31m"` | See [haproxy timeout tunnel](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20tunnel). |
+| image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
+| image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
+| image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.1.1-1.1.0"` | The container image tag to use. |
+| image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
+| ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
@@ -575,7 +673,7 @@ extraEnvVars:
 | kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
 | kedaAutoscaling.pollingInterval | int | `30` | The interval to check each trigger on. |
 | kedaAutoscaling.spotfireConfig | object | `{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"}` | Spotfire specific settings |
-| kedaAutoscaling.spotfireConfig.prometheusServerAddress | string | `"http://prometheus-server.monitor.svc.cluster.local"` | REQUIRED The URL to the Prometheus server where metrics should be fetched from. |
+| kedaAutoscaling.spotfireConfig.prometheusServerAddress | string | `"http://prometheus-server.monitor.svc.cluster.local"` | REQUIRED. The URL to the Prometheus server where metrics should be fetched from. |
 | livenessProbe.enabled | bool | `true` |  |
 | livenessProbe.failureThreshold | int | `3` |  |
 | livenessProbe.httpGet.path | string | `"/spotfire/rest/status/getStatus"` |  |
@@ -602,16 +700,16 @@ extraEnvVars:
 | log-forwarder.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
 | log-forwarder.podLabels."app.kubernetes.io/component" | string | `"logging"` |  |
 | log-forwarder.podLabels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
-| log-forwarder.rbac.create | bool | `false` | Specifies whether to create an rbac for the fluent-bit / log-forwarder. Setting this to `true` requires additional privileges in the Kubernetes cluster. |
+| log-forwarder.rbac.create | bool | `false` | Specifies whether to create an RBAC for the fluent-bit / log-forwarder. Setting this to `true` requires additional privileges in the Kubernetes cluster. |
 | log-forwarder.service.labels."app.kubernetes.io/component" | string | `"logging"` |  |
 | log-forwarder.service.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
-| logging.logForwarderAddress | string | `""` | Specifies a logForwarderAddress. If left empty, then the default log-forwarder is used in the case where log-forwarder.enabled=true. Template. |
+| logging.logForwarderAddress | string | `""` | Specifies a logForwarderAddress. If left empty, then the default `log-forwarder` is used in the case where `log-forwarder.enabled=true`. Template. |
 | logging.logLevel | string | `""` | The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info. |
 | nodeSelector | object | `{}` |  |
 | podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. More info: `kubectl explain deployment.spec.template.spec.securityContext` |
+| podSecurityContext | object | `{}` | The Pod securityContext setting applies to all the containers inside the Pod. More info: `kubectl explain deployment.spec.template.spec.securityContext` |
 | readinessProbe.enabled | bool | `false` |  |
 | replicaCount | int | `1` | The number of Spotfire Server containers. |
 | resources | object | `{}` |  |
@@ -620,13 +718,7 @@ extraEnvVars:
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
-| site | object | Spotfire Server joins the Default site. | Site settings. See https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html for more information. |
-| site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html for more information. |
-| site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
-| spotfireAdmin | object | `{"existingSecret":"","password":"","username":"admin"}` | The user to create for the Spotfire admin. |
-| spotfireAdmin.existingSecret | string | `""` | Read admin username and password from an existing secret instead of from values. Keys should be 'SPOTFIREADMIN_USERNAME' and 'SPOTFIREADMIN_PASSWORD'. |
-| spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire adminstrative user interace because the password is reset to this value on every helm installation or upgrade. |
-| spotfireServerJava.extraJavaOpts | list | `[]` | Additional JAVA_OPTS for spotfire-server pods. |
+| spotfireServerJava.extraJavaOpts | list | `[]` | Additional `JAVA_OPTS` for spotfire-server pods. |
 | startupProbe.enabled | bool | `true` |  |
 | startupProbe.failureThreshold | int | `30` |  |
 | startupProbe.httpGet.path | string | `"/spotfire/rest/status/getStatus"` |  |
@@ -634,21 +726,20 @@ extraEnvVars:
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | tolerations | list | `[]` |  |
-| toolPassword | string | `"toolpassword"` | The Spotfire config tool password to use for bootstrap.xml. If not provided, this password is automatically generated. |
-| troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/tibco/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in .Values.volumes.troubleshooting. |
+| toolPassword | string | `"toolpassword"` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. |
+| troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/tibco/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | volumes.certificates.existingClaim | string | `""` |  |
-| volumes.customExt.existingClaim | string | `""` |  |
-| volumes.customExtInformationservices.existingClaim | string | `""` |  |
-| volumes.deployments.existingClaim | string | `""` |  |
-| volumes.libraryImportExport.existingClaim | string | `""` |  |
-| volumes.libraryImportExport.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
-| volumes.libraryImportExport.persistentVolumeClaim.resources | object | `{"requests":{"storage":"1Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the libraryImportExport volume claims. |
-| volumes.libraryImportExport.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the libraryImportExport volume-claim. |
-| volumes.libraryImportExport.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the libraryImportExport volume-claim. |
-| volumes.troubleshooting.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing persistent volume claim |
-| volumes.troubleshooting.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
-| volumes.troubleshooting.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard K8s resource requests and/or limits for the volumes.troubleshooting claims. |
-| volumes.troubleshooting.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' that to use for the volumes.troubleshooting-claim. |
-| volumes.troubleshooting.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim. |
-
+| volumes.customExt.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
+| volumes.customExtInformationservices.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
+| volumes.deployments.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
+| volumes.libraryImportExport.existingClaim | string | `""` | When `persistentVolumeClaim.create` is `false`, then this value is used to define an already-existing PVC. |
+| volumes.libraryImportExport.persistentVolumeClaim.create | bool | `false` | If `true`, then a `PersistentVolumeClaim` (PVC) is created. |
+| volumes.libraryImportExport.persistentVolumeClaim.resources | object | `{"requests":{"storage":"1Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the `volumes.libraryImportExport` PVC. |
+| volumes.libraryImportExport.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the `StorageClass` to use for the `volumes.libraryImportExport` PVC. |
+| volumes.libraryImportExport.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the `volumes.libraryImportExport` PVC. |
+| volumes.troubleshooting.existingClaim | string | `""` | When `persistentVolumeClaim.create` is `false`, then use this value to define an already-existing PVC. |
+| volumes.troubleshooting.persistentVolumeClaim.create | bool | `false` | If `true`, then a `PersistentVolumeClaim` (PVC) is created. |
+| volumes.troubleshooting.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard K8s resource requests and/or limits for the `volumes.troubleshooting` PVC. |
+| volumes.troubleshooting.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the `StorageClass` that to use for the `volumes.troubleshooting` PVC. |
+| volumes.troubleshooting.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the `volumes.troubleshooting` PVC. |

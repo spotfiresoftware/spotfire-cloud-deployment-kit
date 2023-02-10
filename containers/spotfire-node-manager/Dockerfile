@@ -19,14 +19,14 @@ ARG SPOTFIRE_NODEMANAGER_VERSION
 LABEL org.opencontainers.image.title="tibco/spotfire-node-manager" \
     org.opencontainers.image.description="TIBCO Spotfire® node manager is the service used for controlling the Spotfire services." \
     org.opencontainers.image.version="${SPOTFIRE_NODEMANAGER_VERSION}" \
-    org.opencontainers.image.vendor='TIBCO Software Inc.' \
     org.opencontainers.image.url='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
     org.opencontainers.image.documentation='https://docs.tibco.com/products/tibco-spotfire/' \
     org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
-    org.opencontainers.image.licenses='TIBCO EULA' \
+    org.opencontainers.image.vendor='Cloud Software Group, Inc.' \
+    org.opencontainers.image.licenses='Cloud Software Group, Inc. End User Agreement' \
     com.tibco.image.product.name="TIBCO Spotfire® Server" \
     com.tibco.image.component.name="TIBCO Spotfire® node manager" \
-    com.tibco.image.license.url='https://terms.tibco.com/#end-user-license-agreement' \
+    com.tibco.image.license.url='https://terms.tibco.com/#end-user-agreement' \
     com.tibco.image.type="commercial" \
     com.tibco.image.distribution-scope="private"
 

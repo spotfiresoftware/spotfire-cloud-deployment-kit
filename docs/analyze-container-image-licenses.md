@@ -26,8 +26,7 @@ For example, you can find information about the artifacts of the [debian:bullsey
 Building images often installs additional software packages (fetched from the official distribution software repositories, from other user-added repositories, or from specific locations), in addition to installing the packages provided by the base image.
 You can inspect the Dockerfiles to identify these additional packages.
 
-For example, when you inspect the [spotfire-workerhost Dockerfile](../../containers/spotfire-workerhost/Dockerfile), you see 
-a list of packages that are installed in the image, as specified in the Dockerfile. 
+For example, when you read the [spotfire-workerhost Dockerfile](../../containers/spotfire-workerhost/Dockerfile), you see a list of packages that are installed in the image, as specified in the Dockerfile.
 
 **Note**:  Each such specified package can, in turn, install other software packages as dependencies.
 
@@ -37,7 +36,7 @@ The following tasks are outside the scope of this document.
 - Providing instructions for using specialized tools for analyzing software licenses.
 - Retrieving information about software artifacts, other than software packages installed with the package manager tools.
 
-You can inspect a container image and retrieve its contents with standard container and package management tools. 
+You can inspect a container image and retrieve its contents with standard container and package management tools.
 
 - Use the command `dpkg-query` to retrieve the full list of installed packages in a container image.
 

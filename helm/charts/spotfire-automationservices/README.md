@@ -1,6 +1,6 @@
 # spotfire-automationservices
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.1.1](https://img.shields.io/badge/AppVersion-12.1.1-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.2.0](https://img.shields.io/badge/AppVersion-12.2.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Automation Services.
 
@@ -16,17 +16,18 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.3 |
+| file://../spotfire-common | spotfire-common | 0.1.4 |
 
 ## Overview
 
 This chart deploys the [TIBCO Spotfire® Automation Services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- The Automation Services pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
-- The chart includes service annotations for [Prometheus](https://prometheus.io/) scrapers.
-The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+The Automation Services pod includes:
+- A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
+- Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+- Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
@@ -61,7 +62,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Configuring
 
-Override the default configuration settings by providing a custom configuration file.
+You can override the default configuration settings by providing a custom configuration file.
 
 The following example configuration keys are available in the chart:
 - config."Spotfire.Dxp.Worker.Automation.config"
@@ -70,7 +71,7 @@ The following example configuration keys are available in the chart:
 - config."Spotfire.Dxp.Worker.Host.dll.config"
 - config."log4net.config"
 
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the container image.
 
 See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html)
  and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html).
@@ -83,11 +84,11 @@ helm install my-release . \
     --set-file config.'Spotfire\.Dxp\.Worker\.Automation\.config'=my-Spotfire.Dxp.Worker.Automation.config
 ```
 
-**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a `\`.
+**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a '\'.
 
-#### Getting the original container configuration files
+#### Getting the container default configuration files
 
-Copy the default configuration files used in the container image and use them as templates for your custom configuration.
+You can copy the default configuration files from the container image to use them as templates for your custom configuration.
 
 **Note**: The configuration files content can be version dependent.
 
@@ -132,9 +133,9 @@ The `spotfire-automationservices` has the following defaults:
 - The default autoscaling metric is the `spotfire_Jobs_QueueSize`.
 - The default query is the max _Jobs Queue Size_ of the Automation Services instances.
 
-With these settings, if the queue reaches capacity, another instance is scaled out; if the queue falls below the capacity threshold, the instance is scaled in.
+With these default settings, if the queue reaches the configured threshold, then another instance is started to scale out the service. If the queue size falls below the threshold, then the service scales in.
 
-**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts for long running tasks, so that jobs are not aborted prematurely when the instance is scaled in.
+**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts for long-running tasks, so that jobs are not aborted prematurely when an instance is stopped to scale in.
 
 **Note**: The metric used for autoscaling is scraped from the Spotfire Servers, so if there are more than one Spotfire Server helm releases in the same namespace, `kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease` must also be set.
 
@@ -175,7 +176,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-automationservices container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.8"` | image tag to use for fluent-bit logging sidecar |
+| fluentBitSidecar.image.tag | string | `"2.0.5"` | image tag to use for fluent-bit logging sidecar |
 | fluentBitSidecar.securityContext | object | `{}` | securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"automationservices"` |  |
@@ -186,7 +187,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-automationservices"` | The spotfire-server image repository. |
-| image.tag | string | `"12.1.1-1.1.0"` | The container image tag to use. |
+| image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled. | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

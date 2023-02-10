@@ -1,15 +1,16 @@
-# Example: Service mesh with linkerd for mTLS communication between pods
+# Example: Service mesh with Linkerd for mTLS communication between pods
 
-This document demonstrates using podAnnotations to inject the Linkerd service mesh. Linkerd transparently adds mutual TLS to any on-cluster TCP communication with no configuration. See [Getting started](https://linkerd.io/getting-started/) with linkerd.
+This document demonstrates using podAnnotations to inject the [Linkerd](https://linkerd.io/) service mesh. Linkerd transparently adds mutual TLS to any on-cluster TCP communication with no configuration.
+For more information, see [Getting started](https://linkerd.io/getting-started/) with Linkerd.
 
-To inject linkerd, ensure that the resources that use linkerd have annotations that can be added in one of the following ways.
+To inject Linkerd, ensure that the resources that use Linkerd have annotations that can be added in one of the following ways.
 
 - explicit: add linkerd.io/inject annotation per resource - See below.
 - implicit: add linkerd.io/inject annotation for a namespace - Just annotate the namespace with `linkerd.io/inject: enabled`.
 
-When injecting linkerd on the namespace level, the config-job does not finish because the linkerd proxy sidecar on the jobs prevents it from finishing, but the job remains until it is removed manually.
+When injecting Linkerd on the namespace level, the config-job does not finish because the Linkerd proxy sidecar on the jobs prevents it from finishing, but the job remains until it is removed manually.
 
-The following example shows how to add linkerd injection annotations explicitly to all pods in the spotfire-server chart.
+The following example shows how to add Linkerd injection annotations explicitly to all pods in the spotfire-server chart.
 
 ```yaml
 podAnnotations:

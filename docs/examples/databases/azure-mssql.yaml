@@ -1,10 +1,11 @@
 database:
   bootstrap:
-    databaseUrl: "jdbc:sqlserver://mssql-helm.database.windows.net:1433;DatabaseName=spotfire"
+    databaseUrl: "jdbc:sqlserver://server:1433;DatabaseName=spotfire"
     driverClass: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
-    password: 'Sp0tf1r3!'
+    # username: "spotfire"
+    password: "spotfirePassword"
   create-db:
-    adminUsername: spotfire
-    adminPassword: 'Sp0tf1r3!'
-    databaseUrl: "jdbc:sqlserver://mssql-helm.database.windows.net:1433"
+    adminUsername: "spotfire"
+    adminPassword: "spotfirePassword"
+    databaseUrl: "jdbc:sqlserver://server:1433"
     variant: "azure"

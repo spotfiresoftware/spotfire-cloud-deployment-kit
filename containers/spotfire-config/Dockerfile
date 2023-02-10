@@ -18,14 +18,14 @@ ARG SPOTFIRE_SERVER_VERSION
 LABEL org.opencontainers.image.title="tibco/spotfire-config" \
     org.opencontainers.image.description="TIBCO Spotfire® Server configuration tool provides a command-line for Spotfire installation and administration." \
     org.opencontainers.image.version="${SPOTFIRE_SERVER_VERSION}" \
-    org.opencontainers.image.vendor='TIBCO Software Inc.' \
     org.opencontainers.image.url='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
     org.opencontainers.image.documentation='https://docs.tibco.com/products/tibco-spotfire/' \
     org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
-    org.opencontainers.image.licenses='TIBCO EULA' \
+    org.opencontainers.image.vendor='Cloud Software Group, Inc.' \
+    org.opencontainers.image.licenses='Cloud Software Group, Inc. End User Agreement' \
     com.tibco.image.product.name="TIBCO Spotfire® Server" \
     com.tibco.image.component.name="TIBCO Spotfire® configuration tool" \
-    com.tibco.image.license.url='https://terms.tibco.com/#end-user-license-agreement' \
+    com.tibco.image.license.url='https://terms.tibco.com/#end-user-agreement' \
     com.tibco.image.type="commercial" \
     com.tibco.image.distribution-scope="private"
 

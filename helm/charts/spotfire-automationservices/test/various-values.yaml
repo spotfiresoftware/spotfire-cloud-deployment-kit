@@ -1,0 +1,135 @@
+nodemanagerConfig:
+  serverBackendAddress: mytss-spotfire-server
+  preStopDrainingTimeoutSeconds: 1000
+affinity: {}
+config:
+  Spotfire.Dxp.Worker.Core.config: <xml></xml>
+  Spotfire.Dxp.Worker.Automation.config: <xml></xml>
+  Spotfire.Dxp.Worker.Host.dll.config: <xml></xml>
+  Spotfire.Dxp.Worker.Web.config: <xml></xml>
+fluentBitSidecar:
+  image:
+    pullPolicy: IfNotPresent
+    repository: fluent/fluent-bit
+    tag: 1.9.9
+  securityContext:
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+fullnameOverride: ""
+global:
+  serviceName: automationservices
+  spotfire:
+    image:
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - pullsecret
+      registry: ""
+image:
+  pullPolicy: ""
+  pullSecrets:
+    - pullsecret
+  registry: ""
+  repository: tibco/spotfire-automationservices
+  tag: 12.1.0-1.2.0
+livenessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/liveness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+nameOverride: ""
+nodeSelector: {}
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+readinessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/readiness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+replicaCount: "1"
+resources: {}
+service:
+  port: "9501"
+  type: ClusterIP
+serviceAccount:
+  annotations: {}
+  create: true
+  name: my-service-account-name
+startupProbe:
+  failureThreshold: 20
+  httpGet:
+    path: /spotfire/started
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+tolerations: ""
+kedaAutoscaling:
+  enabled: true
+  pollingInterval: 90
+  cooldownPeriod: 100
+  minReplicas: 2
+  maxReplicas: 10
+  threshold: 8
+  fallback:
+    replicas: 1
+    failureThreshold: 3
+  triggers: []
+  advanced:
+    restoreToOriginalReplicaCount: true
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 15
+  spotfireConfig:
+    prometheusServerAddress: http://address/
+    spotfireServerHelmRelease: tsshelmrelease
+logging:
+  logForwarderAddress: mytss-log-forwarder-automationservices
+  logLevel: info
+extraEnvVars:
+  - name: automationservices
+    value: VALUE
+extraEnvVarsCM: automationservicescm
+extraEnvVarsSecret: automationservicessecret
+extraVolumeMounts:
+  - name: asvolume
+    mountPath: /opt/tibco/services
+extraVolumes:
+  - name: asvolume
+    persistentVolumeClaim:
+      claimName: as-pvc
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command:
+      - echo
+      - hey
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+volumes:
+  troubleshooting:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename

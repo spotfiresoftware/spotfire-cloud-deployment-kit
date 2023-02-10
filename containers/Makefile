@@ -19,22 +19,25 @@ IMAGE_BUILD_ID ?= $(CLOUD_DEPLOYMENT_KIT_VERSION)
 
 # Images - Default target build: build all images
 .SECONDEXPANSION : $(IMAGES)
-IMAGES = spotfire-server spotfire-config spotfire-node-manager spotfire-base spotfire-workerhost spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice
+IMAGES = spotfire-server spotfire-config spotfire-node-manager spotfire-base spotfire-workerhost spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-deployment
 
 # Files needed in image-dir/build by the various targets
 .SECONDEXPANSION : $(BUILD_FILES)
 BUILD_FILES = spotfire-config/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
-              spotfire-node-manager/build/tsnm-$(SPOTFIRE_NODEMANAGER_VERSION).x86_64.tar.gz \
-              spotfire-server/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
-              spotfire-webplayer/build/Spotfire.Dxp.netcore-linux.sdn \
-              spotfire-webplayer/build/TIB_sfire_server_$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)_languagepack-multi.zip \
               spotfire-automationservices/build/Spotfire.Dxp.netcore-linux.sdn \
+              spotfire-deployment/build/Spotfire.Dxp.sdn \
+              spotfire-node-manager/build/tsnm-$(SPOTFIRE_NODEMANAGER_VERSION).x86_64.tar.gz \
+              spotfire-pythonservice/build/Spotfire.Dxp.PythonServiceLinux.sdn \
+              spotfire-server/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
               spotfire-terrservice/build/Spotfire.Dxp.TerrServiceLinux.sdn \
-              spotfire-pythonservice/build/Spotfire.Dxp.PythonServiceLinux.sdn
+              spotfire-webplayer/build/Spotfire.Dxp.netcore-linux.sdn \
+              spotfire-webplayer/build/TIB_sfire_server_$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)_languagepack-multi.zip
+
 
 # Internal additional makefile rules
 -include *.mk
 
+.DEFAULT_GOAL := build
 build : BUILD_DATETIME = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 build : GIT_COMMIT_SHA = $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown"))
 build : $(IMAGES)
@@ -42,14 +45,16 @@ build-files : $(BUILD_FILES)
 
 # Build command
 $(IMAGES) : IMAGE_BUILD_ARGS =
-spotfire-server spotfire-config spotfire-node-manager spotfire-workerhost spotfire-webplayer spotfire-terrservice spotfire-automationservices spotfire-pythonservice : \
+spotfire-server spotfire-config spotfire-node-manager spotfire-workerhost spotfire-webplayer spotfire-terrservice spotfire-automationservices spotfire-pythonservice spotfire-deployment : \
                                                                                         IMAGE_BUILD_ARGS =  "IMAGE_BUILD_ID=$(LOCAL_IMAGE_BUILD_ID)"
-spotfire-pythonservice spotfire-terrservice spotfire-node-manager spotfire-workerhost : IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
+spotfire-deployment :                                                                   IMAGE_BUILD_ARGS += "SPOTFIRE_DEPLOYMENT_VERSION=$(SPOTFIRE_DEPLOYMENT_VERSION)"
 spotfire-pythonservice :                                                                IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
-spotfire-terrservice :                                                                  IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
-spotfire-webplayer spotfire-automationservices :                                        IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
-spotfire-webplayer :                                                                    IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
+spotfire-pythonservice spotfire-terrservice spotfire-node-manager spotfire-workerhost : IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
 spotfire-server spotfire-config :                                                       IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
+spotfire-terrservice :                                                                  IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
+spotfire-webplayer :                                                                    IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
+spotfire-webplayer spotfire-automationservices :                                        IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
+
 
 # TAGS -
 # $(1): IMAGE_BUILD_ID
@@ -62,6 +67,7 @@ spotfire-server spotfire-config :                                               
 %potfire-pythonservice :      IMAGE_TAG  = $(SPOTFIRE_PYTHONSERVICE_VERSION)-$(1)
 %potfire-terrservice :        IMAGE_TAG  = $(SPOTFIRE_TERRSERVICE_VERSION)-$(1)
 %potfire-webplayer :          IMAGE_TAG  = $(SPOTFIRE_NETCORE_VERSION)-$(1)
+%potfire-deployment :         IMAGE_TAG  = $(SPOTFIRE_DEPLOYMENT_VERSION)-$(1)
 # Used when building and pushing
 LOCAL_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
 LOCAL_IMAGE_TAG = $(call IMAGE_TAG,$(LOCAL_IMAGE_BUILD_ID))
@@ -73,7 +79,7 @@ $(IMAGES) :
 	cd $@ && $(DOCKER_CLI) build $(DOCKER_CLI_BUILD_ARGS) $(addprefix --build-arg ,$(IMAGE_BUILD_ARGS)) --tag "$(IMAGE_REPOSITORY_PREFIX)/$@:$(LOCAL_IMAGE_TAG)" .
 
 # Images dependencies
-spotfire-server spotfire-config spotfire-node-manager : spotfire-base
+spotfire-server spotfire-config spotfire-node-manager spotfire-deployment : spotfire-base
 spotfire-workerhost: spotfire-node-manager
 spotfire-automationservices spotfire-webplayer : spotfire-workerhost
 spotfire-terrservice spotfire-pythonservice : spotfire-node-manager

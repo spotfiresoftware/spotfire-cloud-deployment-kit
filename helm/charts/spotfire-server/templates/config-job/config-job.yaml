@@ -17,8 +17,20 @@ spec:
     spec:
       {{- include "spotfire-server.configJob.imagePullSecrets" . | nindent 6}}
       restartPolicy: Never
-      {{- if .Values.configJob.extraInitContainers }}
       initContainers:
+      {{- if .Values.configuration.deployment.defaultDeployment.enabled }}
+        - name: init-deployment
+          image: {{ include "spotfire-server.configuration.deployment.defaultDeployment.image" . }}
+          imagePullPolicy: {{ include "spotfire-server.configuration.deployment.defaultDeployment.image.pullPolicy" . }}
+          command: ['sh', '-c', "mkdir -p /opt/tibco/deployments-volume/${DEPLOYMENT_AREA_NAME}; cp /opt/tibco/deployment-files/* /opt/tibco/deployments-volume/${DEPLOYMENT_AREA_NAME}"]
+          env:
+            - name: DEPLOYMENT_AREA_NAME
+              value: {{ .Values.configuration.deployment.defaultDeployment.deploymentAreaName | quote }}
+          volumeMounts:
+            - mountPath: /opt/tibco/deployments-volume
+              name: deployments-volume
+      {{- end }}
+      {{- if .Values.configJob.extraInitContainers }}
         {{- tpl (toYaml .Values.configJob.extraInitContainers) $ | nindent 8 }}
       {{- end }}
       securityContext:
@@ -52,16 +64,28 @@ spec:
               value: "console"
             - name: LOG_LEVEL
               value: {{ .Values.configJob.logLevel | quote }}
-            - name: JOB_INSTALL
-              value: {{ if (index .Values "database" "create-db" "enabled") }}"true"{{ else }}"false"{{ end }}
-            - name: JOB_DATABASE_UPGRADE
+            - name: JOB_CREATE_DATABASE
+              value: {{ index .Values "database" "create-db" "enabled" | quote }}
+            - name: JOB_UPGRADE_DATABASE
               value: {{ .Values.database.upgrade | quote }}
-            - name: JOB_USE_EXISTING_CONFIGURATION
-              value: {{ .Values.configuration.useExisting | quote }}
-            - name: JOB_DEFAULT_CONFIGURE
-              value: {{ .Values.configuration.applyKubernetesConfiguration | quote }}
+            {{- if or (eq .Values.configuration.apply "always") (eq .Values.configuration.apply "initialsetup") (eq .Values.configuration.apply "never") }}
+            - name: JOB_WHEN_TO_APPLY_CONFIG
+              value: {{ .Values.configuration.apply | quote }}
+            {{- else }}
+            {{- fail "apply must be one of always, never, initialsetup" }}
+            {{- end }}
+            - name: JOB_PREFER_EXISTING_CONFIG
+              value: {{ .Values.configuration.preferExistingConfig | quote }}
+            - name: JOB_DO_DEPLOY
+              value: {{ .Values.configuration.deployment.enabled | quote }}
             - name: JOB_CONFIGURATION_COMMENT
-              value: {{ printf "Helm configuration update - release=%s revision=%s" .Release.Name .Release.Revision }}
+              value: {{ printf "Helm configuration update - release=%s revision=%d" .Release.Name .Release.Revision }}
+            - name: JOB_CREATE_ADMIN
+              value: {{ .Values.configuration.spotfireAdmin.create | quote }}
+            - name: JOB_DRAINING_MINIMUM_SECONDS
+              value: {{ .Values.configuration.draining.minimumSeconds | quote }}
+            - name: JOB_DRAINING_TIMEOUT_SECONDS
+              value: {{ .Values.configuration.draining.timeoutSeconds | quote }}
           resources: {}
           volumeMounts:
             - name: config-job-scripts-volume
@@ -70,11 +94,15 @@ spec:
             - name: command-scripts-volume
               mountPath: /opt/tibco/command-scripts/
             {{- end }}
+            {{- if .Values.configuration.preConfigCommandScripts }}
+            - name: pre-config-command-scripts-volume
+              mountPath: /opt/tibco/pre-config-command-scripts/
+            {{- end }}
             {{- if .Values.configuration.configurationScripts }}
             - name: configuration-scripts-volume
               mountPath: /opt/tibco/configuration-scripts/
             {{- end }}
-            {{- if .Values.volumes.deployments.existingClaim }}
+            {{- if (or .Values.volumes.deployments.existingClaim .Values.configuration.deployment.defaultDeployment.enabled) }}
             - name: deployments-volume
               mountPath: /opt/tibco/spotfireconfigtool/deployments
             {{- end }}
@@ -95,7 +123,6 @@ spec:
             {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-      # use sh txt
       volumes:
         {{- with .Values.configJob.extraVolumes }}
           {{- toYaml . | nindent 8 }}
@@ -110,6 +137,12 @@ spec:
             name: {{ .Release.Name }}-command-scripts
             defaultMode: 0755
         {{- end -}}
+        {{- if .Values.configuration.preConfigCommandScripts }}
+        - name: pre-config-command-scripts-volume
+          configMap:
+            name: {{ .Release.Name }}-pre-config-command-scripts
+            defaultMode: 0755
+        {{- end -}}
         {{- if .Values.configuration.configurationScripts }}
         - name: configuration-scripts-volume
           configMap:
@@ -120,6 +153,9 @@ spec:
         - name: deployments-volume
           persistentVolumeClaim:
             claimName: {{ .Values.volumes.deployments.existingClaim }}
+        {{- else if .Values.configuration.deployment.defaultDeployment.enabled }}
+        - name: deployments-volume
+          emptyDir: {}
         {{- end }}
         {{- if .Values.volumes.certificates.existingClaim }}
         - name: certificates-volume

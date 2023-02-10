@@ -53,7 +53,7 @@ You can package the provided charts, one by one, by following these steps from e
     helm package . -d <helm-charts-destination-path>
     ```
 
-Repeat for all of the charts.
+Repeat for each of the charts.
 
 **Note**: The helm chart packages have dependencies; check the provided `Makefile` for more details.
 

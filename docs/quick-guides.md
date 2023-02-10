@@ -6,9 +6,9 @@ For easier application management, usually you want to integrate Spotfire with a
 
 Typical supporting components are for observability, such as for logging and metrics, and security, such as identity management.
 
-We support standard interfaces such as OpenMetrics, LDAP, OAuth2.0, and so on, to integrate with best-in-breed cloud native components.
+Spotfire supports standard interfaces such as OpenMetrics, LDAP, OAuth2.0, and so on, to integrate with best-in-breed cloud native components.
 
-For more information about common supporting components, see following are quick start guides.
+The following are quick starting guides for some common supporting components:
 - [Logging with EFK](logging-with-efk.md)
 - [Monitoring with Prometheus and Grafana](monitoring-with-prometheus.md)
 - [Autoscaling with KEDA](autoscaling-with-keda.md)

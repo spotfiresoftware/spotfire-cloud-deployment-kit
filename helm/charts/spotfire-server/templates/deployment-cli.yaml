@@ -52,8 +52,10 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           envFrom:
-            - secretRef:
-                name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+              {{/*
+              - secretRef:
+                  name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
+              */}}
             {{- if .Values.cliPod.extraEnvVarsSecret }}
             - secretRef:
                 name: {{ tpl .Values.cliPod.extraEnvVarsSecret $ }}

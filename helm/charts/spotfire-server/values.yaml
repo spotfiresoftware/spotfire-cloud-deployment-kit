@@ -6,11 +6,11 @@
 global:
   spotfire:
     image:
-      # global.spotfire.image.registry -- The global container image registry. Used for TIBCO/Spotfire container images unless overridden.
+      # -- The global container image registry. Used for TIBCO Spotfire container images unless overridden.
       registry:
-      # global.spotfire.image.pullPolicy -- The global container image pull policy.
+      # -- The global container image pull policy.
       pullPolicy: IfNotPresent
-      # global.spotfire.image.pullSecrets -- The global container image pull secrets.
+      # -- The global container image pull secrets.
       ## E.g.
       ## pullSecrets:
       ##   - myRegistryKeySecretName
@@ -19,16 +19,16 @@ global:
 
 # spotfire-server image settings
 image:
-  # image.registry -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
+  # -- The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value.
   registry:
-  # image.repository -- The spotfire-server image repository.
+  # -- The spotfire-server image repository.
   repository: tibco/spotfire-server
-  # image.tag -- The container image tag to use.
-  tag: "12.1.1-1.1.0"
-  # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
+  # -- The container image tag to use.
+  tag: "12.2.0-1.2.0"
+  # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
-  # image.pullSecrets -- spotfire-server image pull secrets.
+  # -- spotfire-server image pull secrets.
   pullSecrets: []
 
 fluentBitSidecar:
@@ -36,7 +36,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "1.9.8"
+    tag: "2.0.5"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -71,7 +71,7 @@ podAnnotations:
   prometheus.io/port: "9080"
   prometheus.io/scrape: "true"
 
-# -- The Pod securityContext setting applies to all of the containers inside the Pod.
+# -- The Pod securityContext setting applies to all the containers inside the Pod.
 # More info: `kubectl explain deployment.spec.template.spec.securityContext`
 podSecurityContext: {}
 
@@ -99,15 +99,6 @@ livenessProbe:
 readinessProbe:
   enabled: false
 
-# -- Configuration of the Spotfire Server container lifecycle PreStop hook.
-draining:
-  # -- Enables or disables the container lifecycle PreStop hook.
-  enabled: true
-  # -- The draining timeout in seconds after which the service is forcibly shut down.
-  timeoutSeconds: 60
-  # -- The minimum time in seconds that the server should be draining, even if it is considered idle.
-  minimumSeconds: 30
-
 ingress:
   # -- Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster.
   enabled: false
@@ -116,6 +107,8 @@ ingress:
         paths:
         - path: /
           pathType: Prefix
+  # -- Annotations for the ingress object. See documentation for your ingress controller for valid annotations.
+  annotations: {}
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -145,8 +138,9 @@ kedaAutoscaling:
   minReplicas: 1
   # -- This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource.
   maxReplicas: 4
-  # threshold: 8
-  # fallback:
+  threshold:
+  fallback: {}
+  triggers: []
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
@@ -157,7 +151,7 @@ kedaAutoscaling:
             periodSeconds: 60
   # -- Spotfire specific settings
   spotfireConfig:
-    # -- REQUIRED The URL to the Prometheus server where metrics should be fetched from.
+    # -- REQUIRED. The URL to the Prometheus server where metrics should be fetched from.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
 
 nodeSelector: {}
@@ -223,24 +217,27 @@ cliPod:
   podSecurityContext: {}
   # -- Podannotations for cliPod
   podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
   image:
     # -- The image registry for spotfireConfig. Overrides global.spotfire.image.registry value.
     registry:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.1.1-1.1.0"
+    tag: "12.2.0-1.2.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
     pullSecrets: []
 
 # ===============================
-# configJob
+# configJob pods settings
 # ===============================
 
 configJob:
-  # -- Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset.
+  # -- Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset.
   logLevel: ""
   # -- Set the length of time in seconds to keep job and its logs until the job is removed.
   ttlSecondsAfterFinished: 3600
@@ -269,14 +266,17 @@ configJob:
   podSecurityContext: {}
   # -- Podannotations for configJob
   podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
   image:
-    # -- The image registry for spotfireConfig. Overrides global.spotfire.image.registry value.
+    # -- The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value.
     registry:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.1.1-1.1.0"
-    # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
+    tag: "12.2.0-1.2.0"
+    # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
     pullSecrets: []
@@ -288,63 +288,61 @@ configJob:
 volumes:
   troubleshooting:
     persistentVolumeClaim:
-       # -- If 'true', then a 'PersistentVolumeClaim' is created.
+       # -- If `true`, then a `PersistentVolumeClaim` (PVC) is created.
       create: false
 
-      # -- Specifies the name of the 'StorageClass' that to use for the volumes.troubleshooting-claim.
+      # -- Specifies the name of the `StorageClass` that to use for the `volumes.troubleshooting` PVC.
       storageClassName: ""
 
-      # -- Specifies the standard K8s resource requests and/or limits for the volumes.troubleshooting claims.
+      # -- Specifies the standard K8s resource requests and/or limits for the `volumes.troubleshooting` PVC.
       resources:
         requests:
           storage: 2Gi
 
-      # -- Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim.
+      # -- Specifies the name of the persistent volume to use for the `volumes.troubleshooting` PVC.
       volumeName:
 
-    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing
-    # persistent volume claim
+    # -- When `persistentVolumeClaim.create` is `false`, then use this value to define an already-existing PVC.
     existingClaim: ""
 
   # The volume with mountPath: /opt/tibco/tss/tomcat/application-data/library
   libraryImportExport:
     persistentVolumeClaim:
-       # -- If 'true', then a 'PersistentVolumeClaim' is created.
+       # -- If `true`, then a `PersistentVolumeClaim` (PVC) is created.
       create: false
 
-      # -- Specifies the name of the 'StorageClass' to use for the libraryImportExport volume-claim.
+      # -- Specifies the name of the `StorageClass` to use for the `volumes.libraryImportExport` PVC.
       storageClassName: ""
 
-      # -- Specifies the standard Kubernetes resource requests and/or limits for the libraryImportExport volume claims.
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the `volumes.libraryImportExport` PVC.
       resources:
         requests:
           storage: 1Gi
 
-      # -- Specifies the name of the persistent volume to use for the libraryImportExport volume-claim.
+      # -- Specifies the name of the persistent volume to use for the `volumes.libraryImportExport` PVC.
       volumeName:
 
-    # When 'persistentVolumeClaim.create' is 'false', then this value is used to define an already-existing
-    # persistent volume claim.
+    # -- When `persistentVolumeClaim.create` is `false`, then this value is used to define an already-existing PVC.
     existingClaim: ""
 
-  # The volume with mountPath: /opt/tibco/tss/tomcat/custom-ext
+  # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext`
   customExt:
-    # Defines an already-existing persistent volume claim.
+    # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
 
-  # The volume with mountPath: /opt/tibco/tss/tomcat/custom-ext-informationservices
+  # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext-informationservices`
   customExtInformationservices:
-    # Defines an already-existing persistent volume claim.
+    # -- Defines an already-existing persistent volume claim.
     existingClaim: ""    
 
-  # The volume with mountPath: /opt/tibco/tss/tomcat/certs
+  # The volume with mountPath: `/opt/tibco/tss/tomcat/certs`
   certificates:
     # Defines an already-existing persistent volume claim.
     existingClaim: ""
 
-  # The volume with mountPath: /opt/tibco/spotfireconfigtool/deployments
+  # The volume with mountPath: `/opt/tibco/spotfireconfigtool/deployments`
   deployments:
-    # Defines an already-existing persistent volume claim.
+    # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
 
 # ===============================
@@ -352,92 +350,164 @@ volumes:
 # ===============================
 
 logging:
-  # -- Specifies a logForwarderAddress. If left empty, then the default log-forwarder is used in the case where log-forwarder.enabled=true. Template.
+  # -- Specifies a logForwarderAddress. If left empty, then the default `log-forwarder` is used in the case where `log-forwarder.enabled=true`. Template.
   logForwarderAddress: ""
   # -- The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info.
   logLevel: ""
 
-# -- The Spotfire config tool password to use for bootstrap.xml. If not provided, this password is automatically generated.
+# -- The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated.
 toolPassword: "toolpassword"
 
 database:
-  # -- For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html)
+  # -- For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html).
+  # @default -- -
   bootstrap:
-    # -- The JDBC URL of the database to be used by Spotfire Server
+    # -- The JDBC URL of the database to be used by Spotfire Server.
     databaseUrl: "jdbc:postgresql://HOSTNAME/"
-    #  -- The Java driver class of the JDBC driver to be used with underlying database
+    #  -- The Java driver class of the JDBC driver to be used with underlying database.
     driverClass: "org.postgresql.Driver"
-    # -- Username to be created for the Spotfire Server database. If unset, default value spotfire would be used.
+    # -- Username to be created for the Spotfire Server database.
+    # If unset, the default value `spotfire` is used.
     username: "spotfire"
-    # -- Password to be created for the Spotfire Server database
+    # -- Password to be created for the Spotfire Server database.
     # If not provided, this password is automatically generated.
     password: ""
-    # -- Read username and password from an existing secret instead of from values. Keys must be 'SPOTFIREDB_USERNAME' and 'SPOTFIREDB_PASSWORD'.
-    # If not set, a secret will be created.
-    existingSecret: ""
-  # -- For details related to create-db cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html)
+    # -- Read spotfire database password from an existing secret. If set, 'password' above is not used.
+    # @default -- Not used unless .name is set
+    passwordExistingSecret:
+      ## -- Name of the secret. Evaluated as a template.
+      name: ""
+      ## -- Key to read the spotfire database password from. Evaluated as a template.
+      key: SPOTFIREDB_PASSWORD
+  # -- For details related to `create-db` cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html).
   # create-db cli also uses properties from database.bootstrap section.
+  # @default -- -
   create-db:
-    # -- if set to true, Spotfire server schema will also get deployed with other installation
+    # -- if set to true, Spotfire server schema will also get deployed with other installation.
     enabled: true
-    # -- Admin username for the database server to be used as the Spotfire Server database
+    # -- Admin username for the database server to be used as the Spotfire Server database.
     adminUsername: "postgres"
-    # -- Instead of adminUsername. If set, read username from an existing secret and key
-    adminUsernameExistingSecret:
-      ## -- Name of the kubernetes secret containing the administrator username
-      name: ""
-      ## -- Name of the key to read the administrator password from
-      key: DBSERVER_ADMIN_USERNAME
+    # -- Admin password for the database server to be used as the Spotfire Server database.
     adminPassword: ""
-    # -- Instead of adminPassword. If set, read password from an existing secret and key
+    # -- Read admin password from an existing secret. If set, 'password' above is not used.
+    # @default -- Not used unless .name is set
     adminPasswordExistingSecret:
-      ## -- Name of the kubernetes secret containing the administrator password
+      ## -- Name of the secret. Evaluated as a template.
       name: ""
-      ## -- Name of the key to read the administrator password from
+      ## -- Key to read the database administrator password from. Evaluated as a template.
       key: DBSERVER_ADMIN_PASSWORD
-    # -- Like database.bootstrap.databaseUrl but is used for the connection when creating the spotfire database.
+
+    # -- Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database.
     databaseUrl: ""
-    # -- Database name to be created to hold the Spotfire Server database schemas
+    # -- Database name to be created to hold the Spotfire Server database schemas.
     spotfiredbDbname: "spotfire"
-    # -- Set this to true, in case supported databases(AWS Postgre, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation
+    # -- Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation
     doNotCreateUser: false
-    # -- For connecting to MS SQL or Oracle on Amazon RDS, specify 'rds', for MS SQL on Azure, specify 'azure', otherwise omit the option.
+    # -- For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option.
     variant: ""
-    # -- Specify the value in case of Oracle database, otherwise keep it blank
+    # -- Specify the value in case of Oracle database, otherwise keep it blank.
     oracleTablespacePrefix: ""
-    # -- Specify the value in case of Oracle database, otherwise keep it blank
+    # -- Specify the value in case of Oracle database, otherwise keep it blank.
     oracleRootfolder: ""
   # -- Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed.
   upgrade: true
-
+ 
 configuration:
+  # -- When to apply configurationScripts, commandScripts and admin user creation. Possible values:
+  # * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release.
+  # * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool.
+  # * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database.
+  apply: "initialsetup"
 
-  # -- Export the existing Spotfire configuration before applying any additional configuration. If false, then a default configuration is created with `config.sh create-default-config`.
-  useExisting: true
+  # -- Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`).
+  # If no current active configuration exists, the default config is used.
+  # Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade.
+  preferExistingConfig: false
 
-  # -- Applies various Spotfire application settings recommended for Kubernetes environments.
-  applyKubernetesConfiguration: true
+  # -- The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command.
+  encryptionPassword: ""
 
-  # -- A list of configuration scripts to apply during helm installation or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local configuration.xml. configuration.xml is automatically imported after all configuration steps run in the order in which they are defined below.
+  # -- A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`.
+  # See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
+  # Commands in these scripts should operate only on a local `configuration.xml`.
+  # Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here.
+  # The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below.
   configurationScripts: []
   # - name: my_configuration_script_name
   #   script: "my configuration script content"
 
-  # -- A list of command scripts to run during helm installation or upgrade. Each list item should have the keys 'name' and 'script'. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on configuration.xml. Operations such as adding/removing users and assigning licenses are such typical administrative commands.
+  # -- A list of command scripts to run during helm installation.
+  # These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`.
+  # See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
+  # Commands in these scripts should NOT operate on `configuration.xml`.
+  # Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here.
   commandScripts: []
   # - name: my_command_script_name
-  #   script: "my confiugration script content"
+  #   script: "my configuration script content"
 
-# -- The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command.
-encryptionPassword: ""
+  # -- The same as `commandScripts` but these command will be run before the configuration is imported.
+  # On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration.
+  preConfigCommandScripts: []
+  # - name:
+  #   script:
 
-# -- The user to create for the Spotfire admin.
-spotfireAdmin:
-  username: "admin"
-  # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire adminstrative user interace because the password is reset to this value on every helm installation or upgrade.
-  password: ""
-  # -- Read admin username and password from an existing secret instead of from values. Keys should be 'SPOTFIREADMIN_USERNAME' and 'SPOTFIREADMIN_PASSWORD'.
-  existingSecret: ""
+  spotfireAdmin:
+    # -- Whether to create an admin user or not.
+    create: true
+    # -- The user to create for the Spotfire admin.
+    username: "admin"
+    # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated. 
+    # Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade.
+    password: ""
+    # -- Read password from an existing secret instead of from values. If set, 'password' above is not used.
+    # @default -- Not used unless .name is set
+    passwordExistingSecret:
+      name: ""
+      ## -- Key to read the password from. Evaluated as a template.
+      key: SPOTFIREADMIN_PASSWORD
+
+  # -- Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information.
+  # @default -- Spotfire Server joins the Default site.
+  site:
+    # -- The name of the site that the Spotfire Server should belong to. The site must be created beforehand. 
+    # See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information.
+    name: "Default"
+    displayName: " "
+    # -- The address that clients use for connecting to the system. It is also used for generating absolute URLs.
+    publicAddress: ""
+
+  # -- Configuration of the Spotfire Server container lifecycle PreStop hook.
+  draining:
+    # -- Enables or disables the container lifecycle PreStop hook.
+    enabled: true
+    # -- The draining timeout in seconds after which the service is forcibly shut down.
+    timeoutSeconds: 180
+    # -- The minimum time in seconds that the server should be draining, even if it is considered idle.
+    minimumSeconds: 90
+  
+  deployment:
+    # -- When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`.
+    enabled: true
+
+    defaultDeployment:
+      # -- Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. 
+      # Set to false to not overwrite the persistent deployments volume with the Spotfire.Dxp.sdn from spotfire-deployment container image.
+      enabled: true
+      # -- The name of the deployment area to create or update
+      deploymentAreaName: "Production"
+      # spotfire-deployment image settings
+      image:
+        # -- The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value.
+        registry:
+        # -- The spotfire-deployment image repository.
+        repository: tibco/spotfire-deployment
+        # -- The container image tag to use.
+        tag: "12.2.0-1.2.0"
+        # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
+        pullPolicy:
+        ## Optionally specify an array of imagePullSecrets.
+        # image.pullSecrets -- spotfire-deployment image pull secrets.
+        pullSecrets: []
 
 troubleshooting:
   jvm:
@@ -446,25 +516,15 @@ troubleshooting:
       enabled: true
       # -- Define a path where the generated dump is exported.
       # By default, this gets mounted in EmptyDir: {} internally, which survives container restarts.
-      # In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in .Values.volumes.troubleshooting.
+      # In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`.
       dumpPath: /opt/tibco/troubleshooting/jvm-heap-dumps
 
 spotfireServerJava:
-  # -- Additional JAVA_OPTS for spotfire-server pods.
+  # -- Additional `JAVA_OPTS` for spotfire-server pods.
   ## Example
     ## extraJavaOpts:
     ##  - -Dsystem.property=value
   extraJavaOpts: []
-
-# -- Site settings. See https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html for more information.
-# @default -- Spotfire Server joins the Default site.
-site:
-  # -- The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html for more information.
-  name: "Default"
-  displayName: " "
-  # -- The address that clients use for connecting to the system. It is also used for generating absolute URLs.
-  publicAddress: ""
-
 
 # ===============================
 # haproxy
@@ -586,13 +646,6 @@ haproxy:
 
       {{- end }}
 
-      {{- if .Values.spotfireConfig.debug }}
-
-      # For logging purposes
-      capture request header X-Forwarded-Proto len 5
-      {{- end }}
-
-
     {{- if .Values.spotfireConfig.cache.enabled }}
 
     cache tss
@@ -619,7 +672,7 @@ haproxy:
       http-response set-header X-Server %s
       {{- end }}
 
-      server-template srv 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }}
+      server-template srv 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
     resolvers pcdns
       parse-resolv-conf
       resolve_retries       3
@@ -640,17 +693,17 @@ haproxy:
     # -- haproxy related timeouts
      # @default -- haproxy timeouts
     timeouts:
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20client
+      # -- See [haproxy timeout client](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20client).
       client: 30m
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20connect
+      # -- See [haproxy timeout connect](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20connect).
       connect: 300ms
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4-timeout%20queue
+      # -- See [haproxy timeout queue](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4-timeout%20queue).
       queue: 60s
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20server
+      # -- See [haproxy timeout server](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20server).
       server: 30m
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20tunnel
+      # -- See [haproxy timeout tunnel](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20tunnel).
       tunnel: 31m
-      # -- https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-timeout%20http-request
+      # -- See [haproxy timeout http-request](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20http-request).
       httpRequest: 3600s
     # -- Cookie-related configuration.
     # @default -- stateless load balancing
@@ -659,13 +712,17 @@ haproxy:
       # -- dynamic-cookie-key value in the haproxy config.
       # @default -- the cookie key
       dynamicCookieKey: "Sp0tf1re01"
-      # -- Attributes for the cookie value in the haproxy config. See https://cbonte.github.io/haproxy-dconv/2.4/configuration.html#4.2-cookie for more information.
+      # -- Attributes for the cookie value in the haproxy config. See [haproxy cookie](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-cookie) for more information.
       attributes: "prefix dynamic"
     cleanup:
       # -- If the SameSite cookie attribute should be removed for HTTP connections in Set-Cookie response headers, then it might be needed in cases where both HTTP and HTTPS are enabled, and upstream servers set this unconditionally.
       sameSiteCookieAttributeForHttp: true
       # -- If incorrect, then the secure cookie attribute should be removed for HTTP connections in the Set-Cookie response headers.
       secureCookieAttributeForHttp: true
+    # @default --
+    serverTemplate:
+      # -- Additional parameters, see [haproxy server](https://cbonte.github.io/haproxy-dconv/2.6/snapshot/configuration.html#server%20%28Alphabetically%20sorted%20keywords%20reference%29)
+      additionalParams: on-marked-down shutdown-sessions
 
     # @default --
     agent:
@@ -682,14 +739,12 @@ haproxy:
 # The values listed below are provided to the fluent-bit helm chart.
 # See https://github.com/fluent/helm-charts/blob/main/charts/fluent-bit/values.yaml for a description of available values.
 log-forwarder:
-  # -- enables or disables the fluent-bit log-forwarder pod. If enabled, it
-  # collects logs from the spotfire-server pods and can forward traffic
-  # to any output supported by fluent-bit.
+  # -- enables or disables the fluent-bit log-forwarder pod.
+  # If enabled, it collects logs from the spotfire-server pods and can forward traffic to any output supported by fluent-bit.
   enabled: true
   rbac:
-    # -- Specifies whether to create an rbac for the fluent-bit / log-forwarder. Setting
-    # this to `true` requires additional privileges in the Kubernetes
-    # cluster.
+    # -- Specifies whether to create an RBAC for the fluent-bit / log-forwarder.
+    # Setting this to `true` requires additional privileges in the Kubernetes cluster.
     create: false
   kind: Deployment
   extraPorts:

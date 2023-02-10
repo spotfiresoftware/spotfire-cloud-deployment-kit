@@ -28,22 +28,31 @@ function logSubHeader() {
     echo "======================================================"
     echo
 }
+# Export existing OR create default config
+function export_or_create_default_config() {
+    # configuration.xml.original: Already existing configuration in database, or empty if none exists from the start
+    # configuration.xml: Configuration that will be modified in this script
+    if [ "${JOB_PREFER_EXISTING_CONFIG}" = "true" ]; then
+        logSubHeader "Exporting existing configuration"
+        config.sh export-config --force --tool-password="${TOOL_PASSWORD}" --bootstrap-config="${BOOTSTRAP_FILE}" "${CONFIGURATION_FILE}" || touch "${CONFIGURATION_FILE}"
+        cp -- "${CONFIGURATION_FILE}" "${CONFIGURATION_FILE}".original
 
-# Export existing config OR create default config 
-function export_config() {
-    if [ "${JOB_USE_EXISTING_CONFIGURATION}" = "true" ]; then
-        logHeader "Exporting existing configuration"
-        config.sh export-config --force --tool-password="${TOOL_PASSWORD}" --bootstrap-config="${BOOTSTRAP_FILE}" || config.sh create-default-config --force 
+        if [ ! -s "${CONFIGURATION_FILE}".original ]; then
+            echo "Creating default configuration because non was present in database"
+            config.sh create-default-config --force "${CONFIGURATION_FILE}"
+        fi
     else
-        logHeader "Creating default configuration"
-        config.sh create-default-config --force
+        logSubHeader "Creating default configuration"
+        touch "${CONFIGURATION_FILE}".original
+        config.sh create-default-config --force "${CONFIGURATION_FILE}"
     fi
-    cp -- "${CONFIGURATION_FILE}" "${CONFIGURATION_FILE}".original
 }
+
+
 
 # Import configuration if needed
 function import_config() {
-    logHeader "Import configuration"
+    logSubHeader "Import configuration"
 
     if [ ! -f "${CONFIGURATION_FILE}" ]; then
         echo "${CONFIGURATION_FILE} does not exist - skipping import"
@@ -61,11 +70,31 @@ function import_config() {
     config.sh import-config --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" -c "${JOB_CONFIGURATION_COMMENT}"
 }
 
+function pre_config_command_scripts() {
+    logSubHeader "Running pre-configuration scripts"
+    for f in /opt/tibco/pre-config-command-scripts/*; do
+        if [ -f "${f}" ]; then
+            logSubHeader "Running pre-config step ${f}"
+            config.sh run --include-environment --fail-on-undefined-variable "${f}"
+        fi
+    done
+}
+
 function command_scripts() {
-    logHeader "Running command scripts"
+    logSubHeader "Running command scripts"
     for f in /opt/tibco/command-scripts/*; do
         if [ -f "${f}" ]; then
             logSubHeader "Running extra commands steps ${f}"
+            config.sh run --include-environment --fail-on-undefined-variable "${f}"
+        fi
+    done
+}
+
+function configuration_scripts() {
+    logSubHeader "Running configuration scripts"
+    for f in /opt/tibco/configuration-scripts/*; do
+        if [ -f "${f}" ]; then
+            logSubHeader "Running config step ${f}"
             config.sh run --include-environment --fail-on-undefined-variable "${f}"
         fi
     done
@@ -87,8 +116,8 @@ logHeader "Version"
 config.sh version
 
 # Install database
-if [ "${JOB_INSTALL}" = "true" ]; then
-    logHeader "Install database"
+if [ "${JOB_CREATE_DATABASE}" = "true" ]; then
+    logHeader "Installing database"
     /opt/tibco/scripts/install-database.sh
 fi
 
@@ -97,41 +126,84 @@ logHeader "Bootstrapping"
 /opt/tibco/bootstrap.sh
 
 # Database upgrade
-if [ "${JOB_DATABASE_UPGRADE}" = "true" ]; then
-    logHeader "Database upgrade"
+if [ "${JOB_UPGRADE_DATABASE}" = "true" ]; then
+    logHeader "Upgrading database"
     /opt/tibco/scripts/database-upgrade.sh
 fi
 
+# Configure public address
+logHeader "Configuration and setup"
 
-# export config
-export_config
-
-# Default kubernetes configuration
-if [ "${JOB_DEFAULT_CONFIGURE}" = "true" ]; then
-    logHeader "Applying default kubernetes configuration"
-    config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/default-kubernetes-config.txt
+# If check-prerequisites are met, there is a configured spotfire database hence no new installation
+if config.sh check-prerequisites --tool-password="${TOOL_PASSWORD}" > /dev/null 2>&1; then
+    is_install="false"
+    echo "An existing configuration was found. It is NOT a new installation."
+else
+    is_install="true"
+    echo "An existing configuration was NOT found. It is a new installation."
 fi
 
-# Custom configuration scripts
-logHeader "Running configuration scripts"
-for f in /opt/tibco/configuration-scripts/*; do
-    if [ -f "${f}" ]; then
-        logSubHeader "Running extra config step ${f}"
-        config.sh run --include-environment --fail-on-undefined-variable "${f}"
+# Don't apply configuration if externally managed, unless helm release is installed i.e initial setup
+if [ "${JOB_WHEN_TO_APPLY_CONFIG,,}" = "initialsetup" ] && [ "${is_install}" = "true" ]; then
+    apply_configuration="true"
+elif [ "${JOB_WHEN_TO_APPLY_CONFIG,,}" = "initialsetup" ] && [ "${is_install}" = "false" ]; then
+    apply_configuration="false"
+elif [ "${JOB_WHEN_TO_APPLY_CONFIG,,}" = "always" ]; then
+    apply_configuration="true"
+elif [ "${JOB_WHEN_TO_APPLY_CONFIG,,}" = "never" ]; then
+    apply_configuration="false"
+else
+    echo 'ERROR $JOB_WHEN_TO_APPLY_CONFIG is not one of initialsetup, always, never'
+    exit 1
+fi
+
+echo -n "JOB_WHEN_TO_APPLY_CONFIG is set to '${JOB_WHEN_TO_APPLY_CONFIG}' and is_install is '${is_install}'. "
+if [ "${apply_configuration}" = "false" ]; then
+    echo "Configuration will not be applied."
+else
+    echo "Configuration will be applied."
+fi
+
+if [ "${apply_configuration}" = "true" ]; then
+    export_or_create_default_config
+
+    if [ ! -z "${SITE_PUBLIC_ADDRESS}" ]; then
+        config.sh set-public-address --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --site-name="${SITE_NAME}" --url="${SITE_PUBLIC_ADDRESS}"
     fi
-done
 
-# import config
-import_config
+    # Configure action logging
+    logSubHeader "Configure action logging"
+    config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/action-logging.txt
 
-# Deployment
-logHeader "Deploying sdn / spk files"
-/opt/tibco/scripts/deploy.sh
+    # Default kubernetes configuration
+    logSubHeader "Applying default kubernetes configuration"
+    config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/default-kubernetes-config.txt
 
-# Add user, set public address
-logHeader "Running default commands"
-config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/default-commands.txt
+    pre_config_command_scripts
 
-command_scripts
+    # Custom configuration scripts
+    configuration_scripts
+
+    # Import config if, but only if it has changed
+    import_config
+fi
+
+
+if [ "${JOB_DO_DEPLOY}" = "true" ]; then
+    logSubHeader "Deploying sdn / spk files"
+    /opt/tibco/scripts/deploy.sh
+fi
+
+if [ "${apply_configuration}" = "true" ]; then
+
+    # Add admin user
+    if [ "${JOB_CREATE_ADMIN}" = "true" ]; then
+        logSubHeader "Creating admin user"
+        config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/create-user.txt
+    fi
+
+    command_scripts
+
+fi
 
 logHeader "Done."

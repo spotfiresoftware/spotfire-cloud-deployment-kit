@@ -35,8 +35,6 @@ The following applications have been validated in this _Cloud Deployment Kit (CD
 - TIBCO Spotfire® Service for Python
 - TIBCO® Enterprise Runtime for R - Server Edition (TERR™ service)
 
-**Note**: We plan to add recipes for additional Spotfire applications. Stay tuned.
-
 **Note**: For more information on TIBCO Spotfire® and its components, see the [TIBCO Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
 
 Using the provided charts, you can also deploy the following:
@@ -45,13 +43,13 @@ Using the provided charts, you can also deploy the following:
 - An [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) with routing rules for accessing the configured reverse proxy.
 - Shared storage locations ([Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)) for the Spotfire Library import and export, custom jars, deployment packages, and so on.
 
-**Note**: For information on sizing and supported third party software, see [System requirements for TIBCO Spotfire® products](https://spotfi.re/sr/).
+**Note**: For information on sizing and supported third party software, see the [System requirements for TIBCO Spotfire® products](https://spotfi.re/sr/).
 
 ## Basic workflow
 
 1. Fetch the required [Spotfire installation packages](containers/README.md#prerequisites).
 2. Build and push the [Spotfire container images](containers/README.md#build-the-images).
-3. Build and publish the [Spotfire helm charts](helm/README.md#build-the-charts).
+3. Build and publish the [Spotfire helm charts](helm/README.md#building-the-charts).
 4. Deploy your Spotfire environment using the [Spotfire helm charts](helm/README.md).
 
 # Issues
@@ -78,7 +76,7 @@ A partial summary of the third party software and licenses used in this project 
 
 ---
 
-Copyright 2022 TIBCO Software Inc.
+Copyright 2022-2023 Cloud Software Group, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -34,7 +34,7 @@ image:
   # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-pythonservice
   # image.tag -- The container image tag to use.
-  tag: "1.13.0-1.1.0"
+  tag: "1.14.0-1.2.0"
   # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy
   pullPolicy:
   ## Optionally specifies an array of imagePullSecrets.
@@ -46,7 +46,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "1.9.8"
+    tag: "2.0.5"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -159,9 +159,10 @@ kedaAutoscaling:
   minReplicas: 1
   # -- This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource.
   maxReplicas: 4
-  # threshold: 8
-  # fallback:
-  # advanced:
+  threshold:
+  fallback: {}
+  triggers: []
+  advanced: {}
   # -- Spotfire specific settings
   spotfireConfig:
     # -- REQUIRED. The URL for the Prometheus server where metrics are fetched from.

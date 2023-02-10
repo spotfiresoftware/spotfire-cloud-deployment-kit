@@ -1,0 +1,37 @@
+volumes:
+  troubleshooting:
+    existingClaim: troubleshootingclaimname
+  libraryImportExport:
+    existingClaim: libraryimportexportclaimname
+  customExt:
+    existingClaim: customextpvc
+  certificates:
+    existingClaim: customcertspvc
+  deployments:
+    existingClaim: deploymentsclaimname
+database:
+  bootstrap:
+    databaseUrl: jdbc://server/
+    driverClass: org.postgresql.Driver
+    username: spotfireuser
+    password: mypassword
+  create-db:
+    enabled: true
+    adminUsername: postgres
+    adminPassword: adminpassword
+    databaseUrl: jdbc://server/
+configuration:
+  spotfireAdmin:
+    username: spotfireadmin
+    password: secretpassword101
+  site:
+    publicAddress: http://www.site.com
+  apply: never
+  deployment:
+    defaultDeployment:
+      deploymentAreaName: productionareaname
+      enabled: false
+haproxy:
+  enabled: true
+  podSecurityPolicy:
+    create: false

@@ -62,7 +62,7 @@ spec:
             mountPath: /opt/tibco/tsnm/nm/logs
           {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
           {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
-          - name: {{ .Values.volumes.packages.name }}
+          - name: packages-volume
             mountPath: {{ .Values.volumes.packages.mountPath }}
           {{- end }}
           {{- range $filename, $content := .Values.config }}
@@ -139,9 +139,9 @@ spec:
         - name: logs-volume
           emptyDir: {}
         {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
-        - name: {{ .Values.volumes.packages.name }}
+        - name: packages-volume
           persistentVolumeClaim:
-            claimName: {{ include "spotfire-common.spotfire-service.volumes.packages.pvc.name" . }}
+            claimName: {{ include "spotfire-common.volumes.packages.pvc.name" . }}
         {{- end }}
         - name: serviceconfig
           configMap:

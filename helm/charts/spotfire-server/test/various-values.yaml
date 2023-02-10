@@ -1,0 +1,441 @@
+spotfireServerJava:
+  extraJavaOpts:
+    - -Dsystem.property=value
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+securityContext:
+  privileged: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+troubleshooting:
+  jvm:
+    heapDumpOnOutOfMemoryError:
+      enabled: true
+      dumpPath: /opt/tibco/troubleshooting/jvm-heap-dumps
+serviceAccount:
+  create: true
+  name: serviceaccountname
+  annotations:
+    myAnnotation: myAnnotationValue
+tolerations:
+  - key: key1
+    operator: Equal
+    value: value1
+    effect: NoSchedule
+nodeSelector:
+  disktype: ssd
+affinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: security
+              operator: In
+              values:
+                - S1
+        topologyKey: topology.kubernetes.io/zone
+cliPod:
+  enabled: true
+  logLevel: TRACE
+  extraEnvVars:
+    - name: HELLOCLIPOD
+      value: worldcliPod
+  extraEnvVarsCM: configmapnameclipod
+  extraEnvVarsSecret: secretnameclipod
+  extraVolumeMounts:
+    - name: empty
+      mountPath: /empty
+  extraVolumes:
+    - name: empty
+      emptyDir: {}
+  extraInitContainers:
+    - name: dummy-init
+      image: busybox
+      command:
+        - echo
+        - hey
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: security
+                operator: In
+                values:
+                  - S1
+          topologyKey: topology.kubernetes.io/zone
+  nodeSelector:
+    disktype: ssd
+  tolerations:
+    - key: key1
+      operator: Equal
+      value: value1
+      effect: NoSchedule
+  podSecurityContext:
+    fsGroup: 1234
+    runAsUser: 1234
+    runAsGroup: 1234
+  securityContext:
+    fsGroup: 9999
+    runAsUser: 2000
+    runAsGroup: 3000
+  image:
+    registry: my.registry.com
+    pullPolicy: Never
+    pullSecrets:
+      - pullsecret
+    repository: tibco/spotfire-config
+    tag: 12.1.0-1.2.0
+  podAnnotations:
+    firstpodannotation: "1"
+    secondpodannotation: "2"
+configJob:
+  logLevel: DEBUG
+  extraEnvVars:
+    - name: HELLOCLICONFIGJOB
+      value: worldConfigJob
+  extraEnvVarsCM: configmapnameconfigjob
+  extraEnvVarsSecret: secretnameconfigjob
+  extraVolumeMounts:
+    - name: empty
+      mountPath: /empty
+  extraVolumes:
+    - name: empty
+      emptyDir: {}
+  extraInitContainers:
+    - name: dummy-init
+      image: busybox
+      command:
+        - echo
+        - hey
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: security
+                operator: In
+                values:
+                  - S1
+          topologyKey: topology.kubernetes.io/zone
+  nodeSelector:
+    disktype: ssd
+  tolerations:
+    - key: key1
+      operator: Equal
+      value: value1
+      effect: NoSchedule
+  podSecurityContext:
+    fsGroup: 4321
+    runAsUser: 4321
+    runAsGroup: 4321
+  securityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+    runAsGroup: 0
+  image:
+    pullPolicy: ""
+    pullSecrets:
+      - one
+      - two
+    registry: ""
+    repository: tibco/spotfire-config
+    tag: 12.1.0-1.2.0
+  podAnnotations:
+    firstpodannotation: "1"
+    secondpodannotation: "2"
+  ttlSecondsAfterFinished: "3600"
+database:
+  bootstrap:
+    databaseUrl: jdbc://server/
+    driverClass: org.postgresql.Driver
+    passwordExistingSecret:
+      name: nameOfExistingSecret
+      key: passwordkey
+  upgrade: true
+  create-db:
+    doNotCreateUser: true
+    oracleRootfolder: /root/folder
+    oracleTablespacePrefix: prefix
+    spotfiredbDbname: dbname
+    variant: rds
+    enabled: true
+    adminPasswordExistingSecret:
+      name: nameofsecret
+      key: DBSERVER_ADMIN_PASSWORD
+    databaseUrl: jdbc://server/
+fluentBitSidecar:
+  image:
+    pullPolicy: Never
+    repository: fluent/fluent-bit
+    tag: 1.9.9
+  securityContext:
+    privileged: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+global:
+  spotfire:
+    image:
+      pullPolicy: Always
+      pullSecrets:
+        - one
+        - two
+      registry: my.registry.com
+# Supress warnings by copying from values.yaml
+haproxy:
+  enabled: true
+  kind: Deployment
+  config: "config"
+  podAnnotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: "1024"
+    prometheus.io/scrape: "false"
+  podLabels:
+    app.kubernetes.io/part-of: spotfire
+    app.kubernetes.io/component: haproxy
+  podSecurityPolicy:
+    create: true
+  service:
+    type: ClusterIP
+  spotfireConfig:
+    debug: true
+    cleanup:
+      secureCookieAttributeForHttp: true
+      sameSiteCookieAttributeForHttp: true
+    cache:
+      enabled: true
+    agent:
+      port: "9081"
+    loadBalancingCookie:
+      attributes: prefix dynamic
+      dynamicCookieKey: Sp0tf1re01
+      name: JSESSIONID
+    timeouts:
+      client: 30m
+      connect: 300ms
+      httpRequest: 3600s
+      queue: 60s
+      server: 30m
+      tunnel: 31m
+  extraVolumeMounts:
+    - name: chart-fix
+      mountPath: /tmp/chart/fix
+  extraVolumes:
+    - name: chart-fix
+      emptyDir: {}
+extraVolumeMounts:
+  - name: volume
+    mountPath: /volume
+extraVolumes:
+  - name: volume
+    emptyDir: {}
+extraEnvVars:
+  - name: HELLO
+    value: world
+extraEnvVarsCM: configmapname
+extraEnvVarsSecret: secretname
+image:
+  repository: tibco/spotfire-server
+  tag: 12.1.0-1.2.0
+  registry:
+  pullPolicy: Always
+  pullSecrets:
+    - pullsecret
+ingress:
+  annotations:
+    myFirstAnnotation: one
+    mySecondAnnotation: two
+  enabled: true
+  tls:
+    - hosts:
+        - www.example.com
+      secretName: tlsSecretName
+  hosts:
+    - host: www.example.com
+      paths:
+        - path: /spotfire
+          pathType: Prefix
+livenessProbe:
+  enabled: true
+  failureThreshold: 3
+  httpGet:
+    path: /spotfire/rest/status/getStatus
+    port: http
+  periodSeconds: 30
+log-forwarder:
+  enabled: true
+  extraPorts:
+    - containerPort: "5170"
+      name: json
+      port: "5170"
+      protocol: TCP
+    - containerPort: "24224"
+      name: forward
+      port: "24224"
+      protocol: TCP
+  image:
+    pullPolicy: IfNotPresent
+  kind: Deployment
+  labels:
+    app.kubernetes.io/component: logging
+    app.kubernetes.io/part-of: spotfire
+  podAnnotations:
+    prometheus.io/path: /api/v1/metrics/prometheus
+    prometheus.io/port: "2020"
+    prometheus.io/scrape: "false"
+  podLabels:
+    app.kubernetes.io/part-of: spotfire
+    app.kubernetes.io/component: logging
+  rbac:
+    create: true
+  service:
+    labels:
+      app.kubernetes.io/part-of: spotfire
+      app.kubernetes.io/component: logging
+  config:
+    outputs: "outputs"
+    inputs: "inputs"
+    filters: "filters"
+logging:
+  logForwarderAddress: log.forwarder.address
+  logLevel: debug
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+readinessProbe:
+  enabled: true
+replicaCount: 2
+resources: {}
+service:
+  type: ClusterIP
+startupProbe:
+  enabled: true
+  failureThreshold: 30
+  httpGet:
+    path: /spotfire/rest/status/getStatus
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 10
+toolPassword: mytoolpassword
+kedaAutoscaling:
+  enabled: true
+  pollingInterval: 90
+  cooldownPeriod: 100
+  minReplicas: 2
+  maxReplicas: 10
+  threshold: 4
+  fallback: {}
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: |
+          '{{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}'
+        metricName: spotfire_OS_OperatingSystem_ProcessCpuLoad
+        threshold: |
+          {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
+        query: |
+          {{ printf "sum(100*spotfire_OS_OperatingSystem_ProcessCpuLoad{app_kubernetes_io_component=\"server\", app_kubernetes_io_instance=\"%s\"})" .Release.Name | quote }}
+        namespace: |
+          {{ .Release.Namespace }}
+    - type: prometheus
+      metadata:
+        serverAddress: |
+          '{{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}'
+        metricName: spotfire_OS_OperatingSystem_ProcessCpuLoad
+        threshold: |
+          {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
+        query: |
+          {{ printf "sum(100*spotfire_OS_OperatingSystem_ProcessCpuLoad{app_kubernetes_io_component=\"server\", app_kubernetes_io_instance=\"%s\"})" .Release.Name | quote }}
+        namespace: |
+          {{ .Release.Namespace }}
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 15
+  spotfireConfig:
+    prometheusServerAddress: http://address/
+volumes:
+  certificates:
+    existingClaim: customcertspvc
+  customExt:
+    existingClaim: customextpvc
+  deployments:
+    existingClaim: deploymentsclaimname
+  customExtInformationservices:
+    existingClaim: existingclaim1
+  libraryImportExport:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: storageclassname
+      volumeName: volumename
+  troubleshooting:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: storageclassname
+      volumeName: volumename
+configuration:
+  preferExistingConfig: false
+  apply: initialsetup
+  deployment:
+    defaultDeployment:
+      deploymentAreaName: productionareaname
+      enabled: true
+      image:
+        pullPolicy: "pullpolicy"
+        pullSecrets:
+          - one
+          - two
+        registry: ""
+        repository: tibco/spotfire-deployment
+        tag: 12.1.0-1.2.0
+    enabled: true
+  draining:
+    enabled: true
+    minimumSeconds: 90
+    timeoutSeconds: 180
+  encryptionPassword: encryption/password
+  spotfireAdmin:
+    passwordExistingSecret:
+      name: theSecretForAdminCredentials
+      key: password
+    create: true
+  site:
+    publicAddress: http://www.site.com
+    displayName: displayname
+    name: sitename
+  configurationScripts:
+    - name: my_custom_script
+      script: |
+        echo "This is an example custom configuration tasks. "
+        set-config-prop --name=lifecycle.changes-monitoring.draining.timeout-seconds --value=180 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+    - name: my_second_script
+      script: |
+        echo "This script will be executed after the one above."
+        echo "Scripts are executed in the order in which they appear the values file."
+  commandScripts:
+    - name: mycommands_script
+      script: create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="mynewuser" --password="password" --ignore-existing=true
+  preConfigCommandScripts:
+    - name: name
+      script: script
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command:
+      - echo
+      - hey

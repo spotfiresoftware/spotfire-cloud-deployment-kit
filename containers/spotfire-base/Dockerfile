@@ -11,10 +11,10 @@ FROM debian:$DEBIAN_TAG as spotfire-base
 ARG DEBIAN_TAG
 LABEL org.opencontainers.image.title="tibco/spotfire-base" \
     org.opencontainers.image.description="Base image for TIBCO Spotfire® container images" \
-    org.opencontainers.image.vendor='TIBCO Software Inc.' \
     org.opencontainers.image.url='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
     org.opencontainers.image.documentation='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
-    org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit'
+    org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
+    org.opencontainers.image.vendor='Cloud Software Group, Inc.'
 
 RUN apt-get update \
   && mkdir -p /usr/share/man/man1 \

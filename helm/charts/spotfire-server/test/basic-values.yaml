@@ -1,12 +1,21 @@
 database:
   bootstrap:
-    databaseUrl: "jdbc://server/"
-    driverClass: "org.postgresql.Driver"
-    password: 'mypassword'
+    databaseUrl: jdbc://server/
+    driverClass: org.postgresql.Driver
+    password: mypassword
   create-db:
     enabled: true
-    adminUsername: postgres 
+    adminUsername: postgres
     adminPassword: adminpassword
-    databaseUrl: "jdbc://server/"
-site:
-  publicAddress: "http://localhost/"
+    databaseUrl: jdbc://server/
+configuration:
+  site:
+    publicAddress: http://localhost/
+haproxy:
+  enabled: false
+livenessProbe:
+  enabled: false
+log-forwarder:
+  enabled: false
+startupProbe:
+  enabled: false

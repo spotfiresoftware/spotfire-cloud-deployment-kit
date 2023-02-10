@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.1.1](https://img.shields.io/badge/AppVersion-12.1.1-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.2.0](https://img.shields.io/badge/AppVersion-12.2.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Web Player.
 
@@ -12,17 +12,18 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.3 |
+| file://../spotfire-common | spotfire-common | 0.1.4 |
 
 ## Overview
 
 This chart deploys the [TIBCO Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- The Spotfire Web Player pod includes a [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
-- The chart includes service annotations for [Prometheus](https://prometheus.io/) scrapers.
-The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+The Spotfire Web Player pod includes:
+- A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
+- Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
+- Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/) and [Prometheus](https://prometheus.io/).
+This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
@@ -57,7 +58,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Configuring
 
-Override the default configuration settings by providing a custom configuration file.
+You can override the default configuration settings by providing a custom configuration file.
 
 The following example configuration keys are available in the chart:
 - config."Spotfire.Dxp.Worker.Core.config"
@@ -65,7 +66,7 @@ The following example configuration keys are available in the chart:
 - config."Spotfire.Dxp.Worker.Host.dll.config"
 - config."log4net.config"
 
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the container image.
 
 See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html)
  and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html).
@@ -78,11 +79,11 @@ helm install my-release . \
     --set-file config.'Spotfire\.Dxp\.Worker\.Web\.config'=my-Spotfire.Dxp.Worker.Web.config
 ```
 
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
+**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a '\'.
 
-#### Getting container original configuration files
+#### Getting the container default configuration files
 
-Copy the default configuration files used in the container image and use them as templates for your custom configuration.
+You can copy the default configuration files from the container image to use them as templates for your custom configuration.
 
 **Note**: The configuration files content can be version dependent.
 
@@ -93,27 +94,26 @@ docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-webplayer
 ```
 
 #### Credentials profiles for connectors
+
 A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
 
 #### Adding a credentials profile to services as a file
-1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See the example [here.](https://got-gitlab01.emea.tibco.com/sf-engr/spotfire-container-edition/-/tree/main/helm/charts/spotfire-webplayer#get-container-original-configuration-files))
 
+1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See the example [here.](#getting-container-original-configuration-files))
 2. Update the connector's authentication mode to `WebConfig`.
-
 3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
-  ```
-  <entry profile="credentials_profile_name">
-    <allowed-usages>
-        <entry server-regex="database\.example\.com" />
-        <entry connector-id="Spotfire.GoogleAnalyticsAdapter" />
-    </allowed-usages>
-    <username>my_username</username>
-    <password>my_password</password>
-  </entry>
-  ```
-
+    ```
+    <entry profile="credentials_profile_name">
+      <allowed-usages>
+          <entry server-regex="database\.example\.com" />
+          <entry connector-id="Spotfire.GoogleAnalyticsAdapter" />
+      </allowed-usages>
+      <username>my_username</username>
+      <password>my_password</password>
+    </entry>
+    ```
 4. Using extraVolumeMounts, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
-5. See the [configuration section](https://got-gitlab01.emea.tibco.com/sf-engr/spotfire-container-edition/-/tree/main/helm/charts/spotfire-webplayer#configuration) to upgrade the deployment. 
+5. See the [configuration section](#configuring) to upgrade the deployment.
 
 For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
 
@@ -149,23 +149,22 @@ kedaAutoscaling:
 ```
 
 The `spotfire-webplayer` has the following defaults:
-- The default autoscaling metric is the `spotfire_Jobs_QueueSize`.
-- The default query used is the max _Jobs Queue Size_ of the Web Player instances.
+- The default autoscaling metric is the `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status`.
+- The default query used is the sum of _Memory health status_ of the Web Player instances.
 
 For any Web Player instance, _Memory health status_ can present one of the following values:
 - 0: OK. Indicates that the instance is under no pressure.
 - 5: Strained. Indicates that the instance is under pressure but is not a problem.
-- 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance. Current users can keep working in this instance.
+- 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance, but current users can keep working in this instance.
 
-If one Web Player instance is strained or exhausted, then another instance is scaled out (if you are above your minimum replicas). If most of them are OK, then the instance is scaled in.
+With these default settings, if one Web Player instance is strained or exhausted, then another instance is started to scale out the service. If most of them are OK, then the service scales in.
 
-For more information, see [Web Player service
-     performance
-     counters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/web_player_service_performance_counters.html).
+For more information, see [Web Player service performance counters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/web_player_service_performance_counters.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` to allow time for draining sessions when scaling in.
 
-In some scenarios, to mitigate toggling scenarios, you can add something like the following to scale down only one pod per hour, or similar :
+To mitigate toggling scenarios, you can control the KEDA scale down policy.
+For example, to scale down only one pod per hour:
 ```
 kedaAutoscaling:
   advanced:
@@ -186,6 +185,7 @@ kedaAutoscaling:
   triggers:
   # {list of triggers to activate scaling of the target resource}
 ```
+
 ### Upgrading
 
 To upgrade the `my-release` deployment:
@@ -213,7 +213,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-webplayer container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for the fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"1.9.8"` | The image tag to use for the fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for the fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for the fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"webplayer"` |  |
@@ -224,7 +224,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server, it overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"12.1.1-1.1.0"` | The container image tag to use. |
+| image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

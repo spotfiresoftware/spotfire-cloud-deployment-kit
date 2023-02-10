@@ -28,14 +28,14 @@ ARG SPOTFIRE_PYTHONSERVICE_VERSION
 LABEL org.opencontainers.image.title="tibco/spotfire-pythonservice" \
     org.opencontainers.image.description="TIBCO Spotfire® Service for Python provides remote execution of Python data functions for users from web client and mobile devices." \
     org.opencontainers.image.version="${SPOTFIRE_PYTHONSERVICE_VERSION}" \
-    org.opencontainers.image.vendor='TIBCO Software Inc.' \
     org.opencontainers.image.url='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
     org.opencontainers.image.documentation='https://docs.tibco.com/products/tibco-spotfire/' \
     org.opencontainers.image.source='https://github.com/TIBCO/Spotfire-cloud-deployment-kit' \
-    org.opencontainers.image.licenses='TIBCO EULA' \
+    org.opencontainers.image.vendor='Cloud Software Group, Inc.' \
+    org.opencontainers.image.licenses='Cloud Software Group, Inc. End User Agreement' \
     com.tibco.image.product.name="TIBCO Spotfire® Statistics Services" \
     com.tibco.image.component.name="TIBCO Spotfire® Service for Python" \
-    com.tibco.image.license.url='https://terms.tibco.com/#end-user-license-agreement' \
+    com.tibco.image.license.url='https://terms.tibco.com/#end-user-agreement' \
     com.tibco.image.type="commercial" \
     com.tibco.image.distribution-scope="private"
 
@@ -44,6 +44,12 @@ USER root
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
+  # Workaround for python module requiring libffi6
+  && apt-get install -y --no-install-recommends wget ca-certificates \
+  && wget http://mirrors.edge.kernel.org/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb -O libffi6_3.2.1-8_amd64.deb \
+  && dpkg -i  libffi6_3.2.1-8_amd64.deb \
+  && rm libffi6_3.2.1-8_amd64.deb \
+  # end workaround
   && apt-get clean all
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/tsnm-install/nm/services /opt/tibco/tsnm/nm/services

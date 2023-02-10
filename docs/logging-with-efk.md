@@ -1,6 +1,6 @@
 # Logging with EFK stack
 
-For application logging, the Spotfire charts are validated with the EFK stack: 
+For application logging, the Spotfire Helm charts are validated with the EFK stack: 
 - [Elastic](https://www.elastic.co/elasticsearch/)
 - [FluentBit](https://fluentbit.io/)
 - [Kibana](https://www.elastic.co/kibana/)
@@ -39,13 +39,13 @@ helm install my-spotfire-release . -f log.forwarder.elasticsearch.yaml
 
 #### Installing
 
-1. Add the [Elastic charts](https://github.com/elastic/helm-charts) repo.
+1. Add the [Elastic charts](https://github.com/elastic/helm-charts) repo:
     ```bash
     helm repo add elastic https://helm.elastic.co
     helm repo update
     ```
 
-2. Install Elasticsearch in its own namespace.
+2. Install Elasticsearch in its own namespace:
     ```bash
     kubectl create namespace elastic
     helm install elasticsearch elastic/elasticsearch --set replicas=1 --namespace elastic
@@ -53,7 +53,8 @@ helm install my-spotfire-release . -f log.forwarder.elasticsearch.yaml
 
     **Note**: You can use just one Elastic pod replica for testing purposes.
 
-For more information, see the [Elasticsearch Helm chart documentation](https://github.com/elastic/helm-charts/blob/main/elasticsearch/README.md) and the [Elasticsearch documentation](https://www.elastic.co/elasticsearch/).
+For more information, see the [Elasticsearch Helm chart documentation](https://github.com/elastic/helm-charts/blob/main/elasticsearch/README.md) 
+and the [Elasticsearch documentation](https://www.elastic.co/elasticsearch/).
 
 ### Kibana
 
@@ -64,7 +65,5 @@ For more information, see the [Elasticsearch Helm chart documentation](https://g
     helm install kibana elastic/kibana --namespace elastic
     ```
 
-For more information, see the [Kibana Helm
-chart documentation](https://github.com/elastic/helm-charts/tree/main/kibana) and the [Kibana documentation](https://www.elastic.co/kibana/).
-
-
+For more information, see the [Kibana Helm chart documentation](https://github.com/elastic/helm-charts/tree/main/kibana) 
+and the [Kibana documentation](https://www.elastic.co/kibana/).

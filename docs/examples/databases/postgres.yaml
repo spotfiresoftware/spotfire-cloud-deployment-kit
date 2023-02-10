@@ -1,9 +1,10 @@
 database:
   bootstrap:
-    databaseUrl: "jdbc:postgresql://10.98.163.73/"
+    databaseUrl: "jdbc:postgresql://server/"
     driverClass: "org.postgresql.Driver"
-    password: 'Spotfire123'
+    # username: "spotfire"
+    password: "spotfirePassword"
   create-db:
-    adminUsername: postgres 
-    adminPassword: R4nd0mP4sswRldsF4yrAlzzes
-    databaseUrl: "jdbc:postgresql://10.98.163.73/"
+    adminUsername: "postgres"
+    adminPassword: "postgresPassword"
+    databaseUrl: "jdbc:postgresql://server/"

@@ -21,7 +21,7 @@ spec:
         {{- include "spotfire-server.labels" . | nindent 8 }}
     spec:
       {{- include "spotfire-server.imagePullSecrets" . | nindent 6}}
-      terminationGracePeriodSeconds: {{ add (ternary .Values.draining.timeoutSeconds 0 .Values.draining.enabled) 30 }}
+      terminationGracePeriodSeconds: {{ add (ternary .Values.configuration.draining.timeoutSeconds 0 .Values.configuration.draining.enabled) 30 }}
       serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -57,14 +57,14 @@ spec:
           {{- if .Values.readinessProbe.enabled }}
           readinessProbe: {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.draining.enabled }}
+          {{- if .Values.configuration.draining.enabled }}
           lifecycle:
             preStop:
               exec:
                 command:
                 - /opt/tibco/scripts/pre-stop-hook.sh
-                - {{ printf "--minimum-draining-seconds=%v" .Values.draining.minimumSeconds }}
-                - {{ printf "--draining-timeout-seconds=%v" .Values.draining.timeoutSeconds }}
+                - {{ printf "--minimum-draining-seconds=%v" .Values.configuration.draining.minimumSeconds }}
+                - {{ printf "--draining-timeout-seconds=%v" .Values.configuration.draining.timeoutSeconds }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

@@ -1,0 +1,8 @@
+nodemanagerConfig:
+  serverBackendAddress: mytss-spotfire-server
+volumes:
+  troubleshooting:
+    existingClaim: existingclaim1
+  packages:
+    existingClaim: existingclaim2
+    mountPath: /the/mount/path

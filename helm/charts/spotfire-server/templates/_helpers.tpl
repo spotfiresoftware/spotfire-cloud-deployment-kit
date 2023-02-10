@@ -19,23 +19,44 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
-
 /*
-Spotfire database secrets
+Spotfire database secrets, either an exterinal existingSecret or spotfire managed secret
 */
 {{- define "spotfire-server.spotfiredatabase.secret.name" -}}
-{{- if .Values.database.bootstrap.existingSecret -}}
-{{- .Values.database.bootstrap.existingSecret }}
+{{- if .Values.database.bootstrap.passwordExistingSecret.name -}}
+{{- tpl .Values.database.bootstrap.passwordExistingSecret.name $ }}
 {{- else -}}
-{{- printf "%s-%s" (include "spotfire-server.fullname" .) "database" -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "spotfire-server.spotfiredatabase.secret.passwordkey" -}}
+{{- if .Values.database.bootstrap.passwordExistingSecret.name -}}
+{{- tpl .Values.database.bootstrap.passwordExistingSecret.key $ }}
+{{- else -}}
+SPOTFIREDB_PASSWORD
 {{- end -}}
 {{- end -}}
 
 /*
-Spotfire administrator secrets
+Spotfire administrator secret name, either an external existingSecret or spotfire managed secret
 */
 {{- define "spotfire-server.spotfireadmin.secret.name" -}}
-{{- or .Values.spotfireAdmin.existingSecret (printf "%s-%s" (include "spotfire-server.fullname" .) "spotfireadmin") -}}
+{{- if .Values.configuration.spotfireAdmin.passwordExistingSecret.name -}}
+{{- tpl .Values.configuration.spotfireAdmin.passwordExistingSecret.name $ -}}
+{{- else -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+Spotfire administrator secret password key
+*/
+{{- define "spotfire-server.spotfireadmin.secret.passwordkey" -}}
+{{- if .Values.configuration.spotfireAdmin.passwordExistingSecret.name -}}
+{{- tpl .Values.configuration.spotfireAdmin.passwordExistingSecret.key $ -}}
+{{- else -}}
+SPOTFIREADMIN_PASSWORD
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -107,24 +128,20 @@ Database info needed to bootstrap and upgrade server
 - name: SPOTFIREDB_URL
   value: {{ required "database.bootstrap.databaseUrl must be set" .Values.database.bootstrap.databaseUrl | quote }}
 - name: SPOTFIREDB_USERNAME
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
-      key: SPOTFIREDB_USERNAME
-      optional: false
+  value: {{ required "database.bootstrap.username must be set" .Values.database.bootstrap.username | quote }}
 - name: SPOTFIREDB_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
-      key: SPOTFIREDB_PASSWORD
+      key: {{ include "spotfire-server.spotfiredatabase.secret.passwordkey" . | quote }}
       optional: false
 - name: SPOTFIREDB_CLASS
   value: {{ required "driver class must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: TOOL_PASSWORD
   value: {{ .Values.toolPassword | quote }}
-{{- if .Values.encryptionPassword }}
+{{- if .Values.configuration.encryptionPassword }}
 - name: ENCRYPTION_PASSWORD
-  value: {{ .Values.encryptionPassword | quote }}
+  value: {{ .Values.configuration.encryptionPassword | quote }}
 {{- end }}
 {{- end -}}
 
@@ -133,16 +150,12 @@ Spotfire administration username and password
 */}}
 {{- define "spotfire-server.spotfireadmin.envVars" -}}
 - name: SPOTFIREADMIN_USERNAME
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
-      key: SPOTFIREADMIN_USERNAME
-      optional: false
+  value: {{ .Values.configuration.spotfireAdmin.username | quote }}
 - name: SPOTFIREADMIN_PASSWORD
   valueFrom:
     secretKeyRef:
       name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
-      key: SPOTFIREADMIN_PASSWORD
+      key: {{ include "spotfire-server.spotfireadmin.secret.passwordkey" . | quote }} 
       optional: false
 {{- end -}}
 
@@ -168,22 +181,14 @@ Database admin credentials environment variables needed to create a Spotfire sch
 - name: SPOTFIREDB_DBNAME
   value: {{ $createdb.spotfiredbDbname | quote }}
 {{- if index $createdb.enabled }}
-{{- if (and $createdb.adminPasswordExistingSecret.name $createdb.adminPasswordExistingSecret.key) }}
-- name: DBSERVER_ADMIN_USERNAME
-  valueFrom:
-    secretKeyRef:
-      name: {{ $createdb.adminUsernameExistingSecret.name | quote }}
-      key: {{ $createdb.adminUsernameExistingSecret.key | quote }}
-{{- else }}
 - name: DBSERVER_ADMIN_USERNAME
   value: {{ required "database.create-db.adminUsername must be set" $createdb.adminUsername | quote }}
-{{- end }}
-{{- if (and $createdb.adminPasswordExistingSecret.name $createdb.adminPasswordExistingSecret.key) }}
+{{- if $createdb.adminPasswordExistingSecret.name }}
 - name: DBSERVER_ADMIN_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ $createdb.adminPasswordExistingSecret.name | quote }}
-      key: {{ $createdb.adminPasswordExistingSecret.key | quote }}
+      name: {{ tpl $createdb.adminPasswordExistingSecret.name $ }}
+      key: {{ tpl $createdb.adminPasswordExistingSecret.key $ }}
 {{- else }}
 - name: DBSERVER_ADMIN_PASSWORD
   value: {{ required "database.create-db.adminPassword must be set" $createdb.adminPassword | quote }}
@@ -208,11 +213,11 @@ Site information
 */}}
 {{- define "spotfire-server.site.envVars" -}}
 - name: SITE_NAME
-  value: {{ .Values.site.name | quote }}
+  value: {{ .Values.configuration.site.name | quote }}
 - name: SITE_DISPLAY_NAME
-  value: {{ .Values.site.displayName | quote }}
+  value: {{ .Values.configuration.site.displayName | quote }}
 - name: SITE_PUBLIC_ADDRESS
-  value: {{ required "site.publicAddress must be set" .Values.site.publicAddress | quote }}
+  value: {{ required "configuration.site.publicAddress must be set" .Values.configuration.site.publicAddress | quote }}
 {{- end -}}
 
 {{/*
@@ -358,4 +363,26 @@ Return the proper Container Image Registry Secret Names (for configJob Job)
 */}}
 {{- define "spotfire-server.configJob.imagePullSecrets" -}}
 {{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.configJob.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+
+{{/*
+Return the proper image name (for configJob image)
+*/}}
+{{- define "spotfire-server.configuration.deployment.defaultDeployment.image" -}}
+{{- include "spotfire-common.images.image" (dict "image" .Values.configuration.deployment.defaultDeployment.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper image pullPolicy (for configJob image)
+*/}}
+{{- define "spotfire-server.configuration.deployment.defaultDeployment.image.pullPolicy" -}}
+{{- include "spotfire-common.images.imagePullPolicy" (dict "image" .Values.configuration.deployment.defaultDeployment.image "globalPath" .Values.global.spotfire) -}}
+{{- end -}}
+
+{{/*
+Return the proper Container Image Registry Secret Names (for configJob Job)
+*/}}
+{{- define "spotfire-server.configuration.deployment.defaultDeployment.imagePullSecrets" -}}
+{{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.configuration.deployment.defaultDeployment.image "globalPath" .Values.global.spotfire) -}}
 {{- end -}}
