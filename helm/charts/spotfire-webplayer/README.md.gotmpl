@@ -45,12 +45,16 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
     ```bash
     helm install my-release . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
         --set logging.logForwarderAddress="$LOG_FORWARDER" \
         -f my-values.yaml
     ```
+
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 **Note**: You must provide your private registry address where the Spotfire containers are stored.
 
@@ -74,6 +78,7 @@ See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/lat
 Example: Use `my-Spotfire.Dxp.Worker.Web.config` instead of the default `Spotfire.Dxp.Worker.Web.config`:
 ```bash
 helm install my-release . \
+    --set acceptEUA=true \
     --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
     --set logging.logForwarderAddress="$LOG_FORWARDER" \
     --set-file config.'Spotfire\.Dxp\.Worker\.Web\.config'=my-Spotfire.Dxp.Worker.Web.config
@@ -90,7 +95,7 @@ You can copy the default configuration files from the container image to use the
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
 You can replace the filename to get a copy any of the other container configuration files.
 ```bash
-docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
+docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
 ```
 
 #### Credentials profiles for connectors
@@ -188,13 +193,21 @@ kedaAutoscaling:
 
 ### Upgrading
 
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
-
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+#### Upgrading helm chart version
+
+**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
+
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
 
 {{ template "chart.valuesSection" . }}

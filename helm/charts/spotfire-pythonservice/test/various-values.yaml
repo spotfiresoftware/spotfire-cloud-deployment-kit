@@ -2,13 +2,12 @@ nodemanagerConfig:
   preStopDrainingTimeoutSeconds: 610
   serverBackendAddress: mytss-spotfire-server
 affinity: {}
-config:
-  conf/custom.properties: 'propertyname: value'
-  log4j2.xml: <xml></xml>
 fullnameOverride: fullnameoverride
+acceptEUA: true
 global:
   serviceName: pythonservice
   spotfire:
+    acceptEUA: true
     image:
       pullPolicy: IfNotPresent
       pullSecrets:
@@ -70,7 +69,6 @@ volumes:
       volumeName: volumename
   packages:
     existingClaim: existingclaim2
-    mountPath: /the/mount/path
     persistentVolumeClaim:
       create: true
       resources:

@@ -32,13 +32,11 @@ Steps:
 
 You can run the containerized Spotfire configuration tool with:
 ```bash
-docker run --rm tibco/spotfire-config help
+docker run -e ACCEPT_EUA=Y --rm tibco/spotfire-config help
 ```
 
-For convenience, you can create an alias:
-```bash
-alias spotfire-config='docker run --rm tibco/spotfire-config'
-```
+**Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the TIBCO Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 For configuration tool documentation, check the [Command-line reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/command-line_reference.html) 
 within the [TIBCO Spotfire® Server and Environment - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server-homepage.html) help.
@@ -57,7 +55,7 @@ documentation pages.
 #### Create the Spotfire database schemas in the given database server
 
 ```bash
-docker run --rm -it tibco/spotfire-config create-db \
+docker run -e ACCEPT_EUA=Y --rm -it tibco/spotfire-config create-db \
   --driver-class=org.postgresql.Driver \
   --database-url=jdbc:postgresql://172.17.0.1/ \
   --admin-username=postgres \
@@ -74,8 +72,8 @@ You can use the Spotfire configuration tool to create bootstrap.xml:
 
 ```bash
 touch bootstrap.xml
-docker run --rm -it \
-  -v "$(pwd)/bootstrap.xml:/opt/tibco/spotfire-config/bootstrap.xml" \
+docker run -e ACCEPT_EUA=Y --rm -it \
+  -v "$(pwd)/bootstrap.xml:/opt/tibco/bootstrap.xml" \
   tibco/spotfire-config bootstrap \
   --driver-class=org.postgresql.Driver \
   --database-url=jdbc:postgresql://172.17.0.1/ \
@@ -91,9 +89,9 @@ docker run --rm -it \
 You can use a script to execute a series of Spotfire configuration tool commands:
 
 ```bash
-docker run --rm -it \
-  -v "$(pwd)/bootstrap.xml:/opt/tibco/spotfire-config/bootstrap.xml" \
-  -v "$(pwd)/files/script.txt:/opt/tibco/spotfire-config/script.txt" \
+docker run -e ACCEPT_EUA=Y --rm -it \
+  -v "$(pwd)/bootstrap.xml:/opt/tibco/bootstrap.xml" \
+  -v "$(pwd)/script.txt:/opt/tibco/script.txt" \
   tibco/spotfire-config run \
   --include-environment --fail-on-undefined-variable script.txt
 ```
@@ -107,7 +105,7 @@ From the container prompt, the configuration tool can be started with the comman
 
 ```bash
 # Run configuration tool interactive with docker run
-docker run -it --entrypoint=bash --rm tibco/spotfire-config
+docker run -e ACCEPT_EUA=Y -it --entrypoint=bash --rm tibco/spotfire-config
 
 # Run configuration tool interactively using kubectl
 kubectl run mypod -it --image=tibco/spotfire-config --command -- bash

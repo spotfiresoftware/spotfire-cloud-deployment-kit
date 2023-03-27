@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.2.0](https://img.shields.io/badge/AppVersion-12.2.0-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.3.0](https://img.shields.io/badge/AppVersion-12.3.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Server.
 
@@ -16,9 +16,9 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.4 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.21.2 |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.17.3 |
+| file://../spotfire-common | spotfire-common | 0.1.5 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.22.* |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.18.* |
 
 ## Overview
 
@@ -73,6 +73,7 @@ This example shows how to deploy a Spotfire Server using an already existing sup
 Deploy the Spotfire Server using an existing database:
 ```bash
 helm install my-release . \
+    --set acceptEUA=true \
     --set database.bootstrap.databaseUrl="$DB_BOOTSTRAP_URL" \
     --set database.create-db.databaseUrl="$DB_URL" \
     --set database.create-db.adminUsername="$DB_ADMIN" \
@@ -80,6 +81,9 @@ helm install my-release . \
     --set database.create-db.enabled=true \
     -f my-values.yml
 ```
+
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 **Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
@@ -115,6 +119,7 @@ Steps:
 3. Install the Spotfire Server chart using the release name `vanilla-tss`:
     ```bash
     helm upgrade --install vanilla-tss . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set database.bootstrap.databaseUrl="jdbc:postgresql://vanilla-tssdb-postgresql.default.svc.cluster.local/" \
@@ -232,20 +237,21 @@ kedaAutoscaling:
 
 ### Upgrading
 
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
-
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
-
 #### Upgrading helm chart version
 
 The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
 
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+| `haproxy.spotfireConfig.captures.forwardedForLength` | | |
+
 ##### Version 0.1.4
 
-| New key (v0.1.4) | Old key (0.1.3) | Comment |
+| New key | Old key | Comment |
 | - | - | - |
 | `configuration.draining.*` | `draining.*` | Moved |
 | `configuration.encryptionPassword` | `encryptionPassword` | Moved |
@@ -258,27 +264,38 @@ The following parameters in values.yaml have been changed, moved or renamed and 
 
 ##### Version 0.1.3
 
-| New key (0.1.3) | Old key (0.1.2) |
+| New key | Old key |
 | - | - |
 | _spotfireAdmin.username_ | _spotfireAdminUsername_ |
 | _spotfireAdmin.password_ | _spotfireAdminPassword_ |
 
 #### Upgrading the Spotfire Server version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+When upgrading a Spotfire Helm chart, there are several considerations that you should keep in mind to ensure a smooth upgrade process.
 
-By default, when you upgrade or install with a Helm chart that deploys a newer version of TIBCO Spotfire Server,
-the Spotfire database is upgraded to the schema version required by the newer Spotfire Server version.
+Firstly it's important to understand whether the new Helm chart version comes with a new Spotfire Server version. If it does, you'll need to carefully consider the implications of upgrading to a new server version, and make sure that you understand any potential compatibility issues or changes in functionality.
 
-**Note**: To disable the automatic Spotfire database schema upgrade, set the value `database.upgrade` to `false`. In this case, you must manually upgrade the database.
+##### Checking the manual
 
-**Note**: To be able to rollback an upgrade, you must backup the Spotfire database before upgrading to a newer Spotfire Server version.
-If you use an external library storage, you need to create also a snapshot of the external library storage corresponding to the database backup state.
+It's a good idea to refer to the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
 
-The Kubernetes job `config-job` upgrades the Spotfire database schema. To verify if the upgrade is successful, check the `config-job` logs.
+##### Upgrading Spotfire Server and Spotfire services
 
-The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool.
-For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
+If you're upgrading to a newer Spotfire Server version and Spotfire services versions, it's recommended to upgrade the Spotfire Server first and then upgrade the Spotfire services.
+
+##### Disabling automatic database schema upgrade
+
+If you prefer to disable the automatic Spotfire database schema upgrade, you can set the `database.upgrade` value to *false*. However, in this case, you must manually upgrade the database.
+
+##### Backing up the database
+
+To roll back an upgrade, it's necessary to back up the Spotfire database before upgrading to a newer Spotfire Server version. This will ensure that you have a copy of the database in its previous state, and that you can revert to this state if necessary. If you use external library storage, you should also create a snapshot of the external library storage that corresponds to the database backup state.
+
+##### Verifying the upgrade
+
+The Kubernetes job `config-job` is responsible for upgrading the Spotfire database. To verify that the upgrade was successful, you should check the `config-job` logs. This will help you to identify any issues or errors that may have occurred during the upgrade process, and to ensure that your Spotfire server database has been successfully upgraded.
+
+The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool. For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
 
 ## Configuration
 
@@ -413,8 +430,8 @@ See the table below.
 #### Volume for certificates
 
 To use self-signed or custom certificates for connecting to LDAPS (such as `.jks` keystore files),
-you can create a volume with the desired files to mount on container start
-and use `volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
+you can create a volume with the desired files and use
+`volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
 - `/opt/tibco/tss/tomcat/certs` (spotfire-server pod)
@@ -427,23 +444,29 @@ For more information on using self-signed certificates for LDAPS with the Spotfi
 #### Volume for custom Java library files
 
 To use custom jar files in the `spotfire-server` container,
-you can create a PersistentVolume with the desired files to mount on container start
-and use `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
+you can create a PersistentVolume with the desired files use
+`volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
 - `/opt/tibco/tss/tomcat/custom-ext` (spotfire-server pod)
-- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
 - `/opt/tibco/spotfireconfigtool/custom-ext` (config-job and cli pods)
-- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
 For information on using additional Java library files for Spotfire Server, see:
-- [Installing database drivers for Information Designer
-  ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
 - [Authentication towards a custom JAAS module
   ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)
 - [Post-authentication filter](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/post-authentication_filter.html)
+
+#### Volume for additional JDBC drivers
+
+To be able to access data from a JDBC-compliant data source with Information Services, use `volumes.customExtInformationservices`:
+
+*mountPath*:
+- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
+- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
+
+See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for more information.
 
 #### Volume for deploying SDNs/SPKs
 
@@ -533,6 +556,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. |
 | affinity | object | `{}` |  |
 | cliPod.affinity | object | `{}` |  |
 | cliPod.enabled | bool | `true` |  |
@@ -546,7 +570,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.2.0-1.2.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"12.3.0-1.3.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -564,7 +588,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.2.0-1.2.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"12.3.0-1.3.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -576,12 +600,12 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation. These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
 | configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
 | configuration.deployment.defaultDeployment.deploymentAreaName | string | `"Production"` | The name of the deployment area to create or update |
-| configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image.  Set to false to not overwrite the persistent deployments volume with the Spotfire.Dxp.sdn from spotfire-deployment container image. |
+| configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. *Warning*: If set to `true` and a deployment volume (see `volumes.deployments` key) is used, a folder with name `deploymentAreaName` will be created and potentially overwrite any existing deployment with the same name on the persistent volume. |
 | configuration.deployment.defaultDeployment.image.pullPolicy | string | `nil` | The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"tibco/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"12.3.0-1.3.0"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
@@ -591,14 +615,14 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these command will be run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
 | configuration.preferExistingConfig | bool | `false` | Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`). If no current active configuration exists, the default config is used. Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade. |
 | configuration.site | object | Spotfire Server joins the Default site. | Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information. |
-| configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand.  See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
+| configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
 | configuration.site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
 | configuration.spotfireAdmin.create | bool | `true` | Whether to create an admin user or not. |
-| configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated.  Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade. |
+| configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade. |
 | configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read password from an existing secret instead of from values. If set, 'password' above is not used. |
 | configuration.spotfireAdmin.username | string | `"admin"` | The user to create for the Spotfire admin. |
 | database.bootstrap | object | - | For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html). |
-| database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | The JDBC URL of the database to be used by Spotfire Server. |
+| database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | The JDBC URL of the database to be used by Spotfire Server. Evaluated as a template. |
 | database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. If not provided, this password is automatically generated. |
 | database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read spotfire database password from an existing secret. If set, 'password' above is not used. |
 | database.bootstrap.username | string | `"spotfire"` | Username to be created for the Spotfire Server database. If unset, the default value `spotfire` is used. |
@@ -606,7 +630,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. |
 | database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read admin password from an existing secret. If set, 'password' above is not used. |
 | database.create-db.adminUsername | string | `"postgres"` | Admin username for the database server to be used as the Spotfire Server database. |
-| database.create-db.databaseUrl | string | `""` | Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. |
+| database.create-db.databaseUrl | string | `""` | Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. Evaluated as a template. |
 | database.create-db.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation |
 | database.create-db.enabled | bool | `true` | if set to true, Spotfire server schema will also get deployed with other installation. |
 | database.create-db.oracleRootfolder | string | `""` | Specify the value in case of Oracle database, otherwise keep it blank. |
@@ -624,6 +648,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
 | fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
 | global.spotfire.image.registry | string | `nil` | The global container image registry. Used for TIBCO Spotfire container images unless overridden. |
@@ -642,6 +667,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | haproxy.spotfireConfig | object | Caching of static resource and debug response headers enabled. | Spotfire specific configuration related to haproxy. |
 | haproxy.spotfireConfig.agent.port | int | `9081` | Spotfire Server haproxy agent-port. |
 | haproxy.spotfireConfig.cache | object | enabled | Caching of static resources |
+| haproxy.spotfireConfig.captures.forwardedForLength | int | `36` | The maximum number of characters captured from the X-Forwarded-For request header |
 | haproxy.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp | bool | `true` | If the SameSite cookie attribute should be removed for HTTP connections in Set-Cookie response headers, then it might be needed in cases where both HTTP and HTTPS are enabled, and upstream servers set this unconditionally. |
 | haproxy.spotfireConfig.cleanup.secureCookieAttributeForHttp | bool | `true` | If incorrect, then the secure cookie attribute should be removed for HTTP connections in the Set-Cookie response headers. |
 | haproxy.spotfireConfig.debug | bool | `false` | Specifies if debug response headers should be enabled. |
@@ -660,7 +686,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
+| image.tag | string | `"12.3.0-1.3.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |

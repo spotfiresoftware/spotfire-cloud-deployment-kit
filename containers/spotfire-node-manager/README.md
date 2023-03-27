@@ -39,8 +39,11 @@ Prerequisites:
 
 You can start an instance of the **TIBCO Spotfire node manager** container with:
 ```bash
-docker run -d --rm -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-node-manager
+docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-node-manager
 ```
+
+**Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the TIBCO Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 ### Adding services to the node manager
 
@@ -48,35 +51,38 @@ Prerequisites:
 - You have deployed the corresponding Spotfire distribution package (.sdn) to the Spotfire Server. 
 For instructions, see [Deploying client packages to Spotfire Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deploying_client_packages_to_spotfire_server.html).
 
-As with on-premises deployment, you can manually add Spotfire services to be managed by the Spotfire node manager.
+As with on-premises deployment, you can manually add Spotfire services to be managed by the Spotfire node manager as described below.
+
+**Important**: Installation of Spotfire services in this image, requires installation of additional software and or changes to the Spotfire services configuration. Instead of installing services in this image, it is recommended to use the specialized container images to run the Spotfire services.For example, the [spotfire-pythonservice](../spotfire-pythonservice/README.md) or the [spotfire-webplayer](../spotfire-webplayer/README.md). 
 
 **Note**: A Spotfire service running on a node manager runs in a separate process.
 
 **Note**: In bare-metal or VM configurations, a node manager can control several Spotfire services in the same host and each Spotfire service can manage multiple instances.
 When running in containers, we recommend creating only one Spotfire service and one Spotfire service instance in that service for each running container instance.
 
-You can also automatically add the Spotfire service in the container on startup by providing a default Spotfire services configuration file: 
+You can automatically add the Spotfire service in the container on startup by providing a default Spotfire services configuration file.
+
 ```bash
-docker run --rm -v "$(pwd)/default.conf:/opt/tibco/tsnm/nm/config/default.conf" \
+docker run --rm -v "$(pwd)/default.conf:/opt/tibco/tsnm/nm/config/default-container.conf" \
+  -e ACCEPT_EUA=Y \
   -e SERVER_BACKEND_ADDRESS=spotfire-server \
   tibco/spotfire-node-manager
 ```
 
-For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html).
+For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html). As opposed what is described in the product documentation you should not be mounting over `/opt/tibco/tsnm/nm/config/default.conf` as this file will be deleted during startup, use the example above instead.
 
 **Note**: The Spotfire service installation files are copied in the image under `/opt/tibco/tsnm/services/`.
 
-**Note**: You can add a service to a node manager container as described above. However, we recommend to use directly the specialized container images for the Spotfire services, e.g. the [spotfire-pythonservice](../spotfire-pythonservice/README.md).
-
 ### Environment variables
 
+- `ACCEPT_EUA` - Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `Y`. Required.
 - `SERVER_BACKEND_ADDRESS` - See **SERVER_NAME** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Example: `spotfire-server`.
 - `NODEMANAGER_REGISTRATION_PORT` - See **NODEMANAGER_REGISTRATION_PORT** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Default value `9080`.
 - `NODEMANAGER_COMMUNICATION_PORT` -  See **NODEMANAGER_COMMUNICATION_PORT** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Default value `9443`.
 - `SERVER_BACKEND_REGISTRATION_PORT` - See **SERVER_BACKEND_REGISTRATION_PORT** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Default value `9080`.
 - `SERVER_BACKEND_COMMUNICATION_PORT` - See **SERVER_BACKEND_COMMUNICATION_PORT** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Default value `9443`.
 - `NODEMANAGER_HOST_NAMES` - See **NODEMANAGER_HOST_NAMES** in the [Installation parameters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_manager_installation.html). Default value: *Unset*.
-- `LOGGING_LOGLEVEL` - Set to `debug`, `minimal` or `trace` to adjust the logging level. Defaults to empty value meaning "info" level logging.
+- `NM_LOG_LEVEL` - Set to `debug`, `minimal` or `trace` to adjust the logging level. Defaults to empty value meaning "info" level logging.
 - `LOGGING_NMLOG_SIZE` - See **nm.log.size** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `10MB`
 - `LOGGING_NMLOG_MAX` - See **nm.log.max** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `2`
 - `LOGGING_NMPERFORMANCELOG_SIZE` - See **nm.performance.log.size** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `10MB`

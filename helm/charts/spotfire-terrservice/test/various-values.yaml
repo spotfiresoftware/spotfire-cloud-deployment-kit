@@ -1,10 +1,8 @@
+acceptEUA: true
 nodemanagerConfig:
   preStopDrainingTimeoutSeconds: 610
   serverBackendAddress: mytss-spotfire-server
 affinity: {}
-config:
-  conf/custom.properties: 'property: value'
-  log4j2.xml: <xml></<xml>
 securityContext:
   privileged: false
   runAsNonRoot: true
@@ -24,6 +22,7 @@ fullnameOverride: ""
 global:
   serviceName: terrservice
   spotfire:
+    acceptEUA: true
     image:
       pullPolicy: IfNotPresent
       pullSecrets:
@@ -131,7 +130,6 @@ volumes:
       storageClassName: storageclassname
       volumeName: volumename
   packages:
-    mountPath: /the/mount/path
     persistentVolumeClaim:
       create: true
       resources:

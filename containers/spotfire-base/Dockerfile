@@ -17,6 +17,7 @@ LABEL org.opencontainers.image.title="tibco/spotfire-base" \
     org.opencontainers.image.vendor='Cloud Software Group, Inc.'
 
 RUN apt-get update \
+  && apt-get upgrade -y \
   && mkdir -p /usr/share/man/man1 \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
      openjdk-17-jre-headless \

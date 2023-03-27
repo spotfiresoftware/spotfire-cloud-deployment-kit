@@ -9,6 +9,13 @@ stop() {
     exit
 }
 
+# Exit if the environment variable ACCEPT_EUA is not set to Y or y
+if [ "${ACCEPT_EUA^^}" != "Y" ]; then
+  echo "You must accept the End User Agreement by setting the ACCEPT_EUA environment variable to Y"
+  echo "Cloud Software Group, Inc. End User Agreement: https://terms.tibco.com/#end-user-agreement"
+  exit 1
+fi
+
 # Clean out any previous marker files
 rm -f /opt/tibco/tsnm/nm/logs/tsnm-terminated
 
@@ -26,10 +33,6 @@ if [ "${NODEMANAGER_IP_ADDRESS:-}" ]; then
 fi
 
 echo "Using hostname: $hostname"
-
-
-# Setup logging
-scripts/setup-logging.sh || exit $?
 
 # Additional configuration
 scripts/configure-nodemanager.sh || exit $?

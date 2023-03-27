@@ -32,7 +32,7 @@ You can apply the configuration in your Spotfire chart values file using a simil
 
 **Example**:
 ```bash
-helm install my-spotfire-release . -f log.forwarder.elasticsearch.yaml 
+helm install --set acceptEUA=true my-spotfire-release . -f log.forwarder.elasticsearch.yaml 
 ```
 
 ### Elasticsearch

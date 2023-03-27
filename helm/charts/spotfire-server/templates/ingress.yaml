@@ -46,11 +46,21 @@ spec:
     - http:
     {{- end }}
         paths:
+          {{- if .paths }}
           {{- range .paths }}
-          - path: {{ .path }}
+          - path: {{ default "/" .path }}
             {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ .pathType }}
+            pathType: {{ default "Prefix" .pathType }}
             {{- end }}
+            backend:
+              service:
+                name: {{ $releaseName }}-haproxy
+                port:
+                  number: 80
+          {{- end }}
+          {{- else }}
+          - path: /
+            pathType: Prefix
             backend:
               service:
                 name: {{ $releaseName }}-haproxy

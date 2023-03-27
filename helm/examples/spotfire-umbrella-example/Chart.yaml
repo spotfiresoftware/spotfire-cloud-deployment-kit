@@ -1,0 +1,36 @@
+apiVersion: v2
+name: spotfire-umbrella-example
+description: Test spotfire-server chart
+type: application
+version: 0.1.0
+kubeVersion: ">=1.23.0-0"
+dependencies:
+  - name: spotfire-server
+    repository: file://../../charts/spotfire-server/
+    version: 0.1.5
+  - name: spotfire-webplayer
+    alias: spotfire-webplayer-pool1
+    repository: file://../../charts/spotfire-webplayer/
+    version: 0.1.5
+    condition: spotfire-webplayer-pool1.enabled
+  - name: spotfire-webplayer
+    alias: spotfire-webplayer-pool2
+    repository: file://../../charts/spotfire-webplayer/
+    version: 0.1.5
+    condition: spotfire-webplayer-pool2.enabled
+  - name: spotfire-automationservices
+    repository: file://../../charts/spotfire-automationservices/
+    version: 0.1.5
+    condition: spotfire-automationservices.enabled
+  - name: spotfire-terrservice
+    repository: file://../../charts/spotfire-terrservice/
+    version: 0.1.5
+    condition: spotfire-terrservice.enabled
+  - name: spotfire-pythonservice
+    repository: file://../../charts/spotfire-pythonservice/
+    version: 0.1.5
+    condition: spotfire-pythonservice.enabled
+  - name: postgresql
+    condition: postgresql.enabled
+    repository: https://charts.bitnami.com/bitnami
+    version: 12.1.2

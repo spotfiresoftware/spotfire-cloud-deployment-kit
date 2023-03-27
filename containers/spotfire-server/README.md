@@ -49,6 +49,7 @@ Requirements:
 You can start an instance of the **TIBCO Spotfire Server** container with:
 ```bash
 docker run -d --rm -p8080:8080 \
+  -e ACCEPT_EUA=Y \
   -e SPOTFIREDB_CLASS="${SPOTFIREDB_CLASS}" \
   -e SPOTFIREDB_URL="jdbc:${SPOTFIREDB_DRIVER}://${SPOTFIREDB_HOST}:${SPOTFIREDB_PORT}/${SPOTFIREDB_DBNAME}" \
   -e SPOTFIREDB_USERNAME="${SPOTFIREDB_USERNAME}" \
@@ -57,10 +58,14 @@ docker run -d --rm -p8080:8080 \
   tibco/spotfire-server
 ```
 
+**Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the TIBCO Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+
 For example, starting a Spotfire Server container instance connecting to a Spotfire database using Postgresql as underlying database server: 
 
 ```bash
 docker run -d --rm -p8080:8080 \
+  -e ACCEPT_EUA=Y \
   -e SPOTFIREDB_CLASS=org.postgresql.Driver \
   -e SPOTFIREDB_URL=jdbc:postgresql://$SPOTFIREDB_HOST/spotfiredb \
   -e SPOTFIREDB_USERNAME=spotfire \
@@ -133,6 +138,8 @@ configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/
 If `LOGGING_JSON_HOST` is set, Spotfire will forward logs to a remote logging collector/forwarder (e.g. fluentbit, fluentd, etc.).
 
 #### Other variables
+
+- `ACCEPT_EUA` - Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `Y`. Required.
 
 The following predefined startup checks are available:
 
@@ -247,5 +254,3 @@ spotfire-server-container $ config.sh export-config --tool-password="${TOOL_PASS
 ```
 
 For more information, see the [Command-line reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/command-line_reference.html).
-
-

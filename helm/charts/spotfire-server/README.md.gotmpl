@@ -67,6 +67,7 @@ This example shows how to deploy a Spotfire Server using an already existing sup
 Deploy the Spotfire Server using an existing database:
 ```bash
 helm install my-release . \
+    --set acceptEUA=true \
     --set database.bootstrap.databaseUrl="$DB_BOOTSTRAP_URL" \
     --set database.create-db.databaseUrl="$DB_URL" \
     --set database.create-db.adminUsername="$DB_ADMIN" \
@@ -74,6 +75,9 @@ helm install my-release . \
     --set database.create-db.enabled=true \
     -f my-values.yml
 ```
+
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 **Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
@@ -109,6 +113,7 @@ Steps:
 3. Install the Spotfire Server chart using the release name `vanilla-tss`:
     ```bash
     helm upgrade --install vanilla-tss . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set database.bootstrap.databaseUrl="jdbc:postgresql://vanilla-tssdb-postgresql.default.svc.cluster.local/" \
@@ -226,20 +231,21 @@ kedaAutoscaling:
 
 ### Upgrading
 
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
-
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
-
 #### Upgrading helm chart version
 
 The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
 
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+| `haproxy.spotfireConfig.captures.forwardedForLength` | | |
+
 ##### Version 0.1.4
 
-| New key (v0.1.4) | Old key (0.1.3) | Comment |
+| New key | Old key | Comment |
 | - | - | - |
 | `configuration.draining.*` | `draining.*` | Moved |
 | `configuration.encryptionPassword` | `encryptionPassword` | Moved |
@@ -252,27 +258,38 @@ The following parameters in values.yaml have been changed, moved or renamed and 
 
 ##### Version 0.1.3
 
-| New key (0.1.3) | Old key (0.1.2) |
+| New key | Old key |
 | - | - |
 | _spotfireAdmin.username_ | _spotfireAdminUsername_ |
 | _spotfireAdmin.password_ | _spotfireAdminPassword_ |
 
 #### Upgrading the Spotfire Server version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+When upgrading a Spotfire Helm chart, there are several considerations that you should keep in mind to ensure a smooth upgrade process.
 
-By default, when you upgrade or install with a Helm chart that deploys a newer version of TIBCO Spotfire Server,
-the Spotfire database is upgraded to the schema version required by the newer Spotfire Server version.
+Firstly it's important to understand whether the new Helm chart version comes with a new Spotfire Server version. If it does, you'll need to carefully consider the implications of upgrading to a new server version, and make sure that you understand any potential compatibility issues or changes in functionality. 
 
-**Note**: To disable the automatic Spotfire database schema upgrade, set the value `database.upgrade` to `false`. In this case, you must manually upgrade the database.
+##### Checking the manual
 
-**Note**: To be able to rollback an upgrade, you must backup the Spotfire database before upgrading to a newer Spotfire Server version.
-If you use an external library storage, you need to create also a snapshot of the external library storage corresponding to the database backup state.
+It's a good idea to refer to the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
 
-The Kubernetes job `config-job` upgrades the Spotfire database schema. To verify if the upgrade is successful, check the `config-job` logs.
+##### Upgrading Spotfire Server and Spotfire services
 
-The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool.
-For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
+If you're upgrading to a newer Spotfire Server version and Spotfire services versions, it's recommended to upgrade the Spotfire Server first and then upgrade the Spotfire services.
+
+##### Disabling automatic database schema upgrade
+
+If you prefer to disable the automatic Spotfire database schema upgrade, you can set the `database.upgrade` value to *false*. However, in this case, you must manually upgrade the database.
+
+##### Backing up the database
+
+To roll back an upgrade, it's necessary to back up the Spotfire database before upgrading to a newer Spotfire Server version. This will ensure that you have a copy of the database in its previous state, and that you can revert to this state if necessary. If you use external library storage, you should also create a snapshot of the external library storage that corresponds to the database backup state.
+
+##### Verifying the upgrade
+
+The Kubernetes job `config-job` is responsible for upgrading the Spotfire database. To verify that the upgrade was successful, you should check the `config-job` logs. This will help you to identify any issues or errors that may have occurred during the upgrade process, and to ensure that your Spotfire server database has been successfully upgraded.
+
+The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool. For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
 
 ## Configuration
 
@@ -407,8 +424,8 @@ See the table below.
 #### Volume for certificates
 
 To use self-signed or custom certificates for connecting to LDAPS (such as `.jks` keystore files),
-you can create a volume with the desired files to mount on container start
-and use `volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
+you can create a volume with the desired files and use
+`volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
 - `/opt/tibco/tss/tomcat/certs` (spotfire-server pod)
@@ -421,23 +438,29 @@ For more information on using self-signed certificates for LDAPS with the Spotfi
 #### Volume for custom Java library files
 
 To use custom jar files in the `spotfire-server` container,
-you can create a PersistentVolume with the desired files to mount on container start
-and use `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
+you can create a PersistentVolume with the desired files use
+`volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
 - `/opt/tibco/tss/tomcat/custom-ext` (spotfire-server pod)
-- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
 - `/opt/tibco/spotfireconfigtool/custom-ext` (config-job and cli pods)
-- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
 For information on using additional Java library files for Spotfire Server, see:
-- [Installing database drivers for Information Designer
-  ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
 - [Authentication towards a custom JAAS module
   ](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)
 - [Post-authentication filter](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/post-authentication_filter.html)
+
+#### Volume for additional JDBC drivers
+
+To be able to access data from a JDBC-compliant data source with Information Services, use `volumes.customExtInformationservices`:
+
+*mountPath*:
+- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
+- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
+
+See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for more information.
 
 #### Volume for deploying SDNs/SPKs
 

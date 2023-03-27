@@ -18,9 +18,11 @@ fluentBitSidecar:
     runAsUser: 1000
     runAsGroup: 0
 fullnameOverride: ""
+acceptEUA: true
 global:
   serviceName: automationservices
   spotfire:
+    acceptEUA: true
     image:
       pullPolicy: IfNotPresent
       pullSecrets:

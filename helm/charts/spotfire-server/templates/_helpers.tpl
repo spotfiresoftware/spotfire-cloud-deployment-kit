@@ -126,7 +126,7 @@ Database info needed to bootstrap and upgrade server
 */}}
 {{- define "spotfire-server.database.envVars" -}}
 - name: SPOTFIREDB_URL
-  value: {{ required "database.bootstrap.databaseUrl must be set" .Values.database.bootstrap.databaseUrl | quote }}
+  value: {{ required "database.bootstrap.databaseUrl must be set" (tpl .Values.database.bootstrap.databaseUrl $) | quote }}
 - name: SPOTFIREDB_USERNAME
   value: {{ required "database.bootstrap.username must be set" .Values.database.bootstrap.username | quote }}
 - name: SPOTFIREDB_PASSWORD
@@ -196,7 +196,7 @@ Database admin credentials environment variables needed to create a Spotfire sch
 - name: DBSERVER_CLASS
   value: {{ required "database.bootstrap.driverClass must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: DBSERVER_URL
-  value: {{ required "database.create-db.databaseUrl must be set" $createdb.databaseUrl | quote }}
+  value: {{ required "database.create-db.databaseUrl must be set" (tpl $createdb.databaseUrl $) | quote }}
 - name: DO_NOT_CREATE_USER
   value: {{ $createdb.doNotCreateUser | quote }}
 - name: VARIANT

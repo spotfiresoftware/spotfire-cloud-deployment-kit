@@ -2,7 +2,7 @@
 [SERVICE]
     Daemon          off
     Flush           1
-    Log_Level       debug
+    Log_Level       warn
     Parsers_File    tsnm.parsers.fluentbit.conf
     HTTP_Server     On
 

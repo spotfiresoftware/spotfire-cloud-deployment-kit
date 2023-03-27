@@ -7,6 +7,8 @@ ARG SPOTFIRE_TERRSERVICE_VERSION
 #
 FROM tibco/spotfire-node-manager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID} as extract
 
+ENV TSNM_CAPABILITY=TERR
+
 RUN mkdir -p /tmp/tsnm-packages
 
 # Spotfire distributions or packages
@@ -14,7 +16,7 @@ ADD --chown=spotfire:spotfire build/*.sdn build/*.spk /tmp/tsnm-packages/
 
 # Note: multiple --file arguments can be used instead of --directory and --directory-pattern to only use specific files
 RUN /opt/tibco/tsnm/scripts/install-service.sh \
-    --capability=TERR \
+    --capability="${TSNM_CAPABILITY}" \
     --directory=/tmp/tsnm-packages \
     --directory-pattern=*.{sdn,spk}
 
@@ -41,25 +43,26 @@ LABEL org.opencontainers.image.title="tibco/spotfire-terrservice" \
 # Temporarilty change from spotfire to root in order to install additional packages
 USER root
 
+ENV TSNM_CAPABILITY=TERR
+
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
   && apt-get clean all
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/tsnm-install/nm/services /opt/tibco/tsnm/nm/services
 COPY --from=extract --chown=spotfire:spotfire /tmp/tsnm-install/nm/config/default.conf /opt/tibco/tsnm/nm/config/default.conf
+COPY --chown=spotfire:spotfire entrypoint-terr.sh ./
 
-COPY custom.properties /tmp/custom.properties
-RUN cat /tmp/custom.properties >> /opt/tibco/tsnm/nm/services/TERR/conf/custom.properties
+# Configure default container properties
+COPY --chown=spotfire:spotfire ./default-container.properties .
+RUN cat default-container.properties >> "/opt/tibco/tsnm/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
+  && chown spotfire:spotfire "/opt/tibco/tsnm/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
+  && rm default-container.properties 
 
 USER spotfire
 
 # Configure logging
 ENV LOGGING_SERVICELOG_SIZE=10MB
 ENV LOGGING_SERVICELOG_MAX=2
-RUN cp nm/services/TERR/log4j2.xml log4j2.xml.orig \
-    && sed -i 's~<DefaultRolloverStrategy max=".*" fileIndex="min"/>~<DefaultRolloverStrategy max="${env:LOGGING_SERVICELOG_MAX}" fileIndex="min"/>~g' nm/services/TERR/log4j2.xml \
-    && ! cmp nm/services/TERR/log4j2.xml log4j2.xml.orig \
-    && cp nm/services/TERR/log4j2.xml log4j2.xml.orig \
-    && sed -i 's~<SizeBasedTriggeringPolicy size=".*"/>~<SizeBasedTriggeringPolicy size="${env:LOGGING_SERVICELOG_SIZE}"/>~g' nm/services/TERR/log4j2.xml \
-    && ! cmp nm/services/TERR/log4j2.xml log4j2.xml.orig \
-    && rm log4j2.xml.orig
+
+ENTRYPOINT ["./entrypoint-terr.sh"]

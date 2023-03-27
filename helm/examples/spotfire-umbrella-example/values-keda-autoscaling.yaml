@@ -1,0 +1,56 @@
+# This example enables autoscaling with keda for the spotfire-webplayer-pool1,
+# spotfire-automationservices, spotfire-terrservice, and spotfire-pythonservice.
+
+# It requires keda and prometheus to be installed in your cluster, as well as a prometheus server.
+# Prometheus installation: https://prometheus.io/docs/prometheus/latest/installation/.
+# Keda installation: https://keda.sh/docs/deploy/.
+# For more information on autoscaling with keda, see https://keda.sh/docs/concepts/scaling-deployments/.
+
+# See more information about keda autoscaling in the respecitve Helm chart documentation
+
+spotfire-webplayer-pool1:
+  kedaAutoscaling:
+    enabled: true
+    advanced:
+      horizontalPodAutoscalerConfig:
+        # Scale down one pod per 200 seconds and don't do anything if something
+        # change for 600 seconds.
+        behavior:
+          scaleDown:
+            policies:
+            - periodSeconds: 200
+              type: Pods
+              value: 1
+            stabilizationWindowSeconds: 600
+    threshold: 4
+    maxReplicas: 10
+    minReplicas: 2
+    spotfireConfig:
+      prometheusServerAddress: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090/
+
+spotfire-automationservices:
+  kedaAutoscaling:
+    enabled: true
+    spotfireConfig:
+      prometheusServerAddress: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090/
+    threshold: 6
+    minReplicas: 0
+    maxReplicas: 3
+
+spotfire-terrservice:
+  kedaAutoscaling:
+    enabled: true
+    spotfireConfig:
+      prometheusServerAddress: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090/
+    threshold: 5
+    minReplicas: 1
+    maxReplicas: 3
+
+spotfire-pythonservice:
+  kedaAutoscaling:
+    enabled: true
+    spotfireConfig:
+      prometheusServerAddress: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090/
+    threshold: 5
+    minReplicas: 1
+    maxReplicas: 3

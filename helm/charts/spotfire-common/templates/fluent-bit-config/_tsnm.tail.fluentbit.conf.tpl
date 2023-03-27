@@ -11,7 +11,7 @@
     Multiline_Flush     1
     Parser_Firstline    tsnm.standardlog
 
-    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}nm.log*
+    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}nm.log
     Db                  ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}tsnm.fluentbit.db
 
     Read_from_Head      True
@@ -26,7 +26,7 @@
     Multiline_Flush     1
     Parser_Firstline    tsnm.standardlog
 
-    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}jetty.log*
+    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}jetty.log
     Db                  ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}tsnm.fluentbit.db
 
     Read_from_Head      True
@@ -39,7 +39,7 @@
 
     parser              tsnm.performancemonitoringlog
 
-    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}performance.monitoring.log*
+    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}performance.monitoring.log
     Db                  ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}tsnm.fluentbit.db
 
     Read_from_Head      True

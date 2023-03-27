@@ -1,0 +1,21 @@
+# This example enables two webplayer pools. It also enables the other services.
+# See the default values.yaml for a complete view of how each service connects
+# to the spotfire-server service. The nodeManagerConfig.serverBackendAddress
+# should be set to {{ .Release.Name }}-spotfire-server, which evaluates to
+# the name of the spotfire-server, for each service. This technique works because the
+# value is evaluated as a gotemplate string during helm installation or upgrade.
+
+spotfire-webplayer-pool1:
+  enabled: true
+
+spotfire-webplayer-pool2:
+  enabled: true
+
+spotfire-automationservices:
+  enabled: true
+
+spotfire-pythonservice:
+  enabled: true
+
+spotfire-terrservice:
+  enabled: true

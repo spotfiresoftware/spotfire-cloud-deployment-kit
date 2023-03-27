@@ -2,11 +2,13 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## @param global.spotfire.image.registry Global Container image registry.
-## @param global.spotfire.image.pullSecrets Global Container registry secret names as an array.
-##
+# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
+acceptEUA:
+
 global:
   spotfire:
+    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
+    acceptEUA:
     image:
       # global.spotfire.image.registry -- The global container image registry. Used for tibco/spotfire container images unless it is overridden.
       registry:
@@ -38,7 +40,7 @@ image:
   # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-webplayer
   # image.tag -- The container image tag to use.
-  tag: "12.2.0-1.2.0"
+  tag: "12.3.0-1.3.0"
   # image.pullPolicy -- The spotfire-server image pull policy, It overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -136,7 +138,7 @@ readinessProbe:
 logging:
   # -- This should be the spotfire-server log-forwarder name
   logForwarderAddress: ""
-  ## -- set to `debug`, `trace`, `minimal` or leave empty for info
+  # -- set to `debug`, `trace`, `minimal` or leave empty for info. This applies to both node manager and the service.
   logLevel: "debug"
 
 resources: {}

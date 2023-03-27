@@ -177,8 +177,10 @@ fluentBitSidecar:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 0
+acceptEUA: true
 global:
   spotfire:
+    acceptEUA: true
     image:
       pullPolicy: Always
       pullSecrets:

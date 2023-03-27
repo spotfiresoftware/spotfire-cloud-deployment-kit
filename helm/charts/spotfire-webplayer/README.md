@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.2.0](https://img.shields.io/badge/AppVersion-12.2.0-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.3.0](https://img.shields.io/badge/AppVersion-12.3.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.4 |
+| file://../spotfire-common | spotfire-common | 0.1.5 |
 
 ## Overview
 
@@ -45,12 +45,16 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
     ```bash
     helm install my-release . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
         --set logging.logForwarderAddress="$LOG_FORWARDER" \
         -f my-values.yaml
     ```
+
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 **Note**: You must provide your private registry address where the Spotfire containers are stored.
 
@@ -74,6 +78,7 @@ See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/lat
 Example: Use `my-Spotfire.Dxp.Worker.Web.config` instead of the default `Spotfire.Dxp.Worker.Web.config`:
 ```bash
 helm install my-release . \
+    --set acceptEUA=true \
     --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
     --set logging.logForwarderAddress="$LOG_FORWARDER" \
     --set-file config.'Spotfire\.Dxp\.Worker\.Web\.config'=my-Spotfire.Dxp.Worker.Web.config
@@ -90,7 +95,7 @@ You can copy the default configuration files from the container image to use the
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
 You can replace the filename to get a copy any of the other container configuration files.
 ```bash
-docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
+docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
 ```
 
 #### Credentials profiles for connectors
@@ -188,19 +193,28 @@ kedaAutoscaling:
 
 ### Upgrading
 
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
-
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+#### Upgrading helm chart version
+
+**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
+
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. |
 | affinity | object | `{}` |  |
 | config."Spotfire.Dxp.Worker.Core.config" | string | `""` | A custom [Spotfire.Dxp.Worker.Core.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.core.config_file.html). |
 | config."Spotfire.Dxp.Worker.Host.dll.config" | string | `""` | A custom Spotfire.Dxp.Worker.Host.dll.config. See [Spotfire.Dxp.Worker.Host.exe.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.host.exe.config_file.html). |
@@ -217,6 +231,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for the fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"webplayer"` |  |
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
 | global.spotfire.image.registry | string | `nil` | The global container image registry. Used for tibco/spotfire container images unless it is overridden. |
@@ -224,7 +239,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server, it overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"12.2.0-1.2.0"` | The container image tag to use. |
+| image.tag | string | `"12.3.0-1.3.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -239,7 +254,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | livenessProbe.initialDelaySeconds | int | `60` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
 | logging.logForwarderAddress | string | `""` | This should be the spotfire-server log-forwarder name |
-| logging.logLevel | string | `"debug"` |  |
+| logging.logLevel | string | `"debug"` | set to `debug`, `trace`, `minimal` or leave empty for info. This applies to both node manager and the service. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | nodemanagerConfig.preStopDrainingTimeoutSeconds | int | `610` | The draining timeout after which the service is forcefully shut down. |

@@ -30,7 +30,7 @@ spec:
         {{- tpl (toYaml .Values.extraInitContainers) $ | nindent 10 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: spotfire-server
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ template "spotfire-server.image" . }}"
@@ -94,6 +94,7 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             {{- include "spotfire-server.site.envVars" . | nindent 12 }}
+            {{- include "spotfire-common.acceptEUAEnvVar" . | nindent 12 }}
             {{- include "spotfire-server.database.envVars" . | nindent 12 }}
             {{- if .Values.logging.logLevel }}
             - name: LOGGING_LOGLEVEL
@@ -149,7 +150,7 @@ spec:
           - name: TSS_HOME
             value: /tss
           - name: CONTAINER_NAME
-            value: {{ .Chart.Name }}
+            value: spotfire-server
           volumeMounts:
           {{- if (include "spotfire-server.log-forwarder.fullname" $) }}
           - name: fluent-bit-config

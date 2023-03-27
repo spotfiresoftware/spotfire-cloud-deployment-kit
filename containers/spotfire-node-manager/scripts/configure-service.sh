@@ -1,6 +1,13 @@
 #!/bin/bash
 
 default_conf=/opt/tibco/tsnm/nm/config/default.conf
+
+# This is a workaround for the fact that the node manager tries to delete
+# default.conf it during startup and fails if it is a mounted volume
+if [ -f /opt/tibco/tsnm/nm/config/default-container.conf ]; then
+    cp /opt/tibco/tsnm/nm/config/default-container.conf "${default_conf}"
+fi
+
 if [ ! -f "${default_conf}" ]; then
     echo "${default_conf} does not exists. Skipping additional service configuration"
     exit 0

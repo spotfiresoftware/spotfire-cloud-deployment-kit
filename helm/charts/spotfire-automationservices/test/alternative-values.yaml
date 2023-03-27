@@ -1,3 +1,6 @@
+global:
+  spotfire:
+    acceptEUA: true
 nodemanagerConfig:
   serverBackendAddress: mytss-spotfire-server
 volumes:

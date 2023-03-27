@@ -44,6 +44,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
     ```bash
     helm install my-release . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
@@ -51,51 +52,24 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
         -f my-values.yaml
     ```
 
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+
 **Note**: You must provide your private registry address where the Spotfire containers are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
 #### Configuration
 
-You can override the default configuration settings by setting environment variables with `extraEnvVars`.
-See [containers README](../../../containers/spotfire-terrservice/README.md#environment-variables) for the complete list.
+To set [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm values.
 
 Example:
-```
-extraEnvVars:
-- name: TERR_RESTRICTED_EXECUTION_MODE
-  value: "FALSE"
-```
+```configuration:
+  # The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
+  engine.session.max: 5
 
-Additionally, you can override the default configuration settings by providing a custom configuration file.
-
-The following configuration keys are available in the chart:
-- config."custom.properties"
-
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
-
-For the TERR™ service configuration, see [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/custom_configuration_properties.html).
-
-Example: Using `my-custom.properties` instead of the default `custom.properties`:
-```bash
-helm install my-release . \
-    --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-    --set logging.logForwarderAddress="$LOG_FORWARDER" \
-    --set-file config.'custom\.properties'=my-custom.properties
-```
-
-**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a '\'.
-
-#### Getting the container default configuration files
-
-You can copy the default configuration files from the container image to use them as templates for your custom configuration.
-
-**Note**: The configuration files content can be version dependent.
-
-Example: Use the following command to get a copy of the original configuration file `custom.properties`.
-You can replace the file name to get a copy any of the other container configuration files.
-```bash
-docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-terrservice:<imagetag> 5):/opt/tibco/tsnm/nm/services/TERR/conf/custom.properties .
+  # The number of TERR engines preallocated and available for new sessions in the TERR service queue.
+  engine.queue.size: 10
 ```
 
 ### Uninstalling
@@ -118,7 +92,7 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
-Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
+Example: Helm values snippet configuration for enabling autoscaling with KEDA:
 ```
 resources:
   limits:
@@ -142,10 +116,10 @@ Typically, you want to scale out before all the available capacity is taken. The
 
 **Note**:  Clients requesting a slot typically wait until a slot is available.
 
-For more information, see [Monitoring the TERR service](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/monitoring_the_terr_service_using_jmx.html).
+For more information, see [Monitoring the TERR service](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
-See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/engine_timeout.html) for more details.
+See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
@@ -156,15 +130,24 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
-### Upgrade
-
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
+### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
+#### Upgrading helm chart version
+
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
+
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+| `configuration` | `config.conf/custom.properties` | Exposes the service configuration 'custom.properties' as Helm values. |
+| | `config.log4j2.xml` | Removed. Log level can be set with `logging.logLevel`. |
+| | `volumes.packages.mountPath` | Removed. `mountPath` is now hardcoded to **/opt/packages**. |
 
 {{ template "chart.valuesSection" . }}

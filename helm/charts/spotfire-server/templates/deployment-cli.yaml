@@ -28,7 +28,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ printf "%s-%s" (include "spotfire-server.fullname" .) "cli" | quote }}
+        - name: spotfire-cli
           command: ["/bin/sh", "-c"]
           args: ["trap 'exit 0' TERM; while true; do sleep 3600 & wait; done"]
           image: {{ include "spotfire-server.cliPod.image" . }}
@@ -69,6 +69,7 @@ spec:
             {{ tpl (toYaml .Values.cliPod.extraEnvVars) $ | nindent 12 }}
             {{- end }}
             {{- include "spotfire-server.configVars" . | nindent 12 -}}
+            {{- include "spotfire-common.acceptEUAEnvVar" . | nindent 12 }}
             {{- include "spotfire-server.site.envVars" . | nindent 12 }}
             {{- include "spotfire-server.database.envVars" . | nindent 12 }}
             - name: LOG_LEVEL

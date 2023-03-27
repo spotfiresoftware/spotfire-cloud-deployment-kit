@@ -8,8 +8,7 @@ metadata:
     {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
   name: {{ .Release.Name }}-{{ .Chart.Name }}-serviceconfig
 data:
-{{- range $filename, $content :=  .Values.config }}
-  {{- if $content }}
-  {{ $filename }}: {{ tpl $content $ | quote }}
-  {{- end }}
-{{- end }}
+  additionalCustomProperties: | 
+  {{- range $key, $value := .Values.configuration }}
+    {{$key}}: {{$value}}
+  {{ end }}

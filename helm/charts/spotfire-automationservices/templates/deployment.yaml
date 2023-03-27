@@ -32,7 +32,7 @@ spec:
         {{- tpl (toYaml .Values.extraInitContainers) $ | nindent 10 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: spotfire-automationservices
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ template "spotfire-common.spotfire-service.image" . }}"
@@ -53,6 +53,7 @@ spec:
                 fieldPath: status.podIP
           - name: SERVER_BACKEND_ADDRESS
             value: {{ required "The spotfire server service address must be set for spotfire nodemanager configuration" (tpl .Values.nodemanagerConfig.serverBackendAddress $) }}
+          {{- include "spotfire-common.acceptEUAEnvVar" . | nindent 10 }}
           {{- include "spotfire-common.spotfire-service.logging.serverEnvVars" . | nindent 10 }}
           {{- include "spotfire-common.spotfire-service.logging.podAnnotationsEnvVars" . | nindent 10 }}
           {{- if .Values.extraEnvVars }}
@@ -122,7 +123,7 @@ spec:
           - name: TSNM_HOME
             value: /tsnm
           - name: CONTAINER_NAME
-            value: {{ .Chart.Name }}
+            value: spotfire-automationservices
           volumeMounts:
           {{- include "spotfire-common.fluenbit-configuration.volume.mount" . | indent 10 }}
           lifecycle:

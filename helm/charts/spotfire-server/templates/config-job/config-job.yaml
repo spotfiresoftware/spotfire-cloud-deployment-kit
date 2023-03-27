@@ -55,6 +55,7 @@ spec:
             {{- if .Values.configJob.extraEnvVars }}
             {{ tpl (toYaml .Values.configJob.extraEnvVars) $ | nindent 12 }}
             {{- end }}
+            {{ include "spotfire-common.acceptEUAEnvVar" . | nindent 12 }}
             {{ include "spotfire-server.site.envVars" . | nindent 12 }}
             {{ include "spotfire-server.spotfireadmin.envVars" . | nindent 12 }}
             {{ include "spotfire-server.database.envVars" . | nindent 12 }}

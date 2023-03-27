@@ -1,3 +1,6 @@
+# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
+acceptEUA:
+
 # ===============================
 # image settings
 # ===============================
@@ -5,6 +8,8 @@
 # spotfire-global image settings
 global:
   spotfire:
+    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
+    acceptEUA:
     image:
       # -- The global container image registry. Used for TIBCO Spotfire container images unless overridden.
       registry:
@@ -24,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: tibco/spotfire-server
   # -- The container image tag to use.
-  tag: "12.2.0-1.2.0"
+  tag: "12.3.0-1.3.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -226,7 +231,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.2.0-1.2.0"
+    tag: "12.3.0-1.3.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -275,7 +280,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.2.0-1.2.0"
+    tag: "12.3.0-1.3.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -333,7 +338,7 @@ volumes:
   # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext-informationservices`
   customExtInformationservices:
     # -- Defines an already-existing persistent volume claim.
-    existingClaim: ""    
+    existingClaim: ""
 
   # The volume with mountPath: `/opt/tibco/tss/tomcat/certs`
   certificates:
@@ -362,7 +367,7 @@ database:
   # -- For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html).
   # @default -- -
   bootstrap:
-    # -- The JDBC URL of the database to be used by Spotfire Server.
+    # -- The JDBC URL of the database to be used by Spotfire Server. Evaluated as a template.
     databaseUrl: "jdbc:postgresql://HOSTNAME/"
     #  -- The Java driver class of the JDBC driver to be used with underlying database.
     driverClass: "org.postgresql.Driver"
@@ -397,7 +402,7 @@ database:
       ## -- Key to read the database administrator password from. Evaluated as a template.
       key: DBSERVER_ADMIN_PASSWORD
 
-    # -- Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database.
+    # -- Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. Evaluated as a template.
     databaseUrl: ""
     # -- Database name to be created to hold the Spotfire Server database schemas.
     spotfiredbDbname: "spotfire"
@@ -411,7 +416,7 @@ database:
     oracleRootfolder: ""
   # -- Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed.
   upgrade: true
- 
+
 configuration:
   # -- When to apply configurationScripts, commandScripts and admin user creation. Possible values:
   # * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release.
@@ -456,7 +461,7 @@ configuration:
     create: true
     # -- The user to create for the Spotfire admin.
     username: "admin"
-    # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated. 
+    # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated.
     # Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade.
     password: ""
     # -- Read password from an existing secret instead of from values. If set, 'password' above is not used.
@@ -469,7 +474,7 @@ configuration:
   # -- Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information.
   # @default -- Spotfire Server joins the Default site.
   site:
-    # -- The name of the site that the Spotfire Server should belong to. The site must be created beforehand. 
+    # -- The name of the site that the Spotfire Server should belong to. The site must be created beforehand.
     # See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information.
     name: "Default"
     displayName: " "
@@ -484,14 +489,14 @@ configuration:
     timeoutSeconds: 180
     # -- The minimum time in seconds that the server should be draining, even if it is considered idle.
     minimumSeconds: 90
-  
+
   deployment:
     # -- When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`.
     enabled: true
 
     defaultDeployment:
-      # -- Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. 
-      # Set to false to not overwrite the persistent deployments volume with the Spotfire.Dxp.sdn from spotfire-deployment container image.
+      # -- Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image.
+      # *Warning*: If set to `true` and a deployment volume (see `volumes.deployments` key) is used, a folder with name `deploymentAreaName` will be created and potentially overwrite any existing deployment with the same name on the persistent volume.
       enabled: true
       # -- The name of the deployment area to create or update
       deploymentAreaName: "Production"
@@ -502,7 +507,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: tibco/spotfire-deployment
         # -- The container image tag to use.
-        tag: "12.2.0-1.2.0"
+        tag: "12.3.0-1.3.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -610,6 +615,8 @@ haproxy:
 
       # For logging purposes
       capture request header X-Forwarded-Proto len 5
+      capture request header X-Forwarded-Port len 4
+      capture request header X-Forwarded-For len {{ .Values.spotfireConfig.captures.forwardedForLength }}
       {{- end }}
 
       {{- if or .Values.spotfireConfig.cleanup.secureCookieAttributeForHttp .Values.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp }}
@@ -723,7 +730,10 @@ haproxy:
     serverTemplate:
       # -- Additional parameters, see [haproxy server](https://cbonte.github.io/haproxy-dconv/2.6/snapshot/configuration.html#server%20%28Alphabetically%20sorted%20keywords%20reference%29)
       additionalParams: on-marked-down shutdown-sessions
-
+    # @default -- only applicable when spotfireConfig.debug is enabled and used for troubleshooting of reverse proxies and X-Forwarded-* headers
+    captures:
+      # -- The maximum number of characters captured from the X-Forwarded-For request header
+      forwardedForLength: 36
     # @default --
     agent:
       # -- Spotfire Server haproxy agent-port.

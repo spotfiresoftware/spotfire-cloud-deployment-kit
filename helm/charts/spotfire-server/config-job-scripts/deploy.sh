@@ -3,11 +3,8 @@
 set -o nounset
 set -o errexit
 
-# bootstrap_timeout_seconds="40"
-# bootstrap_delay_interval_seconds="5"
 startupcheck_timeout_seconds="60"
 startupcheck_delay_interval_seconds="5"
-bootstrap_file="bootstrap.xml"
 
 ##
 ## Get filenames in a dir
@@ -36,7 +33,7 @@ function updateDeployment() {
     if [ "${filenames}" ]; then
         config.sh update-deployment \
             --tool-password="${TOOL_PASSWORD}" \
-            --bootstrap-config="${bootstrap_file}" \
+            --bootstrap-config="${BOOTSTRAP_FILE}" \
             --area="${areaname}" \
             "${filenames}"
     else
@@ -51,7 +48,7 @@ function deployPackages () {
     shopt -s nocaseglob
     # Update deployment needs configuration
     config.sh check-prerequisites \
-        --bootstrap-config="${bootstrap_file}" \
+        --bootstrap-config="${BOOTSTRAP_FILE}" \
         --tool-password="${TOOL_PASSWORD}" \
         --timeout-seconds="${startupcheck_timeout_seconds}" \
         --delay-interval-seconds="${startupcheck_delay_interval_seconds}"
@@ -62,7 +59,7 @@ function deployPackages () {
             areaname=$(basename "$dir")
             config.sh create-deployment-area \
                 --tool-password "${TOOL_PASSWORD}" \
-                --bootstrap-config "${bootstrap_file}" \
+                --bootstrap-config "${BOOTSTRAP_FILE}" \
                 --area-name "${areaname}" \
                 --ignore-existing=true
 

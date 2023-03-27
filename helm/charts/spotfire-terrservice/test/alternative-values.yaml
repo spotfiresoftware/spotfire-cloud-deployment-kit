@@ -1,3 +1,7 @@
+acceptEUA: true
+global:
+  spotfire:
+    acceptEUA: true
 nodemanagerConfig:
   serverBackendAddress: mytss-spotfire-server
 volumes:
@@ -5,4 +9,3 @@ volumes:
     existingClaim: existingclaim1
   packages:
     existingClaim: existingclaim2
-    mountPath: /the/mount/path

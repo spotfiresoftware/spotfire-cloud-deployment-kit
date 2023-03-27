@@ -1,3 +1,7 @@
+global:
+  spotfire:
+    acceptEUA: true
+acceptEUA: true
 nodemanagerConfig:
   serverBackendAddress: mytss-spotfire-server
 startupProbe:

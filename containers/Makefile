@@ -26,6 +26,7 @@ IMAGES = spotfire-server spotfire-config spotfire-node-manager spotfire-base spo
 BUILD_FILES = spotfire-config/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
               spotfire-automationservices/build/Spotfire.Dxp.netcore-linux.sdn \
               spotfire-deployment/build/Spotfire.Dxp.sdn \
+              spotfire-deployment/build/TIB_sfire_server_$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)_languagepack-multi.zip \
               spotfire-node-manager/build/tsnm-$(SPOTFIRE_NODEMANAGER_VERSION).x86_64.tar.gz \
               spotfire-pythonservice/build/Spotfire.Dxp.PythonServiceLinux.sdn \
               spotfire-server/build/tss-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
@@ -52,7 +53,6 @@ spotfire-pythonservice :                                                        
 spotfire-pythonservice spotfire-terrservice spotfire-node-manager spotfire-workerhost : IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
 spotfire-server spotfire-config :                                                       IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
 spotfire-terrservice :                                                                  IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
-spotfire-webplayer :                                                                    IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
 spotfire-webplayer spotfire-automationservices :                                        IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
 
 

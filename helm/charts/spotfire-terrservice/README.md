@@ -1,6 +1,6 @@
 # spotfire-terrservice
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.14.0](https://img.shields.io/badge/AppVersion-1.14.0-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.15.0](https://img.shields.io/badge/AppVersion-1.15.0-informational?style=flat-square)
 
 A Helm chart for TIBCO® Enterprise Runtime for R - Server Edition
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.4 |
+| file://../spotfire-common | spotfire-common | 0.1.5 |
 
 ## Overview
 
@@ -48,6 +48,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
     ```bash
     helm install my-release . \
+        --set acceptEUA=true \
         --set global.spotfire.image.registry="127.0.0.1:32000" \
         --set global.spotfire.image.pullPolicy="Always" \
         --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
@@ -55,51 +56,24 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
         -f my-values.yaml
     ```
 
+**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+
 **Note**: You must provide your private registry address where the Spotfire containers are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
 #### Configuration
 
-You can override the default configuration settings by setting environment variables with `extraEnvVars`.
-See [containers README](../../../containers/spotfire-terrservice/README.md#environment-variables) for the complete list.
+To set [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm values.
 
 Example:
-```
-extraEnvVars:
-- name: TERR_RESTRICTED_EXECUTION_MODE
-  value: "FALSE"
-```
+```configuration:
+  # The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
+  engine.session.max: 5
 
-Additionally, you can override the default configuration settings by providing a custom configuration file.
-
-The following configuration keys are available in the chart:
-- config."custom.properties"
-
-**Note**: If a configuration file key is non-empty, it overrides the default service configuration file built in the image.
-
-For the TERR™ service configuration, see [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/custom_configuration_properties.html).
-
-Example: Using `my-custom.properties` instead of the default `custom.properties`:
-```bash
-helm install my-release . \
-    --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-    --set logging.logForwarderAddress="$LOG_FORWARDER" \
-    --set-file config.'custom\.properties'=my-custom.properties
-```
-
-**Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a '\'.
-
-#### Getting the container default configuration files
-
-You can copy the default configuration files from the container image to use them as templates for your custom configuration.
-
-**Note**: The configuration files content can be version dependent.
-
-Example: Use the following command to get a copy of the original configuration file `custom.properties`.
-You can replace the file name to get a copy any of the other container configuration files.
-```bash
-docker cp $(docker run --detach --rm --entrypoint=sleep tibco/spotfire-terrservice:<imagetag> 5):/opt/tibco/tsnm/nm/services/TERR/conf/custom.properties .
+  # The number of TERR engines preallocated and available for new sessions in the TERR service queue.
+  engine.queue.size: 10
 ```
 
 ### Uninstalling
@@ -122,7 +96,7 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
-Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
+Example: Helm values snippet configuration for enabling autoscaling with KEDA:
 ```
 resources:
   limits:
@@ -146,10 +120,10 @@ Typically, you want to scale out before all the available capacity is taken. The
 
 **Note**:  Clients requesting a slot typically wait until a slot is available.
 
-For more information, see [Monitoring the TERR service](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/monitoring_the_terr_service_using_jmx.html).
+For more information, see [Monitoring the TERR service](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
-See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/engine_timeout.html) for more details.
+See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
@@ -160,24 +134,33 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
-### Upgrade
-
-To upgrade the `my-release` deployment:
-```bash
-helm upgrade --install my-release .
-```
+### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
+#### Upgrading helm chart version
+
 **Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
+
+##### Version 0.1.5
+
+| New key | Old key | Comment |
+| ------- | ------- | ------- |
+| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
+| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+| `configuration` | `config.conf/custom.properties` | Exposes the service configuration 'custom.properties' as Helm values. |
+| | `config.log4j2.xml` | Removed. Log level can be set with `logging.logLevel`. |
+| | `volumes.packages.mountPath` | Removed. `mountPath` is now hardcoded to **/opt/packages**. |
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. |
 | affinity | object | `{}` |  |
-| config."conf/custom.properties" | string | `""` | If set, it will override the default [custom.properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/custom_configuration_properties.html) file. |
-| config."log4j2.xml" | string | `""` |  |
+| configuration | object | `nil` | Add [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall/topics/custom_configuration_properties.html) |
 | extraEnvVars | list | `[]` | Additional environment variables. |
 | extraEnvVarsCM | string | `""` |  |
 | extraEnvVarsSecret | string | `""` |  |
@@ -190,6 +173,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.serviceName | string | `"terrservice"` |  |
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
 | global.spotfire.image.registry | string | `nil` | The global container image registry. Used for tibco/spotfire container images, unless it is overridden. |
@@ -197,7 +181,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | image.pullSecrets | list | `[]` | spotfire-server image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-terrservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.14.0-1.2.0"` | The container image tag to use. |
+| image.tag | string | `"1.15.0-1.3.0"` | The container image tag to use. |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -212,7 +196,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | livenessProbe.initialDelaySeconds | int | `60` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
 | logging.logForwarderAddress | string | `""` | The spotfire-server log-forwarder name. Template. |
-| logging.logLevel | string | `"debug"` |  |
+| logging.logLevel | string | `"debug"` | set to `debug`, `trace`, `minimal` or leave empty for info. This applies for both node manager and the service. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | nodemanagerConfig.preStopDrainingTimeoutSeconds | int | `610` | The draining timeout after which the service is forcefully shut down. |
@@ -243,7 +227,6 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | startupProbe.periodSeconds | int | `3` |  |
 | tolerations | list | `[]` |  |
 | volumes.packages.existingClaim | string | `""` |  |
-| volumes.packages.mountPath | string | `"/opt/packages"` |  |
 | volumes.packages.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
 | volumes.packages.persistentVolumeClaim.resources | object | `{"requests":{"storage":"1Gi"}}` | Specifies the standard Kubernetes resource requests and/or the limits for the customExt volume claims. |
 | volumes.packages.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the customExt volume-claim. |

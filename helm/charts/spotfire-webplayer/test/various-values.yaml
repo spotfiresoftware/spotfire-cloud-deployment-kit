@@ -1,3 +1,4 @@
+acceptEUA: true
 nodemanagerConfig:
   serverBackendAddress: mytss-spotfire-server
   preStopDrainingTimeoutSeconds: 610
@@ -29,6 +30,7 @@ fullnameOverride: ""
 global:
   serviceName: webplayer
   spotfire:
+    acceptEUA: true
     image:
       pullPolicy: IfNotPresent
       pullSecrets:

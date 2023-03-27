@@ -1,0 +1,31 @@
+# This example demonstrates using the configurationScripts and commandScripts to perform initial setup tasks.
+
+spotfire-server:
+  configuration:
+    configurationScripts:
+      - name: my_custom_config_script
+        script: |
+          echo "This is an example custom configuration tasks. "
+          set-config-prop --name=lifecycle.changes-monitoring.interval-seconds --value=20 --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+    commandScripts:
+      - name: create_users_and_groups
+        script: |
+
+          echo "Creating users"
+          create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="usera" --password="alpha" --ignore-existing=true
+          create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="userb" --password="beta" --ignore-existing=true
+          create-user --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --username="userc" --password="gamma" --ignore-existing=true
+
+          echo "Creating groups"
+          create-group --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --group-name="Red" --ignore-existing=true
+
+          echo "Adding users to groups"
+          add-member --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --member-username="usera" --groupname="Red"
+          add-member --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --member-username="userb" --groupname="Red"
+          add-member --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --member-username="userc" --groupname="Red"
+
+      - name: assign_licenses
+        script: |
+          echo "Assigning licenses to groups"
+          set-license --bootstrap-config "${BOOTSTRAP_FILE}" --tool-password="${TOOL_PASSWORD}" --group "Red" -l "Spotfire.Dxp.EnterprisePlayer"

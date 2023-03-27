@@ -1,0 +1,77 @@
+# When using this chart, you should override the values in this file or provide
+# a values file with your own values during installation. values-*.yaml for
+# various examples.
+
+global:
+  spotfire:
+    # Set to true to accept the End User Agreement
+    # Alternatively you can install the chart with:
+    # `helm upgrade/install --set global.spotfire.acceptEUA=true`
+    acceptEUA:
+
+spotfire-server:
+  database:
+    bootstrap:
+      databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/"
+      driverClass: "org.postgresql.Driver"
+    create-db:
+      enabled: true
+      # The postgresql chart will generate a random password and store it in a
+      # secret with the key 'postgres-password'. The username will always be
+      # 'postgres'.
+      adminUsername: "postgres"
+      adminPasswordExistingSecret:
+        name: "{{ .Release.Name }}-postgresql"
+        key: "postgres-password"
+      databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/"
+  configuration:
+    site:
+      publicAddress: "http://localhost/"
+
+postgresql:
+  # Note: Using the PostgreSQL database like this is not recommended for
+  # production use. Make sure you know how to back up and restore your data
+  # when using this chart for other than testing purposes.
+  enabled: true
+  primary:
+   persistence:
+    enabled: false
+
+spotfire-webplayer-pool1:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+  webplayerConfig:
+    resourcePool: "pool1"
+
+spotfire-webplayer-pool2:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+  webplayerConfig:
+    resourcePool: "pool2"
+
+spotfire-automationservices:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+spotfire-pythonservice:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+spotfire-terrservice:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"

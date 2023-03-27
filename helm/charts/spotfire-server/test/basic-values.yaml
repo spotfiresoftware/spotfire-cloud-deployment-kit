@@ -1,3 +1,7 @@
+acceptEUA: true
+global:
+  spotfire:
+    acceptEUA: true
 database:
   bootstrap:
     databaseUrl: jdbc://server/

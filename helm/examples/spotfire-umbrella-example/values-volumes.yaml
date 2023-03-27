@@ -1,0 +1,35 @@
+# This example shows how to use a volume for the libraryImportExport. You can use a
+# similar approach for the troubleshooting volume, deploymnents
+# volume, and so on.
+#
+# The following example shows how to consume a PersistentVolumeClaim that has been
+# created outside of this chart. To create a PersistentVolumeClaim using the
+# storage class 'nfs-client' with kubectl, run the following command:
+#
+# $ kubectl apply -f - <<EOF
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#  name: spotfire-library-pvc
+# spec:
+#  storageClassName: nfs-client
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 2Gi
+# EOF
+#
+# Note: This example assumes that you have a storage class named 'nfs-client' in your
+# cluster. For more information about persistent volumes and storage classes,
+# see https://kubernetes.io/docs/concepts/storage/persistent-volumes/ and
+# https://kubernetes.io/docs/concepts/storage/storage-classes/.
+#
+# The PersistentVolumeClaim can then be used in the values file like this:
+
+spotfire-server:
+  volumes:
+    libraryImportExport:
+      persistentVolumeClaim:
+        create: false
+      existingClaim: spotfire-library-pvc

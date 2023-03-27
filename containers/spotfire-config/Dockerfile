@@ -34,12 +34,11 @@ WORKDIR /opt/tibco/
 COPY --from=extract --chown=spotfire:spotfire /tmp/tss-*.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool spotfireconfigtool/
 COPY --chown=spotfire:spotfire bootstrap.sh ./
 
-ENV PATH=$PATH:/opt/tibco/spotfireconfigtool
 ENV BOOTSTRAP_FILE=bootstrap.xml
 
 # Logging - enable us of LOG_LEVEL environment variable and use LOG_APPENDER
 ADD log4j2-tools.xml.loglevel.transformation.xml .
-RUN config.sh apply-xdt-transformation --input-file=/opt/tibco/spotfireconfigtool/log4j2-tools.xml --transformation-file=log4j2-tools.xml.loglevel.transformation.xml \
+RUN /opt/tibco/spotfireconfigtool/config.sh apply-xdt-transformation --input-file=/opt/tibco/spotfireconfigtool/log4j2-tools.xml --transformation-file=log4j2-tools.xml.loglevel.transformation.xml \
   && sed -i 's/ref="toolLog"/ref="${env:LOG_APPENDER:-toolLog}"/' /opt/tibco/spotfireconfigtool/log4j2-tools.xml \
   && rm -r log4j2-tools.xml.loglevel.transformation.xml spotfireconfigtool/logs
 
@@ -47,4 +46,9 @@ RUN config.sh apply-xdt-transformation --input-file=/opt/tibco/spotfireconfigtoo
 ENV LOG_APPENDER=toolLog
 
 USER spotfire
+
+# config.sh is a wrapper that enforces the End User Agreement, then calls the actual config tool
+RUN mkdir -p /opt/tibco/bin
+COPY --chown=spotfire:spotfire eua-check.sh /opt/tibco/bin/config.sh
+ENV PATH=$PATH:/opt/tibco/bin
 ENTRYPOINT ["config.sh"]
