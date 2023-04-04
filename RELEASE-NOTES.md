@@ -1,3 +1,10 @@
+# Release v1.3.1
+
+Fixes the following issues:
+
+- Error `cp: cannot create regular file 'spotfire-deployment/build/Spotfire.Dxp.sdn': No such file or directory` when building containers.
+- Missing executable attribute on some shell scripts making it impossible to start some container images.
+
 # Release v1.3.0
 
 This release includes recipes for building container images and Helm charts for the following products.

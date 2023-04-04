@@ -570,7 +570,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.3.0-1.3.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"12.3.0-1.3.1"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -588,7 +588,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.3.0-1.3.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"12.3.0-1.3.1"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -605,7 +605,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"tibco/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"12.3.0-1.3.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"12.3.0-1.3.1"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
@@ -686,7 +686,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.3.0-1.3.0"` | The container image tag to use. |
+| image.tag | string | `"12.3.0-1.3.1"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |

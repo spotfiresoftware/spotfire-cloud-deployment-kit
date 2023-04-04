@@ -36,7 +36,7 @@ image:
   # image.repository -- The spotfire-server image repository.
   repository: tibco/spotfire-terrservice
   # image.tag -- The container image tag to use.
-  tag: "1.15.0-1.3.0"
+  tag: "1.15.0-1.3.1"
   # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   ## Optionally specifies an array of imagePullSecrets.
