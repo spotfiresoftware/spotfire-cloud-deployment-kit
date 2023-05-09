@@ -31,7 +31,8 @@ Steps:
 2. From the `<this-repo>/containers` folder, run `make spotfire-pythonservice` to build this image, or `make spotfire-pythonservice --dry-run` to preview the required commands.
 
 ### Adding custom Spotfire packages
-At build time, put custom spk files in the `build/` folder.
+
+Before building the image, put any custom SPK files in the `build/` folder.
 
 ## How to use this image
 
@@ -52,13 +53,18 @@ The `spotfire-pythonservice` will start with the default configuration from `/op
 
 ### Starting with a custom configuration
 
-To add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html) to the PYTHON service configuration an additional-custom.properties file can be mounted at /opt/tibco/tsnm/nm/services/PYTHON/conf/additional-custom.properties.  This would only be necessary if a setting could not be directly set using any of the environment variable settings as listed in the [Environment variables](#environment-variables) section. Any setting here will override properties found in the /opt/tibco/tsnm/nm/services/PYTHON/conf/custom.properties file.
+To add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html) to the Python service configuration, you can mount your custom configuration file at `/opt/tibco/tsnm/nm/services/PYTHON/conf/additional-custom.properties`.
+This is needed only if a setting cannot be directly set by using any of the existing environment variable settings listed in the [Environment variables](#environment-variables) section.
+Any setting here overrides properties found in the `/opt/tibco/tsnm/nm/services/PYTHON/conf/custom.properties` file.
 
 ```bash
-docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-pythonservice \
-  -v "$(pwd)/additional-custom.properties:/opt/tibco/tsnm/nm/services/PYTHON/conf/additional-custom.properties"
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "$(pwd)/additional-custom.properties:/opt/tibco/tsnm/nm/services/PYTHON/conf/additional-custom.properties" \
+  tibco/spotfire-pythonservice
 ```
-Example additional-custom.properties file:
+
+Example of an `additional-custom.properties` file:
 ```
 # The maximum number of Python engine sessions that are allowed to run concurrently in the Python service.
 engine.session.max: 5
@@ -66,20 +72,28 @@ engine.session.max: 5
 # The number of Python engines preallocated and available for new sessions in the Python service queue.
 engine.queue.size: 10
 ```
--For more information, see [Configuring Spotfire Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/configuring_the_service.html).
+
+- For more information, see [Configuring the service](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/configuring_the_service.html).
 
 ### How to add additional Python packages
 
-The [package library location](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/package_library_location.html), or `packagePath`, is set to `/opt/packages` in this container image.
+You can prepare a shared folder in the container host with all the additional required Python packages preinstalled.
+For that, follow the instructions in [Installing Python Packages Manually](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/installing_python_packages_manually.html).
 
-You can mount a folder from your container host to this location to add additional Python packages. The folder can be prepared by using the instructions described in [Installing Python Packages Manually](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/installing_python_packages_manually.html).
+You can then mount that shared folder in your containers and use it as your shared package library location.
 
+Example:
 ```bash
 # You can populate the packages folder with pip.
 # - python -m pip install --target=$(pwd)/packages -r requirements.txt
 # - python -m pip install --target=$(pwd)/packages pandas numpy ...
-docker run -e ACCEPT_EUA=Y -d --rm -v "$(pwd)/packages:/opt/packages" -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-pythonservice
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "$(pwd)/packages:/opt/packages" \
+  tibco/spotfire-pythonservice
 ```
+
+**Note**: The [shared package library location](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/package_library_location.html) configuration property `packagePath` is set to `/opt/packages` in this container image.
 
 ### Environment variables
 
@@ -91,8 +105,8 @@ docker run -e ACCEPT_EUA=Y -d --rm -v "$(pwd)/packages:/opt/packages" -e SERVER_
 - `ENGINE_SESSION_MAXTIME_SECONDS` - See [Engine timeout](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/engine_timeout.html). Defaults to `1800`
 - `ENGINE_DISABLE_JAVA_CORE_DUMPS` - See [disable.java.core.dump](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/manage_java_options.html). Defaults to `TRUE`
 - `ENGINE_JAVA_OPTIONS` - See [javaOptions](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/manage_java_options.html)
-- `LOGGING_SERVICELOG_MAX` - Maximum number of python service log files to save. Defaults to `2`
-- `LOGGING_SERVICELOG_SIZE` - Maximum size for python service log files. Defaults to `10MB`
+- `LOGGING_SERVICELOG_MAX` - Maximum number of Python service log files to save. Defaults to `2`
+- `LOGGING_SERVICELOG_SIZE` - Maximum size for Python service log files. Defaults to `10MB`
 
 **Note**: These environment variables can only be used if the default configuration is used.
 

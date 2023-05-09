@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "spotfire-common.spotfire-service.fullname" . }}
   labels:
-    {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
+    {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "terrservice")) | nindent 4 }}
 spec:
   {{- if not .Values.kedaAutoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "spotfire-common.spotfire-service.selectorLabels" . | nindent 6 }}
+      {{- include "spotfire-common.spotfire-service.selectorLabels" (merge . (dict "componentName" "terrservice")) | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "spotfire-common.spotfire-service.labels" . | nindent 8 }}
+        {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "terrservice")) | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: {{ add .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds 30 }}
       {{- include "spotfire-common.spotfire-service.imagePullSecrets" . | nindent 6 }}

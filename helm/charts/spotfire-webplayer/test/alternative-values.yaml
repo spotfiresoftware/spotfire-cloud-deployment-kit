@@ -7,3 +7,5 @@ nodemanagerConfig:
 volumes:
   troubleshooting:
     existingClaim: existingClaimName
+  customModules:
+    existingClaim: existingclaim2

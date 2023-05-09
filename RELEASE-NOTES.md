@@ -1,9 +1,87 @@
+# Release v1.4.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- TIBCO Spotfire Server 12.4.0
+- TIBCO Spotfire Service for Python 1.15.0
+- TIBCO Enterprise Runtime for R - Server Edition 1.15.0
+- TIBCO Spotfire Web Player 12.4.0
+- TIBCO Spotfire Automation Services 12.4.0
+
+The recipes are validated with the listed Spotfire products and versions. They could work with other Spotfire versions with modifications.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.1.6 | 12.4.0 | 12.4.0-1.4.0 |
+| spotfire-webplayer | 0.1.6 | 12.4.0 | 12.4.0-1.4.0 |
+| spotfire-automationservices | 0.1.6 | 12.4.0 | 12.4.0-1.4.0 |
+| spotfire-terrservice | 0.1.6 | 1.15.0 | 1.15.0-1.4.0 |
+| spotfire-pythonservice | 0.1.6 | 1.15.0 | 1.15.0-1.4.0 |
+
+Note: The image tag format is \<appVersion\>-\<cdk version\>
+
+## Changes
+
+### General
+
+- Bug fixes and improvements.
+
+### spotfire-server chart 0.1.6
+
+- Added possibility to set spotfire-server in maintenance mode during the spotfire-server deployment will be inaccessible
+- Spotfire server configuration properties are exposed in as values
+
+| New key | Old key | Comment |
+| - | - | - |
+| configuration.draining.publishNotReadyAddresses | | Added |
+| configuration.properties.* | | Added |
+| configuration.deployment.clear | | Added |
+| haproxy.config | | Changed. If you have overridden this value, review changes in the chart. |
+| haproxy.spotfireConfig.compression.* | | Added |
+| haproxy.spotfireConfig.cache.* | | Added |
+| haproxy.spotfireConfig.maintenance.* | | Added |
+| haproxy.spotfireConfig.maintenancePage.* | | Added |
+| haproxy.includesMountPath | | Added |
+
+### spotfire-pythonservice chart 0.1.6
+
+| New key | Old key | Comment |
+| - | - | - |
+| | global.serviceName | Removed |
+
+### spotfire-terrservice chart 0.1.6
+
+| New key | Old key | Comment |
+| - | - | - |
+| | global.serviceName | Removed |
+
+### spotfire-webplayer chart 0.1.6
+
+- You can mount in a volume containing Spotfire modules to be loaded during startup.
+
+| New key | Old key | Comment |
+| - | - | - |
+| | global.serviceName | Removed |
+| volumes.customModules.* | | Added |
+
+### spotfire-automationservices chart 0.1.6
+
+- You can mount in a volume containing Spotfire modules to be loaded during startup.
+
+| New key | Old key | Comment |
+| - | - | - |
+| | global.serviceName | Removed |
+| volumes.customModules.* | | Added |
+
+
 # Release v1.3.1
 
 Fixes the following issues:
 
-- Error `cp: cannot create regular file 'spotfire-deployment/build/Spotfire.Dxp.sdn': No such file or directory` when building containers.
-- Missing executable attribute on some shell scripts making it impossible to start some container images.
+- Error when building containers `cp: cannot create regular file 'spotfire-deployment/build/Spotfire.Dxp.sdn': No such file or directory`.
+- Missing executable attribute on some shell scripts, making it impossible to start some container images.
 
 # Release v1.3.0
 
@@ -38,7 +116,7 @@ Note: The image tag format is \<appVersion\>-\<cdk version\>
 - All containers require you to accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the environment variable `ACCEPT_EUA` to **Y**.
 - An example umbrella chart that can install an entire Spotfire system, including a database, a Spotfire Server, a Web Player with multiple resource pools, Automation Services, TIBCO Enterprise Runtime for R - Server Edition (a TERR service), and Spotfire Service for Python. See helm/examples/umbrella-chart/README.md for more information.
 
-### spotfire-server chart
+### spotfire-server chart 0.1.5
 
 - Language packs are automatically deployed when the `configuration.deployment.defaultDeployment.enabled` is set to **true**. Previously, the language packs were not deployed when using the default deployment.
 - Haproxy chart upgraded from 1.17.3 to 1.18.\*.
@@ -52,7 +130,7 @@ Changes in values.yaml:
 | `global.spotfire.acceptEUA` | | The same as `acceptEUA`, but as a global value. |
 | `haproxy.spotfireConfig.captures.forwardedForLength` | | |
 
-### spotfire-pythonservice chart
+### spotfire-pythonservice chart 0.1.5
 
 - Now you can set individual service properties (in `custom.properties`) by adding the name of the property as a subkey to the `configuration` key in values.yaml. Previously, you had to set the entire `custom.properties` file as a string.
 - Improved documentation for installing additional python packages, including an example.
@@ -67,7 +145,7 @@ Changes in values.yaml:
 | | `config.log4j2.xml`| You can no longer set the entire file contents from values, but the log level can be set with `logging.logLevel`. |
 | | `volumes.packages.mountPath` | Removed. `mountPath` is now hardcoded to **/opt/packages**. |
 
-### spotfire-terrservice chart
+### spotfire-terrservice chart 0.1.5
 
 - Now you can set individual service properties (in `custom.properties`) by adding the name of the property as a subkey to the `configuration` key in the file values.yaml. Previously, you had to set the entire `custom.properties` file as a string.
 
@@ -81,7 +159,7 @@ Changes in values.yaml:
 | | `config.log4j2.xml`| You can no longer set the entire file content from values, but log level can be set with `logging.logLevel`. |
 | | `volumes.packages.mountPath` | Removed. `mountPath` is now hardcoded to **/opt/packages**. |
 
-### spotfire-webplayer chart
+### spotfire-webplayer chart 0.1.5
 
 Changes in values.yaml:
 
@@ -90,7 +168,7 @@ Changes in values.yaml:
 | `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true**. If not set, the Helm release does not install. |
 | `global.spotfire.acceptEUA` | | The same as `acceptEUA`, but as a global value. |
 
-### spotfire-automationservices chart
+### spotfire-automationservices chart 0.1.5
 
 Changes in values.yaml:
 
@@ -130,7 +208,7 @@ Note: The image tag format is \<appVersion\>-\<cdk version\>
 
 - Various improvements and bug fixes.
 
-### spotfire-server chart
+### spotfire-server chart 0.1.4
 
 - A client deployment (Spotfire.Dxp.sdn) can be added automatically to a deployment area during installation. See `configuration.deployment` in the chart's README.md.
 - The password for creating and connecting to the Spotfire database, as well as the Spotfire admin password, can be read from an existing secret. See information about `*.<prefix>ExistingSecret` in the chart's README.md.
@@ -154,7 +232,7 @@ Updates to values.yaml
 | `kedaAutoscaling.threshold` | | Added |
 | | `configuration.applyKubernetesConfiguration` | Removed |
 
-### spotfire-pythonservice chart
+### spotfire-pythonservice chart 0.1.4
 
 Updates to values.yaml
 
@@ -162,7 +240,7 @@ Updates to values.yaml
 | - | - | - |
 | `kedaAutoscaling.threshold` | | Added |
 
-### spotfire-terrservice chart
+### spotfire-terrservice chart 0.1.4
 
 Updates to values.yaml
 
@@ -170,7 +248,7 @@ Updates to values.yaml
 | - | - | - |
 | `kedaAutoscaling.threshold` | | Added |
 
-### spotfire-webplayer chart
+### spotfire-webplayer chart 0.1.4
 
 Updates to values.yaml
 
@@ -178,7 +256,7 @@ Updates to values.yaml
 | - | - | - |
 | `kedaAutoscaling.threshold` | | Added |
 
-### spotfire-automationservices chart
+### spotfire-automationservices chart 0.1.4
 
 Updates to values.yaml
 
@@ -214,7 +292,7 @@ Version mapping table:
 
 General: Various improvements and bug fixes.
 
-### spotfire-server chart
+### spotfire-server chart 0.1.3
 
 - You can use an existing Secret to specify usernames and passwords for the database connection and Spotfire admin user. Related values: `database.bootstrap.existingSecret`,` database.create-db.adminUsernameExistingSecret.name`, `database.create-db.adminUsernameExistingSecret.key`, `database.create-db.adminPasswordExistingSecret.name`, `database.create-db.adminPasswordExistingSecret.key`,`spotfireAdmin.existingSecret`.
 - Information services runs as a separate process by default. You can use a separate mount path / volume to add jar-files that should be loaded for information services. Related values: `volumes.customExtInformationservices.existingClaim`

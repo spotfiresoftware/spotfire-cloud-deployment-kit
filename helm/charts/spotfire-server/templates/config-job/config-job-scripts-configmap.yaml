@@ -8,4 +8,14 @@ metadata:
     {{- include "spotfire-server.labels" . | nindent 4 }}
   name: {{ .Release.Name }}-config-job-scripts
 data:
-{{ (.Files.Glob "config-job-scripts/*").AsConfig | indent 2 }}
+{{ range $filepath, $content := .Files.Glob "config-job-scripts/*" }}
+  {{ $content := $content | toString }}
+  {{ $filename := $filepath | trimPrefix "config-job-scripts/" | trimSuffix ".gotmpl" }}
+  {{- if hasSuffix ".gotmpl" $filepath }}
+  {{ $filename }}: |
+  {{- tpl $content $ | nindent 4 }}
+  {{- else }}
+  {{ $filename }}: |
+  {{- $content | nindent 4 }}
+  {{- end }}
+{{ end }}

@@ -204,6 +204,10 @@ haproxy:
   service:
     type: ClusterIP
   spotfireConfig:
+    serverTemplate:
+      additionalParams: "a=b"
+    captures:
+      forwardedForLength: 200
     debug: true
     cleanup:
       secureCookieAttributeForHttp: true
@@ -391,6 +395,8 @@ volumes:
       storageClassName: storageclassname
       volumeName: volumename
 configuration:
+  # Ideally this should be tested better
+  properties: {}
   preferExistingConfig: false
   apply: initialsetup
   deployment:

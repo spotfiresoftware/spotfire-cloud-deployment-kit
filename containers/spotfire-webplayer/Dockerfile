@@ -5,11 +5,12 @@ ARG SPOTFIRE_NETCORE_VERSION
 # extract Spotfire Web Player service from sdn distribution file
 #
 FROM tibco/spotfire-workerhost:${SPOTFIRE_NETCORE_VERSION}-${IMAGE_BUILD_ID} as extract
+ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 ENV TSNM_CAPABILITY=WEB_PLAYER
 RUN mkdir -p /tmp/tsnm-packages
 
 # Language packs
-COPY --chown=spotfire:spotfire build/TIB_sfire_server_*_languagepack-multi.zip /tmp
+COPY --chown=spotfire:spotfire build/TIB_sfire_server_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_languagepack-multi.zip /tmp
 RUN unzip -q -u -j /tmp/TIB_sfire_server_*_languagepack-multi.zip '**/*-netcore.sdn' -d /tmp/tsnm-packages/
 
 # Web Player and any additional packages

@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.3.0](https://img.shields.io/badge/AppVersion-12.3.0-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.4.0](https://img.shields.io/badge/AppVersion-12.4.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.5 |
+| file://../spotfire-common | spotfire-common | 0.1.6 |
 
 ## Overview
 
@@ -56,7 +56,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
-**Note**: You must provide your private registry address where the Spotfire containers are stored.
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
@@ -98,13 +98,11 @@ You can replace the filename to get a copy any of the other container configurat
 docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
 ```
 
-#### Credentials profiles for connectors
+#### Adding a credentials profile for connectors to services as a file
 
 A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
 
-#### Adding a credentials profile to services as a file
-
-1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See the example [here.](#getting-container-original-configuration-files))
+1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See how in the previous [example](#getting-container-original-configuration-files).)
 2. Update the connector's authentication mode to `WebConfig`.
 3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
     ```
@@ -117,10 +115,14 @@ A credentials profile is a method for storing data source credentials to log in 
       <password>my_password</password>
     </entry>
     ```
-4. Using extraVolumeMounts, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
+4. Using _extraVolumeMounts_, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
 5. See the [configuration section](#configuring) to upgrade the deployment.
 
 For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
+
+#### Custom modules
+
+The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
 ### Uninstalling
 
@@ -153,11 +155,11 @@ kedaAutoscaling:
   maxReplicas: 3
 ```
 
-The `spotfire-webplayer` has the following defaults:
-- The default autoscaling metric is the `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status`.
-- The default query used is the sum of _Memory health status_ of the Web Player instances.
+The `spotfire-webplayer` has the following autoscaling defaults:
+- metric name: `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` (_Health status_ Web Player service performance counter).
+- query: the sum of `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` counters of the Web Player instances for the release name.
 
-For any Web Player instance, _Memory health status_ can present one of the following values:
+For any Web Player instance, _Health status_ can present one of the following values:
 - 0: OK. Indicates that the instance is under no pressure.
 - 5: Strained. Indicates that the instance is under pressure but is not a problem.
 - 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance, but current users can keep working in this instance.
@@ -191,6 +193,8 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
@@ -199,16 +203,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 #### Upgrading helm chart version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
-
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 ## Values
 
@@ -220,41 +215,40 @@ The following parameters in values.yaml have been changed, moved or renamed and 
 | config."Spotfire.Dxp.Worker.Host.dll.config" | string | `""` | A custom Spotfire.Dxp.Worker.Host.dll.config. See [Spotfire.Dxp.Worker.Host.exe.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.host.exe.config_file.html). |
 | config."Spotfire.Dxp.Worker.Web.config" | string | `""` | A custom [Spotfire.Dxp.Worker.Web.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.web.config_file.html). |
 | extraEnvVars | list | `[]` | Additional environment variables. |
-| extraEnvVarsCM | string | `""` |  |
-| extraEnvVarsSecret | string | `""` |  |
-| extraInitContainers | list | `[]` | Additional init containers to add to the webplayer pod. |
-| extraVolumeMounts | list | `[]` | Extra volumeMounts for the spotfire-webplayer container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts` |
-| extraVolumes | list | `[]` | Extra volumes for the spotfire-webplayer container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
+| extraEnvVarsCM | string | `""` | The name of the ConfigMap containing additional environment variables. |
+| extraEnvVarsSecret | string | `""` | The name of the Secret containing extra additional environment variables. |
+| extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
+| extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
+| extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for the fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for the fluent-bit logging sidecar. |
-| fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for the fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.0.9"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
-| global.serviceName | string | `"webplayer"` |  |
 | global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
-| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for tibco/spotfire container images unless it is overridden. |
-| image.pullPolicy | string | `nil` | The spotfire-server image pull policy, It overrides global.spotfire.image.pullPolicy. |
-| image.pullSecrets | list | `[]` | The spotfire-server image pull secrets. |
-| image.registry | string | `nil` | The image registry for spotfire-server, it overrides global.spotfire.image.registry value. |
+| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for tibco/spotfire container images, unless it is overridden. |
+| image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
+| image.pullSecrets | list | `[]` | Image pull secrets. |
+| image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"12.3.0-1.3.1"` | The container image tag to use. |
-| kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
+| image.tag | string | `"12.4.0-1.4.0"` | The container image tag to use. |
+| kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
 | kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
 | kedaAutoscaling.pollingInterval | int | `30` | The interval to check each trigger on. |
-| kedaAutoscaling.spotfireConfig | object | `{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"}` | Spotfire specific settings |
-| kedaAutoscaling.spotfireConfig.prometheusServerAddress | string | `"http://prometheus-server.monitor.svc.cluster.local"` | REQUIRED The URL to the Prometheus server where metrics should be fetched from. |
+| kedaAutoscaling.spotfireConfig | object | `{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"}` | Spotfire specific settings. |
+| kedaAutoscaling.spotfireConfig.prometheusServerAddress | string | `"http://prometheus-server.monitor.svc.cluster.local"` | REQUIRED. The URL for the Prometheus server from where metrics are fetched. |
 | livenessProbe.enabled | bool | `true` |  |
 | livenessProbe.failureThreshold | int | `10` |  |
 | livenessProbe.httpGet.path | string | `"/spotfire/liveness"` |  |
 | livenessProbe.httpGet.port | string | `"registration"` |  |
 | livenessProbe.initialDelaySeconds | int | `60` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
-| logging.logForwarderAddress | string | `""` | This should be the spotfire-server log-forwarder name |
-| logging.logLevel | string | `"debug"` | set to `debug`, `trace`, `minimal` or leave empty for info. This applies to both node manager and the service. |
+| logging.logForwarderAddress | string | `""` | The spotfire-server log-forwarder name. Template. |
+| logging.logLevel | string | `"debug"` | Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies for both node manager and the service. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | nodemanagerConfig.preStopDrainingTimeoutSeconds | int | `610` | The draining timeout after which the service is forcefully shut down. |
@@ -271,7 +265,7 @@ The following parameters in values.yaml have been changed, moved or renamed and 
 | readinessProbe.periodSeconds | int | `3` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
-| securityContext | object | `{}` | The securityContext setting for the spotfire-webplayer container. Overrides any securityContext setting on the Pod level. |
+| securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | service.port | int | `9501` |  |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` |  |
@@ -284,8 +278,13 @@ The following parameters in values.yaml have been changed, moved or renamed and 
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `3` |  |
 | tolerations | list | `[]` |  |
-| volumes.troubleshooting.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing persistent volume claim |
-| volumes.troubleshooting.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
+| volumes.customModules.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
+| volumes.customModules.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
+| volumes.customModules.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the volumes.customModules claims. |
+| volumes.customModules.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the volumes.customModules-claim. |
+| volumes.customModules.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the volumes.customModules-claim. |
+| volumes.troubleshooting.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
+| volumes.troubleshooting.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' will be created. |
 | volumes.troubleshooting.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the volumes.troubleshooting claims. |
 | volumes.troubleshooting.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim. |
 | volumes.troubleshooting.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim. |

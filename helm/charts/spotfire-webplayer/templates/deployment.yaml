@@ -3,14 +3,14 @@ kind: Deployment
 metadata:
   name: {{ include "spotfire-common.spotfire-service.fullname" . }}
   labels:
-    {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
+    {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "webplayer")) | nindent 4 }}
 spec:
   {{- if not .Values.kedaAutoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "spotfire-common.spotfire-service.selectorLabels" . | nindent 6 }}
+      {{- include "spotfire-common.spotfire-service.selectorLabels" (merge . (dict "componentName" "webplayer")) | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "spotfire-common.spotfire-service.labels" . | nindent 8 }}
+        {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "webplayer")) | nindent 8 }}
     spec:
       terminationGracePeriodSeconds: {{ add .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds 30 }}
       {{- include "spotfire-common.spotfire-service.imagePullSecrets" . | nindent 6 }}
@@ -66,6 +66,10 @@ spec:
           - name: logs-volume
             mountPath: /opt/tibco/tsnm/nm/logs
           {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
+          {{- if or .Values.volumes.customModules.persistentVolumeClaim.create .Values.volumes.customModules.existingClaim }}
+          - name: custom-modules-volume
+            mountPath: /opt/tibco/tsnm/nm/custom-modules
+          {{- end }}
           {{- range $filename, $content := .Values.config }}
           {{- if $content }}
           - name: serviceconfig
@@ -139,6 +143,11 @@ spec:
         {{- include "spotfire-common.volumes.troubleshooting.volume" . | indent 8 }}
         - name: logs-volume
           emptyDir: {}
+        {{- if or .Values.volumes.customModules.persistentVolumeClaim.create .Values.volumes.customModules.existingClaim }}
+        - name: custom-modules-volume
+          persistentVolumeClaim:
+            claimName: {{ include "spotfire-common.volumes.customModules.pvc.name" . }}
+        {{- end }}
         - name: serviceconfig
           configMap:
             name: {{ .Release.Name }}-{{ .Chart.Name }}-serviceconfig

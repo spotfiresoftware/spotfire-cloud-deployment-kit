@@ -20,7 +20,6 @@ fluentBitSidecar:
     tag: 1.9.9
 fullnameOverride: ""
 global:
-  serviceName: terrservice
   spotfire:
     acceptEUA: true
     image:
@@ -137,3 +136,5 @@ volumes:
           storage: 11Gi
       storageClassName: storageclassname
       volumeName: volumename
+configuration:
+  use.engine.containers: true

@@ -28,7 +28,6 @@ fluentBitSidecar:
     tag: 1.9.9
 fullnameOverride: ""
 global:
-  serviceName: webplayer
   spotfire:
     acceptEUA: true
     image:
@@ -129,6 +128,14 @@ logging:
   logLevel: info
   logForwarderAddress: mytss-log-forwarder
 volumes:
+  customModules:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename
   troubleshooting:
     persistentVolumeClaim:
       create: true

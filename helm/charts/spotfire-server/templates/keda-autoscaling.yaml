@@ -27,7 +27,7 @@ spec:
       serverAddress: {{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}
       metricName: spotfire_OS_OperatingSystem_ProcessCpuLoad
       threshold: {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
-      query: {{ printf "sum(100*spotfire_OS_OperatingSystem_ProcessCpuLoad{app_kubernetes_io_component=\"server\", app_kubernetes_io_instance=\"%s\"})" .Release.Name | quote }}
+      query: {{ printf "sum(100*spotfire_OS_OperatingSystem_ProcessCpuLoad{app_kubernetes_io_component=\"server\", app_kubernetes_io_instance=\"%s\", app_kubernetes_io_name=\"%s\"})" .Release.Name (include "spotfire-server.name" .) | quote }}
       namespace: {{ .Release.Namespace }}
   {{- else }}
   {{- with .Values.kedaAutoscaling.triggers }}

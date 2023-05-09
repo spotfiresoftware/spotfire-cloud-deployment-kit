@@ -4,9 +4,9 @@ description: A Helm chart for TIBCO Spotfire Automation Services.
 
 type: application
 
-version: 0.1.5
+version: 0.1.6
 
-appVersion: "12.3.0"
+appVersion: "12.4.0"
 
 kubeVersion: ">=1.23.0-0"
 
@@ -24,7 +24,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 0.1.5
+    version: 0.1.6
 
 annotations:
   license: Apache 2.0

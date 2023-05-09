@@ -68,6 +68,8 @@ Deploy the Spotfire Server using an existing database:
 ```bash
 helm install my-release . \
     --set acceptEUA=true \
+    --set global.spotfire.image.registry="127.0.0.1:32000" \
+    --set global.spotfire.image.pullPolicy="Always" \
     --set database.bootstrap.databaseUrl="$DB_BOOTSTRAP_URL" \
     --set database.create-db.databaseUrl="$DB_URL" \
     --set database.create-db.adminUsername="$DB_ADMIN" \
@@ -78,6 +80,8 @@ helm install my-release . \
 
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 **Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
@@ -124,7 +128,7 @@ Steps:
         --set configuration.site.publicAddress=http://localhost/
     ```
 
-   **Note**: You must provide your private registry address where the Spotfire containers are stored.
+   **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
    **Note**: This example assumes that your Spotfire container images are located in a configured registry at 127.0.0.1:32000. 
    See the Kubernetes documentation for how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/), 
@@ -205,9 +209,9 @@ kedaAutoscaling:
 
 The value specified for threshold determines the value that the query must reach before the service is scaled.
 
-The `spotfire-server` has the following defaults:
-- The default autoscaling metric is the `spotfire_OS_OperatingSystem_ProcessCpuLoad`.
-- The default query is the sum of CPU usage (in percent) of all of the Spotfire Server instances.
+The `spotfire-server` has the following autoscaling defaults:
+- metric: `spotfire_OS_OperatingSystem_ProcessCpuLoad` (_CPU usage_ of the Spotfire Server instance).
+- query: the sum of `spotfire_OS_OperatingSystem_ProcessCpuLoad` (in percent) of all the Spotfire Server instances for the release name.
 
 With these default settings, if the total CPU usage for all instances is greater than the threshold, then another instance is started to scale out the service. 
 If the total CPU usage for all instances falls under the threshold, then the service scales in.
@@ -229,39 +233,13 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 #### Upgrading helm chart version
 
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
-| `haproxy.spotfireConfig.captures.forwardedForLength` | | |
-
-##### Version 0.1.4
-
-| New key | Old key | Comment |
-| - | - | - |
-| `configuration.draining.*` | `draining.*` | Moved |
-| `configuration.encryptionPassword` | `encryptionPassword` | Moved |
-| `configuration.preferExistingConfig` | `configuration.useExisting` | Moved |
-| `configuration.site.*` | `site.*` | Moved |
-| `configuration.spotfireAdmin.*` | `spotfireAdmin.*` | Moved |
-| `configuration.spotfireAdmin.passwordExistingSecret.{key,name}` | `spotfireAdmin.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
-| `database.bootstrap.passwordExistingSecret.{name,key}` | `database.bootstrap.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
-| `configuration.applyKubernetesConfiguration` | Removed |
-
-##### Version 0.1.3
-
-| New key | Old key |
-| - | - |
-| _spotfireAdmin.username_ | _spotfireAdminUsername_ |
-| _spotfireAdmin.password_ | _spotfireAdminPassword_ |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 #### Upgrading the Spotfire Server version
 
@@ -382,33 +360,12 @@ Setting up volumes permissions is usually handled by the Kubernetes administrato
 - For more information on volumes, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) and [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
 - For more information using PersistentVolumes and PersistentVolumeClaims in a Pod, see [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/).
 
-### Spotfire generic volumes
-
-A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables. 
-
-There are specific variables for using these generic volumes on each pod: 
-- For the `spotfire-server` pod, use `extraVolumeMounts` and `extraVolumes`.
-- For the `cli` pod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`. 
-- For the `config-job` pod, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
-
-Example:
-```yaml
-extraVolumeMounts:
-  - name: example
-    mountPath: /opt/tibco/example.txt
-    subPath: example.txt
-extraVolumes:
-  - name: example
-    persistentVolumeClaim:
-      claimName: exampleClaim
-```
-
-### Spotfire specific volumes
-
 You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, certificates, and other purposes.
 
-You can use predefined chart values for the most common needed Spotfire volumes.
-See the table below.
+It is recommended to use predefined chart values for the most common needed Spotfire volumes. See [table](#spotfire-specific-volumes) below.
+Using generic volumes is also possible. See section [Spotfire generic volumes](#spotfire-generic-volumes).
+
+### Spotfire specific volumes
 
 | Chart values                           | Purpose                                                                      |
 |----------------------------------------|------------------------------------------------------------------------------|
@@ -519,6 +476,27 @@ to control which PersistentVolume or PersistentVolumeClaim to use.
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
+### Spotfire generic volumes
+
+A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables. 
+
+There are specific variables for using these generic volumes on each pod: 
+- For the `spotfire-server` pod, use `extraVolumeMounts` and `extraVolumes`.
+- For the `cli` pod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`. 
+- For the `config-job` pod, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
+
+Example:
+```yaml
+extraVolumeMounts:
+  - name: example
+    mountPath: /opt/tibco/example.txt
+    subPath: example.txt
+extraVolumes:
+  - name: example
+    persistentVolumeClaim:
+      claimName: exampleClaim
+```
+
 ## Always-on Spotfire configuration CLI pod
 
 When `cliPod.enabled` is set to `true`, an always-on Spotfire configuration CLI pod is deployed with the chart. You can use this pod to manage and configure the Spotfire environment.
@@ -535,16 +513,20 @@ For more information, see [Configuration using the command line](https://docs.ti
 
 | Database              | driver class                                 | create-db.databaseUrl                                    | bootstrap.databaseUrl                                                | Additional parameters                    |
 |-----------------------|----------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------|------------------------------------------|
-| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/                         |                                          | 
+| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             |                                          |
 | Oracle                | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@//databasehost:databaseport/service    | jdbc:oracle:thin:@//databasehost:databaseport/service                | oracleRootfolder, oracleTablespacePrefix |
 | MSSQL                 | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename |                                          |
-| AWS Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   | 
-| Aurora Postgres       | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   | 
+| AWS Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Aurora Postgres       | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
 | AWS Oracle            | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@databasehost:databaseport/ORCL         | jdbc:oracle:thin:@databasehost:databaseport/ORCL                     | variant = rds                            |
 | AWS MSSQL             | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = rds                            |
-| Azure Postgres        | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   | 
+| Azure Postgres        | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
 | Azure MSSQL           | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure                          |
-| Google Cloud Postgres | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   | 
+| Google Cloud Postgres | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
 
+For more details, see for example
+- [Postgres JDBC](https://jdbc.postgresql.org/documentation/use/#connecting-to-the-database)
+- [Oracle JDBC](https://docs.oracle.com/en/database/oracle/oracle-database/12.2/jjdbc/data-sources-and-URLs.html#GUID-C4F2CA86-0F68-400C-95DA-30171C9FB8F0)
+- [Microsoft JDBC](https://learn.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url?view=sql-server-ver16)
 
 {{ template "chart.valuesSection" . }}

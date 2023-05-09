@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
         - name: populate-packages
-          image: tibco/spotfire-pythonservice:1.15.0-1.3.1
+          image: tibco/spotfire-pythonservice:1.15.0-1.4.0
           command: ['sh', '-c', 'python -m pip install -t /packages -r /requirements.txt']
           imagePullPolicy: Always
           volumeMounts:

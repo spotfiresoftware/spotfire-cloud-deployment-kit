@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: custom-modules-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-client
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: populate-modules-job
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      containers:
+        - name: populate-modules
+          image: webplayer-custom-modules
+          command: ['sh', '-c', '/unpack-modules-from-spk-sdn.sh /custom-modules/* /custom-modules-persistent-volume-mount']
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: custom-modules-volume
+            mountPath: /custom-modules-persistent-volume-mount
+      volumes:
+        - name: custom-modules-volume
+          persistentVolumeClaim:
+            claimName: custom-modules-pvc
+      restartPolicy: Never

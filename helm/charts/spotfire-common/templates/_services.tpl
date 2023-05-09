@@ -31,12 +31,13 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Service NOTES.txt
+NOTES.txt for services
+Example usage: include "spotfire-common.spotfire-service.notes" (merge . (dict "componentName" "webplayer"))
 */}}
 {{- define "spotfire-common.spotfire-service.notes" -}}
-Service of type {{ include "spotfire-common.spotfire-service.component.name"  . }} with name {{ include "spotfire-common.spotfire-service.fullname" . }} has been {{ if .Release.IsInstall }}installed{{ else }}upgraded{{ end }}.
+Service of type {{ .componentName }} with name {{ include "spotfire-common.spotfire-service.fullname" . }} has been {{ if .Release.IsInstall }}installed{{ else }}upgraded{{ end }}.
 
-The {{ include "spotfire-common.spotfire-service.component.name"  . }} is connected to spotfire server on backend address {{ tpl .Values.nodemanagerConfig.serverBackendAddress $ }}.
+The {{ .componentName }} is connected to spotfire server on backend address {{ tpl .Values.nodemanagerConfig.serverBackendAddress $ }}.
 
 {{ if (tpl .Values.logging.logForwarderAddress $) -}}
 Log are being forwarded to {{ (tpl .Values.logging.logForwarderAddress $) }}
@@ -44,13 +45,14 @@ Log are being forwarded to {{ (tpl .Values.logging.logForwarderAddress $) }}
 
 Log forwarding is disabled. To view logs for the service pod run:
 
-    export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "spotfire-common.spotfire-service.name" . }}, app.kubernetes.io/instance={{ .Release.Name }}, app.kubernetes.io/component={{ include "spotfire-common.spotfire-service.component.name" . }}, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}")
+    export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "spotfire-common.spotfire-service.name" . }}, app.kubernetes.io/instance={{ .Release.Name }}, app.kubernetes.io/component={{ .componentName }}, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}")
     kubectl --namespace {{ .Release.Namespace }} logs "${POD_NAME}" -c fluent-bit
 {{- end }}
 {{- end }}
 
 {{/*
 Common labels
+Example usage: include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "automationservices"))
 */}}
 {{- define "spotfire-common.spotfire-service.labels" -}}
 helm.sh/chart: {{ include "spotfire-common.spotfire-service.chart" . }}
@@ -63,12 +65,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{/*
 Selector labels
+Example usage: include "spotfire-common.spotfire-service.selectorLabels" (merge . (dict "componentName" "automationservices"))
 */}}
 {{- define "spotfire-common.spotfire-service.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "spotfire-common.spotfire-service.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/part-of: spotfire
-app.kubernetes.io/component: {{ include "spotfire-common.spotfire-service.component.name"  . }}
+app.kubernetes.io/component: {{ .componentName }}
 {{- end }}
 
 {{/*

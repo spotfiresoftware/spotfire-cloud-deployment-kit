@@ -85,19 +85,20 @@ see [Database drivers and database connection
 It is required to provide the Spotfire database connection details.
  
 - `SPOTFIREDB_CLASS` - See **--driver-class** for [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
-   Example: *org.postgresql.Driver*
+   Example: _org.postgresql.Driver_
 - `SPOTFIREDB_URL` - See **--database-url** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help. 
-   Example: *jdbc:postgresql://server:5432/spotfire_server*
+   Example: _jdbc:postgresql://server:5432/spotfire_server_
 - `SPOTFIREDB_USERNAME` - See **--username** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
-   Example: *spotfire*.
+   Example: _spotfire_.
 - `SPOTFIREDB_PASSWORD` - See **--password** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
-   Example: *p4s5w0rd!*.
+   Example: _p4s5w0rd!_.
 - `TOOL_PASSWORD` - See **--tool-password** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: **empty value**, meaning a random password will be generated.
 - `SERVER_BACKEND_ADDRESS` - See **-Avalue** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
-   Example: spotfire-server.
+   Example: _spotfire-server_.
+- `BOOTSTRAP_OPTS` - Additional optional arguments to the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html)
 
-**Note**: All `SPOTFIREDB_*` environment variables are __required__ unless an existing `bootstrap.xml` exists in `/opt/tibco/tss/tomcat/webapps/spotfire/WEB-INF` during startup.
+**Note**: All `SPOTFIREDB_*` environment variables are **required** unless an existing `bootstrap.xml` exists in `/opt/tibco/tss/tomcat/webapps/spotfire/WEB-INF` during startup.
 
 **Note**: Make sure to keep a backup before upgrading the database.
 

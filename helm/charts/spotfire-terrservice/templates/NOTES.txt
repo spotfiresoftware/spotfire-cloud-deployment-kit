@@ -1,1 +1,1 @@
-{{- include "spotfire-common.spotfire-service.notes" . -}}
+{{- include "spotfire-common.spotfire-service.notes" (merge . (dict "componentName" "terrservice")) -}}

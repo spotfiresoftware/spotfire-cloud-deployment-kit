@@ -1,3 +1,8 @@
+{{/*
+Test for services
+Example usage:
+include "spotfire-common.test.serviceCurl" (merge . (dict "componentName" "pythonservice"))
+*/}}
 {{- define "spotfire-common.test.serviceCurl" -}}
 apiVersion: v1
 kind: Pod
@@ -13,6 +18,6 @@ spec:
     - name: curl
       image: curlimages/curl:7.77.0
       command: ['curl']
-      args: ['-v', '--retry-connrefused', '--fail', '--retry', '20', '--max-time', '300', '--retry-delay', '10', 'http://{{ include "spotfire-common.spotfire-service.fullname" . }}:9080/spotfire/liveness']
+      args: ['-v', '--trace-time', '--retry-connrefused', '--fail', '--retry', '20', '--max-time', '300', '--retry-delay', '10', 'http://{{ include "spotfire-common.spotfire-service.fullname" . }}:9080/spotfire/liveness']
   restartPolicy: Never
 {{- end -}}

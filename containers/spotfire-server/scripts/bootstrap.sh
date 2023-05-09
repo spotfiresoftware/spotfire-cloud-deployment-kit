@@ -39,7 +39,8 @@ echo "Using hostname: $hostname"
     --delay-interval-seconds="${startupcheck_delay_interval_seconds}" \
     -A"${hostname}" \
     ${SERVER_BACKEND_ADDRESS:+-A"${SERVER_BACKEND_ADDRESS}"} \
-    ${ENCRYPTION_PASSWORD:+--encryption-password="${ENCRYPTION_PASSWORD}"}
+    ${ENCRYPTION_PASSWORD:+--encryption-password="${ENCRYPTION_PASSWORD}"} \
+    ${BOOTSTRAP_OPTS}
 
 exit_code=$?
 if [ ${exit_code} -ne 0 ]; then

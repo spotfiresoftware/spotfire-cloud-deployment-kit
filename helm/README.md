@@ -12,10 +12,7 @@ This directory contains the recipes to build and examples to use the [**TIBCO Sp
 
 See the respective README files for details and usage examples.
 
-**Note**: There are other recipes in the `charts` directory not listed here.
-They are used internally for better template reusability, and they include common software requirements and functions.
-
-**Note**: You can build each chart on its own as described in the respective READMEs, or you can use the provided `Makefile` within this directory to build all the charts with just one single command. (This  `Makefile` also takes care of their internal dependencies.)
+**Note**: There are other recipes in the `charts` directory not listed here. They are used internally for better template reusability, and they include common software requirements and functions.
 
 ## Prerequisites
 
@@ -24,6 +21,8 @@ They are used internally for better template reusability, and they include commo
 - Helm 3+, for building and deploying the charts.
 
 ## Building the charts
+
+You can build each chart on its own as described in the respective READMEs, or you can use the provided `Makefile` within this directory to build all the charts with just one single command. (This `Makefile` also takes care of their internal dependencies.)
 
 To package all the charts in this directory, run `make` from the helm directory.
 The included `Makefile` builds each of the charts, taking care of any dependencies.
@@ -40,7 +39,7 @@ You can package the provided charts, one by one, by following these steps from e
 
 1. Go to the chart directory. For example:
     ```bash
-    cd <this-repo>/helm/chart/<spotfire-chart>
+    cd <this-repo>/helm/charts/<spotfire-chart>
     ```
 
 2. Update the chart dependencies:

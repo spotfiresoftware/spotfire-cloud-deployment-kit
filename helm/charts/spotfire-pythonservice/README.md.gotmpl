@@ -55,7 +55,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` (or the parameter `global.spotfire.acceptEUA`) to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
-**Note**: You must provide your private registry address where the Spotfire containers are stored.
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
@@ -88,11 +88,10 @@ helm install my-release --set volumes.packages=packages-pvc <... additional helm
 ``` 
 #### Configuration
 
-To set [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm values.
+To set [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your Helm values.
 
 Example:
-```
-configuration:
+```configuration:
   # The maximum number of Python engine sessions that are allowed to run concurrently in the Python service.
   engine.session.max: 5
 
@@ -135,14 +134,14 @@ kedaAutoscaling:
 ```
 
 The `spotfire-pythonservice` has the following autoscaling defaults:
-- The default metric:  `spotfire_service_queue_engines_inUse`.
-- The default query:   The sum of _service_queue_engines_inUse_ of the Python service instances.
+- metric: `spotfire_service_queue_engines_inUse` (_serviceQueueEnginesInUse_ Python service counter).
+- query: the sum of `spotfire_service_queue_engines_inUse` of the Python service instances for the release name.
 
 The counter _serviceQueueEnginesInUse_ provides the total number of engines currently executing.
 By default, the Python service has `number of cores - 1` available slots, which means that `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
-Set the `kedaAutoscaling.threshold` to be lower than `resources.limits.cpu` so you can scale out before all the available capacity is taken.
-
-**Note**:  Clients requesting a slot typically wait until a slot is available.
+Typically, you want to scale out before all the available capacity is taken.
+Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
+Note that clients requesting a slot typically wait until a slot is available.
 
 For more information, see [Monitoring Spotfire Service for Python using JMX](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
@@ -158,24 +157,16 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 #### Upgrading helm chart version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
 
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
-| `configuration` | `config.conf/custom.properties` | Exposes the service configuration 'custom.properties' as Helm values. |
-| | `config.log4j2.xml` | Removed. Log level can be set with `logging.logLevel`. |
-| | `volumes.packages.mountPath` | Removed. `mountPath` is now hardcoded to **/opt/packages**. |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 {{ template "chart.valuesSection" . }}

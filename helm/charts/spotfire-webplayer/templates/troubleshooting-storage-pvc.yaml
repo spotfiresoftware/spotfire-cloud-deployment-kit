@@ -1,1 +1,1 @@
-{{ include "spotfire-common.volumes.troubleshooting.persistentVolumeClaim" . }}
+{{ include "spotfire-common.volumes.troubleshooting.persistentVolumeClaim" (merge . (dict "componentName" "webplayer")) }}

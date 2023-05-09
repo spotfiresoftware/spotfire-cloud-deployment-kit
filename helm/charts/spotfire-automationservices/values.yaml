@@ -1,7 +1,3 @@
-# Default values for automationservices.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
 acceptEUA:
 
@@ -10,49 +6,47 @@ global:
     # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
     acceptEUA:
     image:
-      # global.spotfire.image.registry -- Global container image registry. Used for tibco/spotfire container images unless it is overridden.
+      # -- The global container image registry. Used for tibco/spotfire container images, unless it is overridden.
       registry:
-      # global.spotfire.image.pullPolicy -- Global container image pull policy.
+      # -- The global container image pull policy.
       pullPolicy: IfNotPresent
-      # global.spotfire.image.pullSecrets -- Global container image pull secrets.
+      # -- The global container image pull secrets.
       ## E.g.
       ## pullSecrets:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
-  serviceName: automationservices
 
 nodemanagerConfig:
   # -- The spotfire-server service name. This value is evaluated as a helm template.
   serverBackendAddress: ""
-  # -- The draining timeout after which the service is forcefully shutdown
+  # -- The draining timeout after which the service is forcefully shut down.
   preStopDrainingTimeoutSeconds: 610
 
 replicaCount: 1
 
 image:
-  # image.registry -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
+  # -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
   registry:
-  # image.repository -- The spotfire-server image repository.
+  # -- The spotfire-server image repository.
   repository: tibco/spotfire-automationservices
-  # image.tag -- The container image tag to use.
-  tag: "12.3.0-1.3.1"
-  # image.pullPolicy -- spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
+  # -- The container image tag to use.
+  tag: "12.4.0-1.4.0"
+  # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
-  ## Optionally specify an array of imagePullSecrets.
-  # image.pullSecrets -- The spotfire-server image pull secrets.
+  # -- Image pull secrets.
   pullSecrets: []
 
 fluentBitSidecar:
   image:
-    # -- image repository for fluent-bit logging sidecar.
+    # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
-    # -- image tag to use for fluent-bit logging sidecar
-    tag: "2.0.5"
-    # -- image pull policy for the fluent-bit logging sidecar image.
+    # -- The image tag to use for fluent-bit logging sidecar.
+    tag: "2.0.9"
+    # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
-  # -- securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
+  # -- The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
   securityContext: {}
     # # -- Enable this if running as privileged.
     # privileged: false
@@ -89,7 +83,7 @@ podSecurityContext: {}
   # # -- Group ID for the Pod.
   # runAsGroup: 0
 
-# -- The securityContext setting for the spotfire-automationservices container. Overrides any securityContext setting on the Pod level.
+# -- The securityContext setting for the service container. Overrides any securityContext setting on the Pod level.
 securityContext: {}
   # # -- Enable this if running as privileged.
   # privileged: false
@@ -134,7 +128,7 @@ readinessProbe:
 logging:
   # -- The spotfire-server log-forwarder name. Template.
   logForwarderAddress: ""
-  # -- set to `debug`, `trace`, `minimal` or leave empty for info. This applies for both node manager and the service.
+  # -- Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies for both node manager and the service.
   logLevel: "debug"
 
 resources: {}
@@ -150,7 +144,6 @@ resources: {}
   #   memory: 128Mi
 
 # -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details.
-# @default -- Disabled.
 kedaAutoscaling:
   enabled: false
   # -- The interval to check each trigger on.
@@ -165,9 +158,9 @@ kedaAutoscaling:
   triggers: []
   fallback: {}
   advanced: {}
-  # -- Spotfire specific settings
+  # -- Spotfire specific settings.
   spotfireConfig:
-    # -- REQUIRED. The URL for the Prometheus server where metrics are fetched from.
+    # -- REQUIRED. The URL for the Prometheus server from where metrics are fetched.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
     # -- If more than one Spotfire Server release is installed in the same namespace, specify the release to get the correct metrics.
     spotfireServerHelmRelease:
@@ -195,45 +188,59 @@ extraEnvVars: []
 #  - name: NAME
 #    value: value
 
-# The name of ConfigMap containing additional environment variables.
+# -- The name of the ConfigMap containing additional environment variables.
 extraEnvVarsCM: ""
 
-# The name of Secret containing extra additional environment variables.
+# -- The name of the Secret containing extra additional environment variables.
 extraEnvVarsSecret: ""
 
-# -- Extra volumeMounts for the spotfire-automationservices container.
+# -- Extra volumeMounts for the service container.
 # More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`.
 extraVolumeMounts: []
   # - name: example
   #   mountPath: /opt/tibco/example.txt
   #   subPath: example.txt
 
-# -- Extra volumes for the spotfire-automationservices container.
+# -- Extra volumes for the service container.
 # More info: `kubectl explain deployment.spec.template.spec.volumes`.
 extraVolumes: []
   # - name: example
   #   persistentVolumeClaim:
   #     claimName: exampleClaim
 
-# -- Additional init containers to add to the automationservices pod.
+# -- Additional init containers to add to the service pod.
 extraInitContainers: []
   # - name: dummy-init
   #   image: busybox
   #   command: ['echo', "hey"]
 
 volumes:
+  customModules:
+    persistentVolumeClaim:
+      # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      create: false
+      # -- Specifies the name of the 'StorageClass' to use for the volumes.customModules-claim.
+      storageClassName: ""
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the volumes.customModules claims.
+      resources:
+        requests:
+          storage: 2Gi
+      # -- Specifies the name of the persistent volume to use for the volumes.customModules-claim.
+      volumeName:
+    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim.
+    existingClaim: ""
+
   troubleshooting:
     persistentVolumeClaim:
-       # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      # -- If 'true', then a 'PersistentVolumeClaim' will be created.
       create: false
       # -- Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim.
       storageClassName: ""
-      # -- Specifies the standard Kubernetes resource requests and/or the limits for the volumes.troubleshooting claims.
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the volumes.troubleshooting claims.
       resources:
         requests:
           storage: 2Gi
       # -- Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim.
       volumeName:
-    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing
-    # persistent volume claim.
+    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim.
     existingClaim: ""

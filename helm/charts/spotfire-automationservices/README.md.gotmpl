@@ -56,7 +56,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
-**Note**: You must provide your private registry address where the Spotfire containers are stored.
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
@@ -99,6 +99,10 @@ You can replace the file name to get a copy any of the other container configura
 docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-automationservices:<imagetag> 5):/opt/tibco/tsnm/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Automation.config .
 ```
 
+#### Custom modules
+
+The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
+
 ### Uninstalling
 
 To uninstall/delete the `my-release` deployment:
@@ -130,15 +134,15 @@ kedaAutoscaling:
   maxReplicas: 3
 ```
 
-The `spotfire-automationservices` has the following defaults:
-- The default autoscaling metric is the `spotfire_Jobs_QueueSize`.
-- The default query is the max _Jobs Queue Size_ of the Automation Services instances.
+The `spotfire-automationservices` has the following autoscaling defaults:
+- metric: `spotfire_Jobs_QueueSize` (_Jobs Queue Size_ of the Automation Services instances).
+- query: the max `spotfire_Jobs_QueueSize` within the measurement interval for the release name.
 
 With these default settings, if the queue reaches the configured threshold, then another instance is started to scale out the service. If the queue size falls below the threshold, then the service scales in.
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts for long-running tasks, so that jobs are not aborted prematurely when an instance is stopped to scale in.
 
-**Note**: The metric used for autoscaling is scraped from the Spotfire Servers, so if there are more than one Spotfire Server helm releases in the same namespace, `kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease` must also be set.
+**Note**: The metric used for autoscaling is scraped from the Spotfire Servers, so if there are more than one Spotfire Server Helm releases in the same namespace, `kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease` must also be set.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
@@ -149,21 +153,16 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
 
 #### Upgrading helm chart version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
 
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 {{ template "chart.valuesSection" . }}

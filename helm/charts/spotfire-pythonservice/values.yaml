@@ -1,7 +1,3 @@
-# Default values for pythonservice.
-# This is a YAML-formatted file.
-# Declare variables to pass into your templates.
-
 # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
 acceptEUA:
 
@@ -10,17 +6,16 @@ global:
     # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
     acceptEUA:
     image:
-      # global.spotfire.image.registry -- Global container image registry, this will be used for tibco/spotfire container images unless overridden.
+      # -- The global container image registry. Used for tibco/spotfire container images, unless it is overridden.
       registry:
-      # global.spotfire.image.pullPolicy -- Global container image pull policy.
+      # -- The global container image pull policy.
       pullPolicy: IfNotPresent
-      # global.spotfire.image.pullSecrets -- Global container image pull secrets.
+      # -- The global container image pull secrets.
       ## E.g.
       ## pullSecrets:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
-  serviceName: pythonservice
 
 nodemanagerConfig:
   # -- The spotfire-server service name. This value is evaluated as a helm template.
@@ -31,16 +26,15 @@ nodemanagerConfig:
 replicaCount: 1
 
 image:
-  # image.registry -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
+  # -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
   registry:
-  # image.repository -- The spotfire-server image repository.
+  # -- The spotfire-server image repository.
   repository: tibco/spotfire-pythonservice
-  # image.tag -- The container image tag to use.
-  tag: "1.15.0-1.3.1"
-  # image.pullPolicy -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy
+  # -- The container image tag to use.
+  tag: "1.15.0-1.4.0"
+  # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
-  ## Optionally specifies an array of imagePullSecrets.
-  # image.pullSecrets -- The spotfire-server image pull secrets.
+  # -- Image pull secrets.
   pullSecrets: []
 
 fluentBitSidecar:
@@ -48,7 +42,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.0.5"
+    tag: "2.0.9"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -80,7 +74,7 @@ podAnnotations:
   prometheus.io/port: "9080"
   prometheus.io/scrape: "true"
 
-# --  The Pod securityContext setting applies to all of the containers inside the Pod.
+# -- The Pod securityContext setting applies to all of the containers inside the Pod.
 podSecurityContext: {}
   # # -- Owner User ID for the volume and any file created in that volume.
   # fsGroup: 1000
@@ -89,7 +83,7 @@ podSecurityContext: {}
   # # -- Group ID for the Pod.
   # runAsGroup: 0
 
-# -- The securityContext setting for the spotfire-pythonservice container. Overrides any securityContext setting on the Pod level.
+# -- The securityContext setting for the service container. Overrides any securityContext setting on the Pod level.
 securityContext: {}
   # # -- Enable this if running as privileged.
   # privileged: false
@@ -150,7 +144,6 @@ resources: {}
   #   memory: 128Mi
 
 # -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details.
-# @default -- Disabled
 kedaAutoscaling:
   enabled: false
   # -- The interval to check each trigger on.
@@ -165,7 +158,7 @@ kedaAutoscaling:
   fallback: {}
   triggers: []
   advanced: {}
-  # -- Spotfire specific settings
+  # -- Spotfire specific settings.
   spotfireConfig:
     # -- REQUIRED. The URL for the Prometheus server from where metrics are fetched.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
@@ -176,8 +169,9 @@ tolerations: []
 
 affinity: {}
 
-# -- (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/custom_configuration_properties.html). Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'.
-configuration:
+# -- (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html). 
+# Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'.
+configuration: {}
   # add any key: value here for custom configuration
   # engine.execution.timeout:	"600"
 
@@ -186,25 +180,31 @@ extraEnvVars: []
 #  - name: NAME
 #    value: value
 
-# The name of the ConfigMap containing additional environment variables.
+# -- The name of the ConfigMap containing additional environment variables.
 extraEnvVarsCM: ""
 
-# The name of the Secret containing extra additional environment variables.
+# -- The name of the Secret containing extra additional environment variables.
 extraEnvVarsSecret: ""
 
-# -- Extra volumeMounts for the spotfire-pythonservice container.
+# -- Extra volumeMounts for the service container.
 # More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`.
 extraVolumeMounts: []
   # - name: example
   #   mountPath: /opt/tibco/example.txt
   #   subPath: example.txt
 
-# -- Extra volumes for the spotfire-pythonservice container.
+# -- Extra volumes for the service container.
 # More info: `kubectl explain deployment.spec.template.spec.volumes`.
 extraVolumes: []
   # - name: example
   #   persistentVolumeClaim:
   #     claimName: exampleClaim
+
+# -- Additional init containers to add to the service pod.
+extraInitContainers: []
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', "hey"]
 
 volumes:
   packages:
@@ -213,34 +213,26 @@ volumes:
       create: false
       # -- Specifies the name of the 'StorageClass' to use for the customExt volume-claim.
       storageClassName: ""
-      # -- Specifies the standard K8s resource requests and/or limits for the customExt volume claims.
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the customExt volume claims.
       resources:
         requests:
           storage: 1Gi
-      # -- Specifies the name of the persistent volume to use for the customExt volume-claim.
+      # -- Specifies the name of the persistent volume that should be used for the customExt volume-claim.
       volumeName:
-    # When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing 
-    # persistent volume claim
+    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim.
     existingClaim: ""
 
   troubleshooting:
     persistentVolumeClaim:
-       # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      # -- If 'true', then a 'PersistentVolumeClaim' will be created.
       create: false
       # -- Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim.
       storageClassName: ""
-      # -- Specifies the standard Kubernetes resource requests and/or the limits for the volumes.troubleshooting claims.
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the volumes.troubleshooting claims.
       resources:
         requests:
           storage: 2Gi
       # -- Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim.
       volumeName:
-    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already-existing
-    # persistent volume claim.
+    # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim.
     existingClaim: ""
-
-# -- Additional init containers to add to the pythonservice pod.
-extraInitContainers: []
-  # - name: dummy-init
-  #   image: busybox
-  #   command: ['echo', "hey"]

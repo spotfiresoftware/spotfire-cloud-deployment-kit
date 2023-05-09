@@ -20,7 +20,7 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 /*
-Spotfire database secrets, either an exterinal existingSecret or spotfire managed secret
+Spotfire database secrets, either an external existingSecret or spotfire managed secret
 */
 {{- define "spotfire-server.spotfiredatabase.secret.name" -}}
 {{- if .Values.database.bootstrap.passwordExistingSecret.name -}}
@@ -138,7 +138,7 @@ Database info needed to bootstrap and upgrade server
 - name: SPOTFIREDB_CLASS
   value: {{ required "driver class must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: TOOL_PASSWORD
-  value: {{ .Values.toolPassword | quote }}
+  value: {{ default (randAlpha 6) .Values.toolPassword | quote }}
 {{- if .Values.configuration.encryptionPassword }}
 - name: ENCRYPTION_PASSWORD
   value: {{ .Values.configuration.encryptionPassword | quote }}

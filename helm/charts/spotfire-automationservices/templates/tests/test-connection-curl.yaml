@@ -1,1 +1,1 @@
-{{ include "spotfire-common.test.serviceCurl" . }}
+{{ include "spotfire-common.test.serviceCurl" (merge . (dict "componentName" "automationservices")) }}

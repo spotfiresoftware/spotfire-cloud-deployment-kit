@@ -1,7 +1,7 @@
 #
 # spotfire-base container for latest released stable Debian
 #
-ARG DEBIAN_TAG=stable-slim
+ARG DEBIAN_TAG=11-slim
 
 #
 # common java-base

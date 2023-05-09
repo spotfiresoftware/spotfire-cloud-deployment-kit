@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.3.0](https://img.shields.io/badge/AppVersion-12.3.0-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.4.0](https://img.shields.io/badge/AppVersion-12.4.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire Server.
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.23.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.5 |
+| file://../spotfire-common | spotfire-common | 0.1.6 |
 | https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.22.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.18.* |
 
@@ -74,6 +74,8 @@ Deploy the Spotfire Server using an existing database:
 ```bash
 helm install my-release . \
     --set acceptEUA=true \
+    --set global.spotfire.image.registry="127.0.0.1:32000" \
+    --set global.spotfire.image.pullPolicy="Always" \
     --set database.bootstrap.databaseUrl="$DB_BOOTSTRAP_URL" \
     --set database.create-db.databaseUrl="$DB_URL" \
     --set database.create-db.adminUsername="$DB_ADMIN" \
@@ -84,6 +86,8 @@ helm install my-release . \
 
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 **Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
@@ -130,7 +134,7 @@ Steps:
         --set configuration.site.publicAddress=http://localhost/
     ```
 
-   **Note**: You must provide your private registry address where the Spotfire containers are stored.
+   **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
    **Note**: This example assumes that your Spotfire container images are located in a configured registry at 127.0.0.1:32000.
    See the Kubernetes documentation for how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/),
@@ -211,9 +215,9 @@ kedaAutoscaling:
 
 The value specified for threshold determines the value that the query must reach before the service is scaled.
 
-The `spotfire-server` has the following defaults:
-- The default autoscaling metric is the `spotfire_OS_OperatingSystem_ProcessCpuLoad`.
-- The default query is the sum of CPU usage (in percent) of all of the Spotfire Server instances.
+The `spotfire-server` has the following autoscaling defaults:
+- metric: `spotfire_OS_OperatingSystem_ProcessCpuLoad` (_CPU usage_ of the Spotfire Server instance).
+- query: the sum of `spotfire_OS_OperatingSystem_ProcessCpuLoad` (in percent) of all the Spotfire Server instances for the release name.
 
 With these default settings, if the total CPU usage for all instances is greater than the threshold, then another instance is started to scale out the service.
 If the total CPU usage for all instances falls under the threshold, then the service scales in.
@@ -235,39 +239,13 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 #### Upgrading helm chart version
 
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
-| `haproxy.spotfireConfig.captures.forwardedForLength` | | |
-
-##### Version 0.1.4
-
-| New key | Old key | Comment |
-| - | - | - |
-| `configuration.draining.*` | `draining.*` | Moved |
-| `configuration.encryptionPassword` | `encryptionPassword` | Moved |
-| `configuration.preferExistingConfig` | `configuration.useExisting` | Moved |
-| `configuration.site.*` | `site.*` | Moved |
-| `configuration.spotfireAdmin.*` | `spotfireAdmin.*` | Moved |
-| `configuration.spotfireAdmin.passwordExistingSecret.{key,name}` | `spotfireAdmin.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
-| `database.bootstrap.passwordExistingSecret.{name,key}` | `database.bootstrap.existingSecret` | Changed. Only the password and not the username is read from the existingSecret |
-| `configuration.applyKubernetesConfiguration` | Removed |
-
-##### Version 0.1.3
-
-| New key | Old key |
-| - | - |
-| _spotfireAdmin.username_ | _spotfireAdminUsername_ |
-| _spotfireAdmin.password_ | _spotfireAdminPassword_ |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 #### Upgrading the Spotfire Server version
 
@@ -388,33 +366,12 @@ Setting up volumes permissions is usually handled by the Kubernetes administrato
 - For more information on volumes, see [Volumes](https://kubernetes.io/docs/concepts/storage/volumes/) and [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/).
 - For more information using PersistentVolumes and PersistentVolumeClaims in a Pod, see [Configure a Pod to Use a PersistentVolume for Storage](https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/).
 
-### Spotfire generic volumes
-
-A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables.
-
-There are specific variables for using these generic volumes on each pod:
-- For the `spotfire-server` pod, use `extraVolumeMounts` and `extraVolumes`.
-- For the `cli` pod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`.
-- For the `config-job` pod, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
-
-Example:
-```yaml
-extraVolumeMounts:
-  - name: example
-    mountPath: /opt/tibco/example.txt
-    subPath: example.txt
-extraVolumes:
-  - name: example
-    persistentVolumeClaim:
-      claimName: exampleClaim
-```
-
-### Spotfire specific volumes
-
 You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, certificates, and other purposes.
 
-You can use predefined chart values for the most common needed Spotfire volumes.
-See the table below.
+It is recommended to use predefined chart values for the most common needed Spotfire volumes. See [table](#spotfire-specific-volumes) below.
+Using generic volumes is also possible. See section [Spotfire generic volumes](#spotfire-generic-volumes).
+
+### Spotfire specific volumes
 
 | Chart values                           | Purpose                                                                      |
 |----------------------------------------|------------------------------------------------------------------------------|
@@ -525,6 +482,27 @@ to control which PersistentVolume or PersistentVolumeClaim to use.
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
+### Spotfire generic volumes
+
+A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables.
+
+There are specific variables for using these generic volumes on each pod:
+- For the `spotfire-server` pod, use `extraVolumeMounts` and `extraVolumes`.
+- For the `cli` pod, use `cliPod.extraVolumeMounts` and `cliPod.extraVolumes`.
+- For the `config-job` pod, use `configJob.extraVolumeMounts` and `configJob.extraVolumes`.
+
+Example:
+```yaml
+extraVolumeMounts:
+  - name: example
+    mountPath: /opt/tibco/example.txt
+    subPath: example.txt
+extraVolumes:
+  - name: example
+    persistentVolumeClaim:
+      claimName: exampleClaim
+```
+
 ## Always-on Spotfire configuration CLI pod
 
 When `cliPod.enabled` is set to `true`, an always-on Spotfire configuration CLI pod is deployed with the chart. You can use this pod to manage and configure the Spotfire environment.
@@ -541,7 +519,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 
 | Database              | driver class                                 | create-db.databaseUrl                                    | bootstrap.databaseUrl                                                | Additional parameters                    |
 |-----------------------|----------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------|------------------------------------------|
-| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/                         |                                          |
+| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             |                                          |
 | Oracle                | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@//databasehost:databaseport/service    | jdbc:oracle:thin:@//databasehost:databaseport/service                | oracleRootfolder, oracleTablespacePrefix |
 | MSSQL                 | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename |                                          |
 | AWS Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
@@ -551,6 +529,11 @@ For more information, see [Configuration using the command line](https://docs.ti
 | Azure Postgres        | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
 | Azure MSSQL           | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure                          |
 | Google Cloud Postgres | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+
+For more details, see for example
+- [Postgres JDBC](https://jdbc.postgresql.org/documentation/use/#connecting-to-the-database)
+- [Oracle JDBC](https://docs.oracle.com/en/database/oracle/oracle-database/12.2/jjdbc/data-sources-and-URLs.html#GUID-C4F2CA86-0F68-400C-95DA-30171C9FB8F0)
+- [Microsoft JDBC](https://learn.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url?view=sql-server-ver16)
 
 ## Values
 
@@ -570,7 +553,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.3.0-1.3.1"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"12.4.0-1.4.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -588,7 +571,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.3.0-1.3.1"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"12.4.0-1.4.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -599,21 +582,24 @@ For more information, see [Configuration using the command line](https://docs.ti
 | configuration.apply | string | `"initialsetup"` | When to apply configurationScripts, commandScripts and admin user creation. Possible values: * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release. * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool. * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database. |
 | configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation. These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
 | configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
+| configuration.deployment.clear | bool | `false` | Clear existing packages before any new files are added. Setting it `true` can cause extra delay because packages need to be added again every time the config-job is run. |
 | configuration.deployment.defaultDeployment.deploymentAreaName | string | `"Production"` | The name of the deployment area to create or update |
 | configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. *Warning*: If set to `true` and a deployment volume (see `volumes.deployments` key) is used, a folder with name `deploymentAreaName` will be created and potentially overwrite any existing deployment with the same name on the persistent volume. |
 | configuration.deployment.defaultDeployment.image.pullPolicy | string | `nil` | The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"tibco/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"12.3.0-1.3.1"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"12.4.0-1.4.0"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
-| configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
+| configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
 | configuration.draining.minimumSeconds | int | `90` | The minimum time in seconds that the server should be draining, even if it is considered idle. |
+| configuration.draining.publishNotReadyAddresses | bool | `true` | Makes sure that service SRV records are preserved while terminating pods, typically used with the spotfire haproxy deployment. |
 | configuration.draining.timeoutSeconds | int | `180` | The draining timeout in seconds after which the service is forcibly shut down. |
 | configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
 | configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these command will be run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
 | configuration.preferExistingConfig | bool | `false` | Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`). If no current active configuration exists, the default config is used. Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade. |
+| configuration.properties | object | Default values for kubernetes, see values.yaml. | Configuration properties The key name is the name of the property to set. If the value is a scalar the configuration tool command `set-config-prop` is used. To set a list or map the value should have the keys `itemName` and `value`. If the value is a map or object the configuration tool command `set-config-map-prop` is used. If the value is a list the configuration tool command `set-config-list-prop` is used. |
 | configuration.site | object | Spotfire Server joins the Default site. | Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information. |
 | configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
 | configuration.site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
@@ -646,18 +632,20 @@ For more information, see [Configuration using the command line](https://docs.ti
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.0.5"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.0.9"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
 | global.spotfire.image.registry | string | `nil` | The global container image registry. Used for TIBCO Spotfire container images unless overridden. |
-| haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. |
+| haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | haproxy.enabled | bool | `true` |  |
 | haproxy.extraVolumeMounts[0].mountPath | string | `"/tmp/chart/fix"` |  |
 | haproxy.extraVolumeMounts[0].name | string | `"chart-fix"` |  |
 | haproxy.extraVolumes[0].emptyDir | object | `{}` |  |
 | haproxy.extraVolumes[0].name | string | `"chart-fix"` |  |
+| haproxy.includes | object | `{}` |  |
+| haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | haproxy.kind | string | `"Deployment"` |  |
 | haproxy.podAnnotations | object | `{"prometheus.io/path":"/metrics","prometheus.io/port":"1024","prometheus.io/scrape":"true"}` | Prometheus annotations. Should match the haproxy.config settings. |
 | haproxy.podLabels."app.kubernetes.io/component" | string | `"haproxy"` |  |
@@ -672,10 +660,19 @@ For more information, see [Configuration using the command line](https://docs.ti
 | haproxy.spotfireConfig.cleanup.secureCookieAttributeForHttp | bool | `true` | If incorrect, then the secure cookie attribute should be removed for HTTP connections in the Set-Cookie response headers. |
 | haproxy.spotfireConfig.debug | bool | `false` | Specifies if debug response headers should be enabled. |
 | haproxy.spotfireConfig.loadBalancingCookie | object | stateless load balancing | Cookie-related configuration. |
-| haproxy.spotfireConfig.loadBalancingCookie.attributes | string | `"prefix dynamic"` | Attributes for the cookie value in the haproxy config. See [haproxy cookie](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-cookie) for more information. |
+| haproxy.spotfireConfig.loadBalancingCookie.attributes | string | `"insert indirect nocache dynamic httponly secure attr \"SameSite=None\""` | Attributes for the cookie value in the haproxy config. See [haproxy cookie](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-cookie) for more information. |
 | haproxy.spotfireConfig.loadBalancingCookie.dynamicCookieKey | string | the cookie key | dynamic-cookie-key value in the haproxy config. |
+| haproxy.spotfireConfig.maintenance | object | disabled | Maintenance mode, can be used to temporarily block requests (but still allow some, see allowCookie below). |
+| haproxy.spotfireConfig.maintenance.allowCookie | object | disabled | Allowed requests in maintenance mode by configuring a cookie for allowed requests. |
+| haproxy.spotfireConfig.maintenance.allowCookie.enabled | bool | `false` | Specifies if a cookie can be used to access the environment while maintenance mode is enabled. |
+| haproxy.spotfireConfig.maintenance.allowCookie.name | string | `""` | The name of the cookie, case sensitive |
+| haproxy.spotfireConfig.maintenance.allowCookie.value | string | `""` | The value of the cookie, case sensitive |
+| haproxy.spotfireConfig.maintenance.enabled | bool | `false` | Specifies if maintenance mode is enabled. |
+| haproxy.spotfireConfig.maintenancePage | object | maintenance page related settings | A custom maintenance page that is displayed if maintenance mode is enabled or if no Spotfire Server instances are running |
+| haproxy.spotfireConfig.maintenancePage.bufSize | int | `24576` | For larger files, haproxy tune.bufsize may need to be increased to accommodate the larger size. |
+| haproxy.spotfireConfig.maintenancePage.responseString | string | `"<html><title>Maintenance - TIBCO Spotfire</title><body>Maintenance in progress</body></html>"` | The maintenance page response string. |
+| haproxy.spotfireConfig.maintenancePage.useFile | bool | `false` | If a haproxy include file,  haproxy.includes.'maintenance\\.html'=<path to file>, should be used instead of haproxy.maintenancePage.responseString below. |
 | haproxy.spotfireConfig.serverTemplate.additionalParams | string | `"on-marked-down shutdown-sessions"` | Additional parameters, see [haproxy server](https://cbonte.github.io/haproxy-dconv/2.6/snapshot/configuration.html#server%20%28Alphabetically%20sorted%20keywords%20reference%29) |
-| haproxy.spotfireConfig.timeouts | object | haproxy timeouts | haproxy related timeouts |
 | haproxy.spotfireConfig.timeouts.client | string | `"30m"` | See [haproxy timeout client](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20client). |
 | haproxy.spotfireConfig.timeouts.connect | string | `"300ms"` | See [haproxy timeout connect](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20connect). |
 | haproxy.spotfireConfig.timeouts.httpRequest | string | `"3600s"` | See [haproxy timeout http-request](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-timeout%20http-request). |
@@ -686,7 +683,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.3.0-1.3.1"` | The container image tag to use. |
+| image.tag | string | `"12.4.0-1.4.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -698,7 +695,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
 | kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
 | kedaAutoscaling.pollingInterval | int | `30` | The interval to check each trigger on. |
-| kedaAutoscaling.spotfireConfig | object | `{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"}` | Spotfire specific settings |
+| kedaAutoscaling.spotfireConfig | object | `{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"}` | Spotfire specific settings. |
 | kedaAutoscaling.spotfireConfig.prometheusServerAddress | string | `"http://prometheus-server.monitor.svc.cluster.local"` | REQUIRED. The URL to the Prometheus server where metrics should be fetched from. |
 | livenessProbe.enabled | bool | `true` |  |
 | livenessProbe.failureThreshold | int | `3` |  |
@@ -752,7 +749,7 @@ For more information, see [Configuration using the command line](https://docs.ti
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | tolerations | list | `[]` |  |
-| toolPassword | string | `"toolpassword"` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. |
+| toolPassword | string | `""` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/tibco/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | volumes.certificates.existingClaim | string | `""` |  |

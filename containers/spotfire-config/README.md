@@ -55,7 +55,7 @@ documentation pages.
 #### Create the Spotfire database schemas in the given database server
 
 ```bash
-docker run -e ACCEPT_EUA=Y --rm -it tibco/spotfire-config create-db \
+docker run --rm -it -e ACCEPT_EUA=Y tibco/spotfire-config create-db \
   --driver-class=org.postgresql.Driver \
   --database-url=jdbc:postgresql://172.17.0.1/ \
   --admin-username=postgres \
@@ -72,7 +72,7 @@ You can use the Spotfire configuration tool to create bootstrap.xml:
 
 ```bash
 touch bootstrap.xml
-docker run -e ACCEPT_EUA=Y --rm -it \
+docker run --rm -it -e ACCEPT_EUA=Y \
   -v "$(pwd)/bootstrap.xml:/opt/tibco/bootstrap.xml" \
   tibco/spotfire-config bootstrap \
   --driver-class=org.postgresql.Driver \
@@ -89,7 +89,7 @@ docker run -e ACCEPT_EUA=Y --rm -it \
 You can use a script to execute a series of Spotfire configuration tool commands:
 
 ```bash
-docker run -e ACCEPT_EUA=Y --rm -it \
+docker run --rm -it -e ACCEPT_EUA=Y \
   -v "$(pwd)/bootstrap.xml:/opt/tibco/bootstrap.xml" \
   -v "$(pwd)/script.txt:/opt/tibco/script.txt" \
   tibco/spotfire-config run \
@@ -104,8 +104,8 @@ To start a container to use the configuration tool interactively override the pr
 From the container prompt, the configuration tool can be started with the command `./config.sh`.
 
 ```bash
-# Run configuration tool interactive with docker run
-docker run -e ACCEPT_EUA=Y -it --entrypoint=bash --rm tibco/spotfire-config
+# Run configuration tool interactively with docker run
+docker run --rm -it -e ACCEPT_EUA=Y --entrypoint=bash tibco/spotfire-config
 
 # Run configuration tool interactively using kubectl
 kubectl run mypod -it --image=tibco/spotfire-config --command -- bash

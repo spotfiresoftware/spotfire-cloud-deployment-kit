@@ -56,7 +56,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 **Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
-**Note**: You must provide your private registry address where the Spotfire containers are stored.
+**Note**: You must provide your private registry address where the Spotfire container images are stored.
 
 See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
 
@@ -98,13 +98,11 @@ You can replace the filename to get a copy any of the other container configurat
 docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
 ```
 
-#### Credentials profiles for connectors
+#### Adding a credentials profile for connectors to services as a file
 
 A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
 
-#### Adding a credentials profile to services as a file
-
-1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See the example [here.](#getting-container-original-configuration-files))
+1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See how in the previous [example](#getting-container-original-configuration-files).)
 2. Update the connector's authentication mode to `WebConfig`.
 3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
     ```
@@ -117,10 +115,14 @@ A credentials profile is a method for storing data source credentials to log in 
       <password>my_password</password>
     </entry>
     ```
-4. Using extraVolumeMounts, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
+4. Using _extraVolumeMounts_, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
 5. See the [configuration section](#configuring) to upgrade the deployment.
 
 For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
+
+#### Custom modules
+
+The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
 ### Uninstalling
 
@@ -153,11 +155,11 @@ kedaAutoscaling:
   maxReplicas: 3
 ```
 
-The `spotfire-webplayer` has the following defaults:
-- The default autoscaling metric is the `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status`.
-- The default query used is the sum of _Memory health status_ of the Web Player instances.
+The `spotfire-webplayer` has the following autoscaling defaults:
+- metric name: `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` (_Health status_ Web Player service performance counter).
+- query: the sum of `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` counters of the Web Player instances for the release name.
 
-For any Web Player instance, _Memory health status_ can present one of the following values:
+For any Web Player instance, _Health status_ can present one of the following values:
 - 0: OK. Indicates that the instance is under no pressure.
 - 5: Strained. Indicates that the instance is under pressure but is not a problem.
 - 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance, but current users can keep working in this instance.
@@ -191,6 +193,8 @@ kedaAutoscaling:
   # {list of triggers to activate scaling of the target resource}
 ```
 
+**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+
 ### Upgrading
 
 See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
@@ -199,15 +203,6 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 #### Upgrading helm chart version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
-
-The following parameters in values.yaml have been changed, moved or renamed and must be taken into consideration when upgrading the release.
-
-##### Version 0.1.5
-
-| New key | Old key | Comment |
-| ------- | ------- | ------- |
-| `acceptEUA` | | Accept the End User Agreement by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true** or else Helm release will not install. |
-| `global.spotfire.acceptEUA` | | Same as `acceptEUA` but as a global value. |
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 {{ template "chart.valuesSection" . }}

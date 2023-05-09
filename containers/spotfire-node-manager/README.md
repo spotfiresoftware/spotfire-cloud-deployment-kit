@@ -33,13 +33,15 @@ Steps:
 ## How to use this image
 
 Prerequisites:
-- In order to start the **spotfire-node-manager** container you first need a configured **spotfire-server** to connect to.
+- To start the **spotfire-node-manager** container, first you need a configured **spotfire-server** to connect to.
 
 ### Start a node manager container
 
 You can start an instance of the **TIBCO Spotfire node manager** container with:
 ```bash
-docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-node-manager
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  tibco/spotfire-node-manager
 ```
 
 **Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
@@ -53,23 +55,28 @@ For instructions, see [Deploying client packages to Spotfire Server](https://doc
 
 As with on-premises deployment, you can manually add Spotfire services to be managed by the Spotfire node manager as described below.
 
-**Important**: Installation of Spotfire services in this image, requires installation of additional software and or changes to the Spotfire services configuration. Instead of installing services in this image, it is recommended to use the specialized container images to run the Spotfire services.For example, the [spotfire-pythonservice](../spotfire-pythonservice/README.md) or the [spotfire-webplayer](../spotfire-webplayer/README.md). 
+**IMPORTANT**: This image recipe is provided only for reference and testing purposes.
+Installation of Spotfire services in this image requires installation of additional software and changes to the Spotfire services configuration.
+Instead of installing services in this image, use the specialized container images to run the Spotfire services.
+For example, the [spotfire-pythonservice](../spotfire-pythonservice/README.md) or the [spotfire-webplayer](../spotfire-webplayer/README.md). 
 
 **Note**: A Spotfire service running on a node manager runs in a separate process.
 
 **Note**: In bare-metal or VM configurations, a node manager can control several Spotfire services in the same host and each Spotfire service can manage multiple instances.
-When running in containers, we recommend creating only one Spotfire service and one Spotfire service instance in that service for each running container instance.
+When running in containers, create only one Spotfire service and one Spotfire service instance in that service for each running container instance.
 
 You can automatically add the Spotfire service in the container on startup by providing a default Spotfire services configuration file.
-
+For example:
 ```bash
-docker run --rm -v "$(pwd)/default.conf:/opt/tibco/tsnm/nm/config/default-container.conf" \
-  -e ACCEPT_EUA=Y \
+docker run -d --rm -e ACCEPT_EUA=Y \
   -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "$(pwd)/default.conf:/opt/tibco/tsnm/nm/config/default-container.conf" \
   tibco/spotfire-node-manager
 ```
 
-For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html). As opposed what is described in the product documentation you should not be mounting over `/opt/tibco/tsnm/nm/config/default.conf` as this file will be deleted during startup, use the example above instead.
+For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html). 
+
+**Note**: Do not mount over `/opt/tibco/tsnm/nm/config/default.conf` (as described in the product documentation), because this file is deleted during startup. Instead, follow the example provided above.
 
 **Note**: The Spotfire service installation files are copied in the image under `/opt/tibco/tsnm/services/`.
 

@@ -1,0 +1,23 @@
+# Draining configuration properties
+set-config-prop --name="lifecycle.changes-monitoring.draining.minimum-seconds" --value={{ .Values.configuration.draining.minimumSeconds | quote }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-prop --name="lifecycle.changes-monitoring.draining.timeout-seconds" --value={{ .Values.configuration.draining.timeoutSeconds | quote }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+# Default Kubernetes properties other user defined properties
+{{- range $name, $property := .Values.configuration.properties }}
+
+{{- if kindIs "map" $property }}
+{{- if kindIs "map" $property.value }}
+set-config-map-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -A{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+{{- else if kindIs "slice" $property.value }}
+set-config-list-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -A{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+{{- end }}
+{{- else }}
+set-config-prop --name={{ $name | quote }} --value={{ tpl (toString $property) $ | quote }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+
+{{- end }}
+{{- end }}
+
+# Other
+config-external-ignite-process --add-jvm-opts-Djava.net.preferIPv4Stack=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"

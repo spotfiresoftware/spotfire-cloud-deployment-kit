@@ -5,7 +5,6 @@ affinity: {}
 fullnameOverride: fullnameoverride
 acceptEUA: true
 global:
-  serviceName: pythonservice
   spotfire:
     acceptEUA: true
     image:
@@ -139,3 +138,5 @@ extraEnvVarsSecret: pythonservicesecret
 logging:
   logForwarderAddress: mytss-log-forwarder
   logLevel: trace
+configuration:
+  use.engine.containers: "true"

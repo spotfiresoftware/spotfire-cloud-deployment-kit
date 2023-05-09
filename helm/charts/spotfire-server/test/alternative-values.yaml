@@ -25,6 +25,8 @@ database:
     adminPassword: adminpassword
     databaseUrl: jdbc://server/
 configuration:
+  draining:
+    publishNotReadyAddresses: false
   spotfireAdmin:
     username: spotfireadmin
     password: secretpassword101
@@ -32,6 +34,7 @@ configuration:
     publicAddress: http://www.site.com
   apply: never
   deployment:
+    clear: true
     defaultDeployment:
       deploymentAreaName: productionareaname
       enabled: false
@@ -39,3 +42,13 @@ haproxy:
   enabled: true
   podSecurityPolicy:
     create: false
+  spotfireConfig:
+    debug: true
+    maintenance:
+      enabled: true
+      allowCookie:
+        enabled: true
+        name: "open"
+        value: "sesame"
+    maintenancePage:
+        useFile: false

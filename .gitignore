@@ -1,5 +1,4 @@
 /*.*~
-build/
 build.properties
 lockfile
 cache/
@@ -21,6 +20,9 @@ cache/
 *.tgz
 test-results.xml
 
+
 helm/packages/*
 
-helm/test/images.yaml
+**/Chart.lock
+
+containers/scans/*

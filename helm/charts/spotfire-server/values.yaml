@@ -29,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: tibco/spotfire-server
   # -- The container image tag to use.
-  tag: "12.3.0-1.3.1"
+  tag: "12.4.0-1.4.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -41,7 +41,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.0.5"
+    tag: "2.0.9"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -154,7 +154,7 @@ kedaAutoscaling:
           - type: Pods
             value: 1
             periodSeconds: 60
-  # -- Spotfire specific settings
+  # -- Spotfire specific settings.
   spotfireConfig:
     # -- REQUIRED. The URL to the Prometheus server where metrics should be fetched from.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
@@ -231,7 +231,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.3.0-1.3.1"
+    tag: "12.4.0-1.4.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -280,7 +280,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.3.0-1.3.1"
+    tag: "12.4.0-1.4.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -360,8 +360,8 @@ logging:
   # -- The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info.
   logLevel: ""
 
-# -- The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated.
-toolPassword: "toolpassword"
+# -- The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod.
+toolPassword: ""
 
 database:
   # -- For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html).
@@ -489,10 +489,55 @@ configuration:
     timeoutSeconds: 180
     # -- The minimum time in seconds that the server should be draining, even if it is considered idle.
     minimumSeconds: 90
+    # -- Makes sure that service SRV records are preserved while terminating pods, typically used with the spotfire haproxy deployment.
+    publishNotReadyAddresses: true
+
+  # -- Configuration properties
+  # The key name is the name of the property to set.
+  # If the value is a scalar the configuration tool command `set-config-prop` is used.
+  # To set a list or map the value should have the keys `itemName` and `value`.
+  # If the value is a map or object the configuration tool command `set-config-map-prop` is used.
+  # If the value is a list the configuration tool command `set-config-list-prop` is used.
+  # @default -- Default values for kubernetes, see values.yaml.
+  properties:
+    # Map example:
+    # set-config-map-prop --name="tomcat.remote-ip-filter.init-parameters" --item-name="parameter" -VportHeader=X-Forwarded-Port -VproxiesHeader=X-Forwarded-By
+    # tomcat.remote-ip-valve.attributes:
+    #  itemName: parameter
+    #  value: {"portHeader": "X-Forwarded-Port", "proxiesHeader": "X-Forwarded-By"}
+    #
+    # List example: 
+    # set-config-list-prop --name="security.allowed-http-methods" --item-name="method-name" -VGET -VHEAD -VPOST -VPUT -VDELETE -VPATCH
+    # security.allowed-http-methods:
+    #   itemName: method-name
+    #   value: ["GET", "HEAD", "POST", "PUT", "DELETE", "PATCH""]
+
+    # Various Kubernetes properties
+    performance-monitoring.metrics-exporter.enabled: true
+    status-controller.enabled: true
+    monitoring.haproxy-agent-check.enabled: true
+    security.trust.auto-trust.enabled: true
+    general.calculate-public-address-per-request: true
+    tomcat.remote-ip-valve.enabled: true
+    nodemanager.expire-offline: 5
+
+    # Reduce number of idle connections
+    data-sources.default.connection-timeout: 10
+    data-sources.default.min-connections: 1
+
+    # Monitor and handle changes, draining timeouts are multiples of monitor interval
+    lifecycle.changes-monitoring.interval-seconds: 30
+    lifecycle.changes-monitoring.database-schema-change-action: IMMEDIATE_SHUTDOWN
+    lifecycle.changes-monitoring.technical-version-change-action: IGNORE
+    lifecycle.changes-monitoring.configuration-change-action: GRACEFUL_SHUTDOWN
+    lifecycle.changes-monitoring.draining.shutdown: true
 
   deployment:
     # -- When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`.
     enabled: true
+
+    # -- Clear existing packages before any new files are added. Setting it `true` can cause extra delay because packages need to be added again every time the config-job is run.
+    clear: false
 
     defaultDeployment:
       # -- Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image.
@@ -507,7 +552,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: tibco/spotfire-deployment
         # -- The container image tag to use.
-        tag: "12.3.0-1.3.1"
+        tag: "12.4.0-1.4.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -565,138 +610,17 @@ haproxy:
     app.kubernetes.io/part-of: spotfire
     app.kubernetes.io/component: haproxy
 
-  # -- The haproxy configuration file template.
-  # @default -- The chart creates a configuration automatically.
-  config: |
-    global
-      log stdout format raw local0
-      daemon
-      maxconn 1024
-    defaults
-      log global
-      mode http
-      option http-server-close
-      http-reuse safe
-      option forwardfor except 127.0.0.0/8
-      option dontlognull
-      option http-keep-alive
-      option httplog
-      option prefer-last-server
-      option redispatch
-      retries 1
-      timeout client {{ .Values.spotfireConfig.timeouts.client }}
-      timeout queue {{ .Values.spotfireConfig.timeouts.queue }}
-      timeout connect {{ .Values.spotfireConfig.timeouts.connect }}
-      timeout server {{ .Values.spotfireConfig.timeouts.server }}
-      timeout tunnel {{ .Values.spotfireConfig.timeouts.tunnel }}
-      timeout http-request {{ .Values.spotfireConfig.timeouts.httpRequest }}
-    frontend stats
-      bind :1024
-      {{- if not .Values.spotfireConfig.debug }}
-      option dontlog-normal
-      {{- end }}
-
-      http-request use-service prometheus-exporter if { path {{ index .Values "podAnnotations" "prometheus.io/path" }} }
-      stats enable
-      stats uri /stats
-      stats refresh 10s
-    frontend spotfire
-      bind :80
-
-      option httplog
-
-      # Deny all non-spotfire requests
-      http-request deny status 403 content-type text/html string "403 Forbidden" unless { path -m beg /spotfire/ } || { path / } || { path /spotfire }
-
-      # Deny external access to Spotfire Server health check url
-      http-request deny deny_status 404 if { path /spotfire/rest/status/getStatus }
-
-      {{- if .Values.spotfireConfig.debug }}
-
-      # For logging purposes
-      capture request header X-Forwarded-Proto len 5
-      capture request header X-Forwarded-Port len 4
-      capture request header X-Forwarded-For len {{ .Values.spotfireConfig.captures.forwardedForLength }}
-      {{- end }}
-
-      {{- if or .Values.spotfireConfig.cleanup.secureCookieAttributeForHttp .Values.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp }}
-
-      # Clean up cookies attributes that work less well in different combinations, relies on correct
-      # value of the ingress to set X-Forwarded-Proto correctly.
-      http-request set-var(txn.x_forwarded_proto) req.hdr(X-Forwarded-Proto),lower
-
-      {{- if .Values.spotfireConfig.cleanup.secureCookieAttributeForHttp }}
-      http-response replace-header Set-Cookie "(.*)(; Secure)(.*)" "\1\3" if !{ var(txn.x_forwarded_proto) -m str "https" }
-      {{- end }}
-
-      {{- if .Values.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp }}
-      http-response replace-header Set-Cookie "(.*)(; SameSite=\S+)(.*)" "\1\3" if !{ var(txn.x_forwarded_proto) -m str "https" }
-      {{- end }}
-
-      {{- end }}
-
-      default_backend spotfire
-
-      {{- if .Values.spotfireConfig.cache.enabled }}
-
-      http-request cache-use tss
-      http-response cache-store tss
-      http-after-response del-header Set-Cookie if { res.cache_hit }
-
-
-      {{- if .Values.spotfireConfig.debug }}
-
-      # For debug purposes
-      http-response set-header X-Cache-Status HIT if { res.cache_hit }
-      http-response set-header X-Cache-Status MISS if !{ res.cache_hit }
-      {{- end }}
-
-      {{- end }}
-
-    {{- if .Values.spotfireConfig.cache.enabled }}
-
-    cache tss
-      # In megabytes
-      total-max-size 100
-
-      # In seconds
-      max-age 10485760
-
-      # In bytes
-      max-object-size 10485760
-
-      process-vary on
-    {{- end }}
-
-    backend spotfire
-      dynamic-cookie-key {{ .Values.spotfireConfig.loadBalancingCookie.dynamicCookieKey }}
-      cookie {{ .Values.spotfireConfig.loadBalancingCookie.name }} {{ .Values.spotfireConfig.loadBalancingCookie.attributes }}
-      option httpchk GET /spotfire/rest/status/getStatus HTTP/1.0
-
-      {{- if .Values.spotfireConfig.debug }}
-
-      # For debug purposes
-      http-response set-header X-Server %s
-      {{- end }}
-
-      server-template srv 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
-    resolvers pcdns
-      parse-resolv-conf
-      resolve_retries       3
-      timeout resolve       1s
-      timeout retry         1s
-      hold other           30s
-      hold refused         30s
-      hold nx              30s
-      hold timeout         30s
-      hold valid           10s
-      hold obsolete        30s
-
   # -- Spotfire specific configuration related to haproxy.
   # @default -- Caching of static resource and debug response headers enabled.
   spotfireConfig:
     # -- Specifies if debug response headers should be enabled.
     debug: false
+
+    compression:
+      enabled: true
+      algo: gzip
+      type: "text/html text/plain"
+
     # -- haproxy related timeouts
      # @default -- haproxy timeouts
     timeouts:
@@ -715,12 +639,12 @@ haproxy:
     # -- Cookie-related configuration.
     # @default -- stateless load balancing
     loadBalancingCookie:
-      name: JSESSIONID
+      name: SFLB
       # -- dynamic-cookie-key value in the haproxy config.
       # @default -- the cookie key
       dynamicCookieKey: "Sp0tf1re01"
       # -- Attributes for the cookie value in the haproxy config. See [haproxy cookie](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#4.2-cookie) for more information.
-      attributes: "prefix dynamic"
+      attributes: insert indirect nocache dynamic httponly secure attr "SameSite=None"
     cleanup:
       # -- If the SameSite cookie attribute should be removed for HTTP connections in Set-Cookie response headers, then it might be needed in cases where both HTTP and HTTPS are enabled, and upstream servers set this unconditionally.
       sameSiteCookieAttributeForHttp: true
@@ -742,6 +666,41 @@ haproxy:
     # @default -- enabled
     cache:
       enabled: true
+      totalMaxSizeMegabytes: 100
+      maxAgeSeconds: "10485760"
+      maxObjectSizeBytes: "10485760"
+
+    # -- Maintenance mode, can be used to temporarily block requests (but still allow some, see allowCookie below).
+    # @default -- disabled
+    maintenance:
+      # -- Specifies if maintenance mode is enabled.
+      enabled: false
+      # -- Allowed requests in maintenance mode by configuring a cookie for allowed requests.
+      # @default -- disabled
+      allowCookie:
+        # -- Specifies if a cookie can be used to access the environment while maintenance mode is enabled.
+        enabled: false
+        # -- The name of the cookie, case sensitive
+        name: ""
+        # -- The value of the cookie, case sensitive
+        value: ""
+    # -- A custom maintenance page that is displayed if maintenance mode is enabled or if no Spotfire Server instances are running
+    # @default -- maintenance page related settings
+    maintenancePage:
+        # -- If a haproxy include file,  haproxy.includes.'maintenance\\.html'=<path to file>, should be used instead of haproxy.maintenancePage.responseString below.
+        useFile: false
+        # -- For larger files, haproxy tune.bufsize may need to be increased to accommodate the larger size.
+        bufSize: 24576
+        # -- The maintenance page response string.
+        responseString: "<html><title>Maintenance - TIBCO Spotfire</title><body>Maintenance in progress</body></html>"
+
+  # -- The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl.
+  # @default -- The chart creates a configuration automatically.
+  config: '{{ include "spotfire-server.haproxy.config" . }}'
+
+  includes: {}
+
+  includesMountPath: /etc/haproxy/includes
 
 # ===============================
 # fluent-bit (also known as "log-forwarder")

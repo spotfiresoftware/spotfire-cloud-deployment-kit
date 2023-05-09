@@ -28,14 +28,24 @@ Spotfire service troubleshooting pvc name
 {{- end -}}
 
 {{/*
-Spotfire service packages pvc name
+Spotfire data function services packages pvc name
 */}}
 {{- define "spotfire-common.volumes.packages.pvc.name" -}}
 {{- .Values.volumes.packages.existingClaim | default (printf "%s-%s" (include "spotfire-common.spotfire-service.fullname" .) "packages" ) -}}
 {{- end -}}
 
 {{/*
+Spotfire workerhost services custom modules pvc name
+*/}}
+{{- define "spotfire-common.volumes.customModules.pvc.name" -}}
+{{- .Values.volumes.customModules.existingClaim | default (printf "%s-%s" (include "spotfire-common.spotfire-service.fullname" .) "custom-modules" ) -}}
+{{- end -}}
+
+
+{{/*
 Spotfire service troubleshooting persistentVolumeClaim  
+Example usage:
+include "spotfire-common.volumes.troubleshooting.persistentVolumeClaim" (merge . (dict "componentName" "automationservices"))
 */}}
 {{- define "spotfire-common.volumes.troubleshooting.persistentVolumeClaim" -}}
 {{- if .Values.volumes.troubleshooting.persistentVolumeClaim.create }}

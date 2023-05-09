@@ -79,14 +79,12 @@ spec:
               value: {{ .Values.configuration.preferExistingConfig | quote }}
             - name: JOB_DO_DEPLOY
               value: {{ .Values.configuration.deployment.enabled | quote }}
+            - name: JOB_DO_DEPLOY_CLEAR
+              value: {{ .Values.configuration.deployment.clear | quote }}
             - name: JOB_CONFIGURATION_COMMENT
               value: {{ printf "Helm configuration update - release=%s revision=%d" .Release.Name .Release.Revision }}
             - name: JOB_CREATE_ADMIN
               value: {{ .Values.configuration.spotfireAdmin.create | quote }}
-            - name: JOB_DRAINING_MINIMUM_SECONDS
-              value: {{ .Values.configuration.draining.minimumSeconds | quote }}
-            - name: JOB_DRAINING_TIMEOUT_SECONDS
-              value: {{ .Values.configuration.draining.timeoutSeconds | quote }}
           resources: {}
           volumeMounts:
             - name: config-job-scripts-volume

@@ -6,7 +6,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ include "spotfire-common.volumes.packages.pvc.name" . }}
   labels:
-  {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
+  {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "pythonservice")) | nindent 4 }}
   annotations:
     helm.sh/resource-policy: keep
 spec:

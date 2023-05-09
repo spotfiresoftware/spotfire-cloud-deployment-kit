@@ -31,12 +31,13 @@ clean :
 	rm -rf -- $(PACKAGE_DIR)/
 	find . -name tmpcharts -type d -exec rm -rf -- {} \;
 	find . -wholename "*/charts/*.tgz" -exec rm -- {} \;
+	find . -iname "*.lock" -type f -exec rm -rf -- {} \;
 
 documentation :
 	helm-docs --chart-search-root charts/
 
 spotfire-umbrella-example : spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-server
-	helm dependency build examples/$@
+	helm dependency update examples/$@
 
 # Test targets
 include test.mk

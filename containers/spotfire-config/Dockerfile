@@ -36,12 +36,6 @@ COPY --chown=spotfire:spotfire bootstrap.sh ./
 
 ENV BOOTSTRAP_FILE=bootstrap.xml
 
-# Logging - enable us of LOG_LEVEL environment variable and use LOG_APPENDER
-ADD log4j2-tools.xml.loglevel.transformation.xml .
-RUN /opt/tibco/spotfireconfigtool/config.sh apply-xdt-transformation --input-file=/opt/tibco/spotfireconfigtool/log4j2-tools.xml --transformation-file=log4j2-tools.xml.loglevel.transformation.xml \
-  && sed -i 's/ref="toolLog"/ref="${env:LOG_APPENDER:-toolLog}"/' /opt/tibco/spotfireconfigtool/log4j2-tools.xml \
-  && rm -r log4j2-tools.xml.loglevel.transformation.xml spotfireconfigtool/logs
-
 # "toolLog" means log to file and "console" menas log to console
 ENV LOG_APPENDER=toolLog
 

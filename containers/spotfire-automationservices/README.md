@@ -39,7 +39,9 @@ Prerequisites:
 
 You can start an instance of the **TIBCO Spotfire Automation Services** container with:
 ```bash
-docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-automationservices
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  tibco/spotfire-automationservices
 ```
 
 **Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
@@ -49,8 +51,10 @@ By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree tha
 
 You can also start the `spotfire-automationservices` with a custom configuration by providing a Spotfire services configuration file:
 ```bash
-docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-automationservices \
-  -v "$(pwd)/Spotfire.Dxp.Worker.Web.config:/opt/tibco/tsnm/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Web.config"
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "$(pwd)/Spotfire.Dxp.Worker.Web.config:/opt/tibco/tsnm/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Web.config" \
+  tibco/spotfire-automationservices
 ```
 
 For more information, see [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html) 

@@ -30,11 +30,18 @@ function getFilenames() {
 function updateDeployment() {
     filenames=$1
     dir=$2
+
+    clear=""
+    if [ "${JOB_DO_DEPLOY_CLEAR}" = "true" ]; then
+        clear="--clear"
+    fi
+
     if [ "${filenames}" ]; then
         config.sh update-deployment \
             --tool-password="${TOOL_PASSWORD}" \
             --bootstrap-config="${BOOTSTRAP_FILE}" \
             --area="${areaname}" \
+            ${clear} \
             "${filenames}"
     else
         echo "No files to deploy in path ${dir}"

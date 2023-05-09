@@ -2,7 +2,7 @@
 # Linux container images Makefile
 #
 # Run `make` to build all linux container images
-# Run `make spotfire-server` to build just spotfire-sever
+# Run `make spotfire-server` to build just spotfire-server
 SHELL                       = /bin/bash
 .SHELLFLAGS                 = -o pipefail -c
 
@@ -54,6 +54,7 @@ spotfire-pythonservice spotfire-terrservice spotfire-node-manager spotfire-worke
 spotfire-server spotfire-config :                                                       IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
 spotfire-terrservice :                                                                  IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
 spotfire-webplayer spotfire-automationservices :                                        IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
+spotfire-webplayer :                                                                    IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
 
 
 # TAGS -

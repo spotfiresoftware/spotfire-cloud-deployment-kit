@@ -20,7 +20,6 @@ fluentBitSidecar:
 fullnameOverride: ""
 acceptEUA: true
 global:
-  serviceName: automationservices
   spotfire:
     acceptEUA: true
     image:
@@ -127,6 +126,14 @@ podSecurityContext:
   runAsUser: 1000
   runAsGroup: 0
 volumes:
+  customModules:
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename
   troubleshooting:
     persistentVolumeClaim:
       create: true
