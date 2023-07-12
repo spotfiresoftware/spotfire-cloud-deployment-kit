@@ -1,5 +1,5 @@
 # This example enables autoscaling with keda for the spotfire-webplayer-pool1,
-# spotfire-automationservices, spotfire-terrservice, and spotfire-pythonservice.
+# spotfire-automationservices, spotfire-rservice, spotfire-terrservice, and spotfire-pythonservice.
 
 # It requires keda and prometheus to be installed in your cluster, as well as a prometheus server.
 # Prometheus installation: https://prometheus.io/docs/prometheus/latest/installation/.
@@ -38,6 +38,15 @@ spotfire-automationservices:
     maxReplicas: 3
 
 spotfire-terrservice:
+  kedaAutoscaling:
+    enabled: true
+    spotfireConfig:
+      prometheusServerAddress: http://prometheus-kube-prometheus-prometheus.prometheus.svc.cluster.local:9090/
+    threshold: 5
+    minReplicas: 1
+    maxReplicas: 3
+
+spotfire-rservice:
   kedaAutoscaling:
     enabled: true
     spotfireConfig:

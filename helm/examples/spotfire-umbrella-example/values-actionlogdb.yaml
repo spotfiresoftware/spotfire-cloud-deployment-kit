@@ -1,0 +1,28 @@
+# This example shows how to set up the Spotfire-server Actionlog so that 
+# actionlogs can be stored to a database, as well as setting 'categories' and 'webCategories'
+spotfire-server:
+  configuration:
+    actionLog:
+      categories: "admin,library,monitoring,info_link,routing_info"
+      webCategories: "all"
+      file:
+        enabled: true
+      database:
+        enabled: true
+        create-actionlogdb:
+          enabled: true
+          actiondbDbname: "spotfire_actionlog"
+          adminUsername: "postgres"
+          adminPasswordExistingSecret:
+            name: "{{ .Release.Name }}-postgresql"
+            key: "postgres-password"
+          databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/"
+        config-action-log-database-logger:
+          databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/spotfire_actionlog"
+          driverClass: "org.postgresql.Driver"
+          username: "spotfire_actionlog"
+          password: ""
+          additionalOptions:
+            pruning-period: 168
+            log-local-time: false
+ 

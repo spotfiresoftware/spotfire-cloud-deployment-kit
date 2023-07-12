@@ -67,6 +67,7 @@ volumes:
       storageClassName: storageclassname
       volumeName: volumename
   packages:
+    subPath: subpath
     existingClaim: existingclaim2
     persistentVolumeClaim:
       create: true

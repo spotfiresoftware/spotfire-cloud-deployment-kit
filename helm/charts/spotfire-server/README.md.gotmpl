@@ -33,10 +33,10 @@ This chart is tested to work with [NGINX Ingress Controller](https://github.com/
 
 ## Prerequisites
 
-- Familiarity with Kubernetes, containers and Helm chart concepts and usage
-- Helm 3+
-- Ingress controller (optional)
-- PV (Persistent Volume) provisioner support in the underlying infrastructure (optional)
+- Familiarity with Kubernetes, containers and Helm chart concepts and usage.
+- Helm 3+.
+- Ingress controller (optional).
+- PV (Persistent Volume) provisioner support in the underlying infrastructure (optional).
 - A supported database server for use as the Spotfire database. For information on supported databases, see [Spotfire Server requirements](https://docs.tibco.com/pub/spotfire/general/sr/sr/topics/system_requirements_for_spotfire_products.html).
 
 **Note**: You can install the database server in the same Kubernetes cluster or on premises. Alternatively, you can use a cloud database service.
@@ -51,9 +51,9 @@ helm install my-release -f my-values.yml .
 ```
 
 **Note**: The Spotfire Server chart requires some variables to start (such as database server connection details). 
-See examples and variables description below.
+See the examples and variables descriptions below.
 
-**Note**: You can use any of the Spotfire supported databases with these recipes, and you can choose to run the database on containers, VMs, bare metal servers, or use a cloud database service.
+**Note**: You can use any of the Spotfire supported databases with these recipes, and you can choose to run the database on containers, VMs, or bare metal servers, or you can use a cloud database service.
 
 For more information on how to configure the different supported databases using this Helm chart, 
 see the [Supported databases configuration table](#supported-databases-configuration) and the [Values table](#values).
@@ -62,7 +62,8 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Example: Installing with an existing database
 
-This example shows how to deploy a Spotfire Server using an already existing supported database.
+This example shows how to deploy a Spotfire Server using an already existing supported database. Before running this command, set the proposed 
+variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
 Deploy the Spotfire Server using an existing database:
 ```bash
@@ -83,25 +84,24 @@ By doing so, you agree that your use of the TIBCO Spotfire software running in t
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
-**Note**: Before running the previous command, set the proposed variables in your environment, or edit the command, replacing the proposed variables with the corresponding values.
 
-For more information, see:
+For more information, see the following topics.
 - [create-db](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html) command documentation.
 - [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command documentation.
-- and the [Values table](#values) section
+- The [Values table](#values) section.
 
-Additional database connection configuration is typically done through the JDBC connection properties in the connection url and varies between different database and driver vendors. 
+Additional database connection configuration is typically done through the JDBC connection properties in the connection URL and varies between different database and driver vendors. 
 For example, for PostgreSQL, see [Postgres JDBC](https://jdbc.postgresql.org/documentation/head/connect.html).
 
-In some specific cases there is also a need to place additional files in the container and supply the absolute path of these files in the connection url. 
-See [Volumes](#volumes) section for details.
+In some specific cases, you must place additional files in the container and supply the absolute path of these files in the connection URL. 
+See the [Volumes](#volumes) section for details.
 
 #### Example: Installing with a new database
 
 This example shows how to deploy a Spotfire Server using a PostgreSQL database in a Kubernetes cluster using Helm charts. 
 The database is deployed as a container and, by default, the PostgreSQL Helm chart creates its own PVC for persistent data storage. 
 
-Steps:
+**Procedure**
 
 1. Add the Bitnami charts repository and install a Postgresql database using the [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql):
     ```bash
@@ -163,22 +163,22 @@ See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command docu
 
 Normally, all services and pods are deleted using `helm uninstall`, but occasionally you might need to manually delete existing Spotfire persistent volume claims or not completed jobs due to interrupted operation or incorrect setup.
 
-To delete unused persistent volume claims, you can first list the persistent volume claims:
+To delete unused persistent volume claims, first list the persistent volume claims:
 ```bash
 kubectl get pvc
 ```
 
-And then, delete only the persistent volume claims that you do not want to keep. For example:
+Second, delete only the persistent volume claims that you do not want to keep. For example:
 ```bash
 kubectl delete pvc data-my-release-postgresql-0
 ```
 
-To delete old release jobs, you can first list the jobs:
+To delete old release jobs, first list the jobs:
 ```bash
 kubectl get jobs
 ```
 
-And then, delete the ones that you do not want to keep. For example:
+Second, delete the ones that you do not want to keep. For example:
 ```bash
 kubectl delete job.batch/my-release-spotfire-server-basic-config-job
 ```
@@ -217,8 +217,8 @@ With these default settings, if the total CPU usage for all instances is greater
 If the total CPU usage for all instances falls under the threshold, then the service scales in.
 
 For each multiple of the `kedaAutoscaling.threshold`, another instance is scaled out.
-- With 1 replica, if the query value is at >60% CPU, another replica is created.
-- With 2 replicas, if the query value is at >120%, another replica is created, and so on.
+- With 1 replica, if the query value is at >60% CPU, then another replica is created.
+- With 2 replicas, if the query value is at >120%, then another replica is created, and so on.
 
 For more information, see the [HPA algorithm details](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details).
 
@@ -239,21 +239,21 @@ kedaAutoscaling:
 
 #### Upgrading helm chart version
 
-Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
+Some parameters might have been changed, moved, or renamed. They must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
 
 #### Upgrading the Spotfire Server version
 
-When upgrading a Spotfire Helm chart, there are several considerations that you should keep in mind to ensure a smooth upgrade process.
+When you upgrade a Spotfire Helm chart, consider the following to ensure a smooth upgrade process.
 
-Firstly it's important to understand whether the new Helm chart version comes with a new Spotfire Server version. If it does, you'll need to carefully consider the implications of upgrading to a new server version, and make sure that you understand any potential compatibility issues or changes in functionality. 
+You must understand whether the new Helm chart version comes with a new Spotfire Server version. If it does, you will need to carefully consider the implications of upgrading to a new server version, and to make sure that you understand any potential compatibility issues or changes in functionality. 
 
 ##### Checking the manual
 
-It's a good idea to refer to the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
+See the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
 
 ##### Upgrading Spotfire Server and Spotfire services
 
-If you're upgrading to a newer Spotfire Server version and Spotfire services versions, it's recommended to upgrade the Spotfire Server first and then upgrade the Spotfire services.
+If you are upgrading to a newer Spotfire Server version and Spotfire services versions, first upgrade the Spotfire Server, and then upgrade the Spotfire services.
 
 ##### Disabling automatic database schema upgrade
 
@@ -261,11 +261,11 @@ If you prefer to disable the automatic Spotfire database schema upgrade, you can
 
 ##### Backing up the database
 
-To roll back an upgrade, it's necessary to back up the Spotfire database before upgrading to a newer Spotfire Server version. This will ensure that you have a copy of the database in its previous state, and that you can revert to this state if necessary. If you use external library storage, you should also create a snapshot of the external library storage that corresponds to the database backup state.
+To roll back an upgrade, you must back up the Spotfire database before upgrading to a newer Spotfire Server version. This ensures that you have a copy of the database in its previous state, and that you can revert to this state if necessary. If you use external library storage, you should also create a snapshot of the external library storage that corresponds to the database backup state.
 
 ##### Verifying the upgrade
 
-The Kubernetes job `config-job` is responsible for upgrading the Spotfire database. To verify that the upgrade was successful, you should check the `config-job` logs. This will help you to identify any issues or errors that may have occurred during the upgrade process, and to ensure that your Spotfire server database has been successfully upgraded.
+The Kubernetes job `config-job` is responsible for upgrading the Spotfire database. To verify that the upgrade was successful, you should check the `config-job` logs. This will help you to identify any issues or errors that might have occurred during the upgrade process, and to ensure that your Spotfire Server database has been successfully upgraded.
 
 The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool. For details, see [Run the Spotfire Server Upgrade Tool](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/run_the_spotfire_server_upgrade_tool.html).
 
@@ -273,11 +273,11 @@ The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool. For detai
 
 #### Running custom spotfire-config tool tasks during helm install / upgrade
 
-During a helm release upgrade or install, you can run a custom `spotfire-config` tool tasks to add a custom configuration or to run custom tasks.
+During a helm release upgrade or install, you can run a custom `spotfire-config` tool task to add a custom configuration or to run custom tasks.
 There are three types of `config.sh` scripts that you can run:
 
-- `configuration.configurationScripts` - Scripts that modify the Spotfire server configuration (`configuration.xml`).
-- `configuration.commandScripts` - Scripts that do not modify the Spotfire server configuration (for example, for creating users, assigning licenses, and so on).
+- `configuration.configurationScripts` - Scripts that modify the Spotfire Server configuration (`configuration.xml`).
+- `configuration.commandScripts` - Scripts that do not modify the Spotfire Server configuration (for example, for creating users, assigning licenses, and so on).
 - `configuration.preConfigCommandScripts` - Same as commandScripts but these command will be run before the configuration is imported.
 
 See the [Values](#values) section below for more details.

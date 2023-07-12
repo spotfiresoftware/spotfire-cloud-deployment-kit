@@ -1,0 +1,240 @@
+# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
+acceptEUA:
+
+global:
+  spotfire:
+    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
+    acceptEUA:
+    image:
+      # -- The global container image registry. Used for tibco/spotfire container images, unless it is overridden.
+      registry:
+      # -- The global container image pull policy.
+      pullPolicy: IfNotPresent
+      # -- The global container image pull secrets.
+      ## E.g.
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
+nodemanagerConfig:
+  # -- The spotfire-server service name. This value is evaluated as a helm template.
+  serverBackendAddress: ""
+  # -- The draining timeout after which the service is forcefully shut down.
+  preStopDrainingTimeoutSeconds: 610
+
+replicaCount: 1
+
+image:
+  # -- The image registry for spotfire-server. Overrides the global.spotfire.image.registry value.
+  registry:
+  # -- The spotfire-server image repository.
+  repository: tibco/spotfire-rservice
+  # -- The container image tag to use.
+  tag: "1.16.0-1.5.0"
+  # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
+  pullPolicy:
+  # -- Image pull secrets.
+  pullSecrets: []
+
+fluentBitSidecar:
+  image:
+    # -- The image repository for fluent-bit logging sidecar.
+    repository: fluent/fluent-bit
+    # -- The image tag to use for fluent-bit logging sidecar.
+    tag: "2.1.2"
+    # -- The image pull policy for the fluent-bit logging sidecar image.
+    pullPolicy: IfNotPresent
+
+  # -- The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
+  securityContext: {}
+    # # -- Enable this if running as privileged.
+    # privileged: false
+    # # -- Enable this if running as NonRoot User.
+    # runAsNonRoot: true
+    # # -- User ID for the Container.
+    # runAsUser: 1000
+    # # -- Group ID for the Container.
+    # runAsGroup: 0
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: false
+  # Annotations to add to the service account.
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, then a name is generated using the fullname template.
+  name: ""
+
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+
+# -- The Pod securityContext setting applies to all of the containers inside the Pod.
+podSecurityContext: {}
+  # # -- Owner User ID for the volume and any file created in that volume.
+  # fsGroup: 1000
+  # # -- User ID for the Pod.
+  # runAsUser: 1000
+  # # -- Group ID for the Pod.
+  # runAsGroup: 0
+
+# -- The securityContext setting for the service container. Overrides any securityContext setting on the Pod level.
+securityContext: {}
+  # # -- Enable this if running as privileged.
+  # privileged: false
+  # # -- Enable this if running as NonRoot User.
+  # runAsNonRoot: true
+  # # -- User ID for the Container.
+  # runAsUser: 1000
+  # # -- Group ID for the Container.
+  # runAsGroup: 0
+
+service:
+  type: ClusterIP
+  port: 9501
+
+## The Spotfire node manager startup, readiness, and liveness probe initial delay and timeout.
+## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+startupProbe:
+  enabled: true
+  httpGet:
+    path: /spotfire/started
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+  failureThreshold: 20
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /spotfire/liveness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+  failureThreshold: 10
+readinessProbe:
+  enabled: false
+  httpGet:
+    path: /spotfire/readiness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+  failureThreshold: 10
+
+logging:
+  # -- The spotfire-server log-forwarder name. Template.
+  logForwarderAddress: ""
+  # -- Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies for both node manager and the service.
+  logLevel: "debug"
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This increases chances that charts can run on environments with few 
+  # resources, such as Minikube. If you do want to specify resources, then uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details.
+kedaAutoscaling:
+  enabled: false
+  # -- The interval to check each trigger on.
+  pollingInterval: 30
+  # -- The period to wait after the last trigger reported active before scaling the resource back to 0.
+  cooldownPeriod: 300
+  # -- The minimum number of replicas KEDA scales the resource down to.
+  minReplicas: 1
+  # -- This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource.
+  maxReplicas: 4
+  threshold:
+  fallback: {}
+  triggers: []
+  advanced: {}
+  # -- Spotfire specific settings.
+  spotfireConfig:
+    # -- REQUIRED. The URL for the Prometheus server from where metrics are fetched.
+    prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html).
+# Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'.
+configuration: {}
+  # add any key: value here for custom configuration
+  # engine.execution.timeout:	"600"
+
+# -- Additional environment variables.
+extraEnvVars: []
+#  - name: NAME
+#    value: value
+
+# -- The name of the ConfigMap containing additional environment variables.
+extraEnvVarsCM: ""
+
+# -- The name of the Secret containing extra additional environment variables.
+extraEnvVarsSecret: ""
+
+# -- Extra volumeMounts for the service container.
+# More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`.
+extraVolumeMounts: []
+  # - name: example
+  #   mountPath: /opt/tibco/example.txt
+  #   subPath: example.txt
+
+# -- Extra volumes for the service container.
+# More info: `kubectl explain deployment.spec.template.spec.volumes`.
+extraVolumes: []
+  # - name: example
+  #   persistentVolumeClaim:
+  #     claimName: exampleClaim
+
+# -- Additional init containers to add to the service pod.
+extraInitContainers: []
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ['echo', "hey"]
+
+volumes:
+  packages:
+    persistentVolumeClaim:
+      # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      create: false
+      # -- Specifies the name of the 'StorageClass' to use for the customExt volume-claim.
+      storageClassName: ""
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the customExt volume claims.
+      resources:
+        requests:
+          storage: 1Gi
+      # -- Specifies the name of the persistent volume to use for the customExt volume-claim.
+      volumeName:
+    # -- If 'persistentVolumeClaim.create' is 'false' (the default), then use this value to define an already existing persistent volume claim.
+    existingClaim: ""
+    # -- The subPath of the volume to use for the volume mount.
+    subPath: ""
+
+  troubleshooting:
+    persistentVolumeClaim:
+      # -- If 'true', then a 'PersistentVolumeClaim' is created.
+      create: false
+      # -- Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim.
+      storageClassName: ""
+      # -- Specifies the standard Kubernetes resource requests and/or limits for the volumes.troubleshooting claims.
+      resources:
+        requests:
+          storage: 2Gi
+      # -- Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim.
+      volumeName:
+    # -- If 'persistentVolumeClaim.create' is 'false' (the default), then use this value to define an already existing persistent volume claim.
+    existingClaim: ""

@@ -65,6 +65,7 @@ spec:
           {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
           - name: packages-volume
             mountPath: /opt/packages
+            subPath: {{ .Values.volumes.packages.subPath | quote }}
           {{- end }}
           - name: serviceconfig
             mountPath: /opt/tibco/tsnm/nm/services/TERR/conf/additional-custom.properties
@@ -94,10 +95,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command:
-                - /opt/tibco/tsnm/scripts/pre-stop-hook.sh
-                - {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds | quote }}
-                - "true"
+                command: ["/bin/bash", "-c", "/opt/tibco/tsnm/scripts/pre-stop-hook.sh {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds }} true >> /proc/1/fd/1 2>&1"]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: fluent-bit

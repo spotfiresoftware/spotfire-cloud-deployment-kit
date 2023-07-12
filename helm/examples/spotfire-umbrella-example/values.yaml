@@ -62,6 +62,13 @@ spotfire-automationservices:
   logging:
     logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
 
+spotfire-rservice:
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
 spotfire-pythonservice:
   enabled: false
   nodemanagerConfig:

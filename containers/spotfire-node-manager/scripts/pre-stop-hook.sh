@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# set -o nounset
+set -o verbose
 
 # Initiate the shutdown
 touch /opt/tibco/tsnm/nm/logs/tsnm-terminated

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  creationTimestamp: null
+  labels:
+    {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "rservice")) | nindent 4 }}
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-serviceconfig
+data:
+  additionalCustomProperties: | 
+  {{- range $key, $value := .Values.configuration }}
+    {{$key}}: {{$value}}
+  {{ end }}

@@ -170,4 +170,19 @@
 
     Read_from_Head      True
     Buffer_Max_Size     64KB
+
+[INPUT]
+    Name                tail
+    Alias               tsnm.datafunctionservices.r
+    Tag                 tsnm.datafunctionservices.r
+
+    Multiline           on
+    Multiline_Flush     1
+    Parser_Firstline    datafunctionservices.standardlog
+
+    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}r-service*.log*
+    Db                  ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}tsnm.fluentbit.db
+
+    Read_from_Head      True
+    Buffer_Max_Size     64KB
 # {{- end -}}

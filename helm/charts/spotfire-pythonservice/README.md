@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.15.0](https://img.shields.io/badge/AppVersion-1.15.0-informational?style=flat-square)
+![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 A Helm chart for TIBCO Spotfire® Service for Python
 
@@ -12,11 +12,11 @@ A Helm chart for TIBCO Spotfire® Service for Python
 
 ## Requirements
 
-Kubernetes: `>=1.23.0-0`
+Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.6 |
+| file://../spotfire-common | spotfire-common | 0.1.7 |
 
 ## Overview
 
@@ -188,7 +188,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.0.9"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.1.2"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
@@ -199,7 +199,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"tibco/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.15.0-1.4.0"` | The container image tag to use. |
+| image.tag | string | `"1.16.0-1.5.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -249,6 +249,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | volumes.packages.persistentVolumeClaim.resources | object | `{"requests":{"storage":"1Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the customExt volume claims. |
 | volumes.packages.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the customExt volume-claim. |
 | volumes.packages.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume that should be used for the customExt volume-claim. |
+| volumes.packages.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | volumes.troubleshooting.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
 | volumes.troubleshooting.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' will be created. |
 | volumes.troubleshooting.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the volumes.troubleshooting claims. |

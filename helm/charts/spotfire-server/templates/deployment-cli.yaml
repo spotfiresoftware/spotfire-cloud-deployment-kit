@@ -39,14 +39,17 @@ spec:
             {{- if .Values.volumes.certificates.existingClaim }}
             - name: certificates-volume
               mountPath: /opt/tibco/spotfireconfigtool/certs
+              subPath: {{ .Values.volumes.certificates.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
             - name: custom-ext
               mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+              subPath: {{ .Values.volumes.customExt.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExtInformationservices.existingClaim }}
             - name: custom-ext-informationservices
               mountPath: /opt/tibco/spotfireconfigtool/custom-ext-informationservices
+              subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
             {{- end }}
             {{- with .Values.cliPod.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}

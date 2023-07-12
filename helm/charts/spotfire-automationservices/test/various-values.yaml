@@ -127,6 +127,7 @@ podSecurityContext:
   runAsGroup: 0
 volumes:
   customModules:
+    subPath: subpath
     persistentVolumeClaim:
       create: true
       resources:

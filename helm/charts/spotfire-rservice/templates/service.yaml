@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "spotfire-common.spotfire-service.fullname" . }}
+  labels:
+    {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "rservice")) | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  clusterIP: None
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 9443
+      name: backend 
+      protocol: TCP
+      targetPort: 9443
+    - port: 9080
+      name: registration
+      protocol: TCP
+      targetPort: 9080
+  selector:
+    {{- include "spotfire-common.spotfire-service.selectorLabels" (merge . (dict "componentName" "rservice")) | nindent 4 }}

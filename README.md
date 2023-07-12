@@ -22,7 +22,7 @@ Carefully review the [TIBCO Cloud Computing Environment Licensing Policy (“CCE
 ## Prerequisites
 
 - Required TIBCO Spotfire installation packages. If you have a TIBCO account, you can download the packages from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
-- Kubernetes 1.23+, a working Kubernetes cluster from a [certified K8s distro](https://www.cncf.io/certification/software-conformance/).
+- Kubernetes 1.24+, a working Kubernetes cluster from a [certified K8s distro](https://www.cncf.io/certification/software-conformance/).
 - Helm 3+, for building and deploying the charts.
 - An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman`, or alternative), for building the container images.
 
@@ -33,6 +33,7 @@ The following applications have been validated in this _Cloud Deployment Kit (CD
 - TIBCO Spotfire® Web Player
 - TIBCO Spotfire® Automation Services
 - TIBCO Spotfire® Service for Python
+- TIBCO Spotfire® Service for R
 - TIBCO® Enterprise Runtime for R - Server Edition (TERR™ service)
 
 **Note**: For more information on TIBCO Spotfire® and its components, see the [TIBCO Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).

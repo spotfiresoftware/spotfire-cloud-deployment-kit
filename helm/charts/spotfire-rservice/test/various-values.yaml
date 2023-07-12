@@ -1,0 +1,143 @@
+nodemanagerConfig:
+  preStopDrainingTimeoutSeconds: 610
+  serverBackendAddress: mytss-spotfire-server
+affinity: {}
+fullnameOverride: fullnameoverride
+acceptEUA: true
+global:
+  spotfire:
+    acceptEUA: true
+    image:
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - pullsecret
+      registry: my.registry.com
+image:
+  pullPolicy: Never
+  pullSecrets:
+    - pullsecret
+  registry: your.registry.com
+  repository: tibco/spotfire-rservice
+  tag: 1.13.0-1.2.0
+livenessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/liveness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+nameOverride: ""
+nodeSelector: {}
+podAnnotations:
+  prometheus.io/path: /spotfire/metrics
+  prometheus.io/port: "9080"
+  prometheus.io/scrape: "true"
+readinessProbe:
+  failureThreshold: 10
+  httpGet:
+    path: /spotfire/readiness
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+replicaCount: 2
+resources: {}
+service:
+  port: "9501"
+  type: ClusterIP
+serviceAccount:
+  annotations: {}
+  create: true
+  name: serviceaccountname
+startupProbe:
+  failureThreshold: 20
+  httpGet:
+    path: /spotfire/started
+    port: registration
+  initialDelaySeconds: 60
+  periodSeconds: 3
+tolerations: ""
+volumes:
+  troubleshooting:
+    existingClaim: existingclaim1
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename
+  packages:
+    subPath: subpath
+    existingClaim: existingclaim2
+    persistentVolumeClaim:
+      create: true
+      resources:
+        requests:
+          storage: 11Gi
+      storageClassName: storageclassname
+      volumeName: volumename
+kedaAutoscaling:
+  enabled: true
+  spotfireConfig:
+    prometheusServerAddress: http://prometheus-server.monitoring.svc.cluster.local
+  threshold: 8
+  fallback:
+    replicas: 1
+    failureThreshold: 3
+  triggers: []
+  minReplicas: 2
+  maxReplicas: 10
+  pollingInterval: 90
+  cooldownPeriod: 100
+  advanced:
+    restoreToOriginalReplicaCount: true
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleDown:
+          stabilizationWindowSeconds: 300
+          policies:
+            - type: Percent
+              value: 100
+              periodSeconds: 15
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+  runAsGroup: 0
+securityContext:
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 0
+fluentBitSidecar:
+  securityContext:
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 0
+  image:
+    pullPolicy: Always
+    repository: fluent/fluent-bit
+    tag: 1.9.9
+extraInitContainers:
+  - name: dummy-init
+    image: busybox
+    command:
+      - echo
+      - hey
+extraVolumes:
+  - name: rvolume
+    persistentVolumeClaim:
+      claimName: r-pvc
+extraVolumeMounts:
+  - name: rvolume
+    mountPath: /opt/tibco/services
+extraEnvVarsCM: rservicecm
+extraEnvVars:
+  - name: rservice
+    value: VALUE
+extraEnvVarsSecret: rservicesecret
+logging:
+  logForwarderAddress: mytss-log-forwarder
+  logLevel: trace
+configuration:
+  use.engine.containers: "true"

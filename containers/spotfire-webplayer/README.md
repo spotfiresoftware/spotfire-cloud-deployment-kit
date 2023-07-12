@@ -2,7 +2,7 @@
 
 ## About This Image
 
-This directory contains the official container recipe for **TIBCO Spotfire® Web Player**. 
+This directory contains the official container recipe for **TIBCO Spotfire® Web Player**.
 
 ## What is TIBCO Spotfire Web Player?
 
@@ -29,12 +29,12 @@ Prerequisites:
 
 Steps:
 1. Copy the `Spotfire.Dxp.netcore-linux.sdn` package into the `build/` directory within this folder.
-2. Copy language pack files (for example de-DE-netcore.sdn) into the `build/` with the desired language packs to build into the image. 
+2. Copy language pack files (for example de-DE-netcore.sdn) into the `build/` with the desired language packs to build into the image.
    These files can be extracted from `TIB_sfire_server_<version>_languagepack-multi.zip`.
 3. From the `<this-repo>/containers` folder, run `make spotfire-webplayer` to build this image, or `make spotfire-webplayer --dry-run` to just view the commands.
 
 ### Adding custom Spotfire packages
-Custom packages (SPKs) can include a cobranding package, for example.  You must use the Spotfire® Package Builder console to create the cobranding package for your containerized Web Player. See [Creating and deploying a cobranding package](https://docs.tibco.com/emp/sfire-analyst/latest/doc/html/en-US/TIB_sfire_cobranding_help/cobranding/topics/creating_and_deploying_a_cobranding_package.html) for more information. 
+Custom packages (SPKs) can include a cobranding package, for example.  You must use the Spotfire® Package Builder console to create the cobranding package for your containerized Web Player. See [Creating and deploying a cobranding package](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire_cobranding_help/cobranding/topics/creating_and_deploying_a_cobranding_package.html) for more information.
 
 At build time, put custom spk files in the `build/` folder.
 
@@ -66,12 +66,12 @@ docker run -d --rm -e ACCEPT_EUA=Y \
   tibco/spotfire-webplayer
 ```
 
-For more information, see [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html) 
-and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html). 
+For more information, see [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html)
+and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html).
 
 ### Environment variables
 
-- `TSWP_RESOURCEPOOL` - Set to the name of the resource pool the `spotfire-webplayer` instance should belong to. 
+- `TSWP_RESOURCEPOOL` - Set to the name of the resource pool the `spotfire-webplayer` instance should belong to.
   Default value: *Unset*
 - `LOGGING_SERVICELOG_MAX` - Maximum number of web player service log files to save. Default `2`
 - `LOGGING_SERVICELOG_SIZE` - Maximum size for web player service service log files. Default `10MB`

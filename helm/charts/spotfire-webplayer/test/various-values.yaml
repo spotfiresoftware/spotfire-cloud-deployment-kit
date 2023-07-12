@@ -129,6 +129,7 @@ logging:
   logForwarderAddress: mytss-log-forwarder
 volumes:
   customModules:
+    subPath: subpath
     persistentVolumeClaim:
       create: true
       resources:

@@ -129,6 +129,7 @@ volumes:
       storageClassName: storageclassname
       volumeName: volumename
   packages:
+    subPath: subpath
     persistentVolumeClaim:
       create: true
       resources:

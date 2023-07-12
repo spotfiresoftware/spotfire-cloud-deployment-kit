@@ -11,7 +11,7 @@ global:
     # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
     acceptEUA:
     image:
-      # -- The global container image registry. Used for TIBCO Spotfire container images unless overridden.
+      # -- The global container image registry. Used for  container images unless overridden.
       registry:
       # -- The global container image pull policy.
       pullPolicy: IfNotPresent
@@ -29,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: tibco/spotfire-server
   # -- The container image tag to use.
-  tag: "12.4.0-1.4.0"
+  tag: "12.5.0-1.5.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -41,7 +41,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.0.9"
+    tag: "2.1.2"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -231,7 +231,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.4.0-1.4.0"
+    tag: "12.5.0-1.5.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -280,7 +280,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: tibco/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.4.0-1.4.0"
+    tag: "12.5.0-1.5.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -295,18 +295,14 @@ volumes:
     persistentVolumeClaim:
        # -- If `true`, then a `PersistentVolumeClaim` (PVC) is created.
       create: false
-
       # -- Specifies the name of the `StorageClass` that to use for the `volumes.troubleshooting` PVC.
       storageClassName: ""
-
       # -- Specifies the standard K8s resource requests and/or limits for the `volumes.troubleshooting` PVC.
       resources:
         requests:
           storage: 2Gi
-
       # -- Specifies the name of the persistent volume to use for the `volumes.troubleshooting` PVC.
       volumeName:
-
     # -- When `persistentVolumeClaim.create` is `false`, then use this value to define an already-existing PVC.
     existingClaim: ""
 
@@ -315,40 +311,46 @@ volumes:
     persistentVolumeClaim:
        # -- If `true`, then a `PersistentVolumeClaim` (PVC) is created.
       create: false
-
       # -- Specifies the name of the `StorageClass` to use for the `volumes.libraryImportExport` PVC.
       storageClassName: ""
-
       # -- Specifies the standard Kubernetes resource requests and/or limits for the `volumes.libraryImportExport` PVC.
       resources:
         requests:
           storage: 1Gi
-
       # -- Specifies the name of the persistent volume to use for the `volumes.libraryImportExport` PVC.
       volumeName:
-
     # -- When `persistentVolumeClaim.create` is `false`, then this value is used to define an already-existing PVC.
     existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""
 
   # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext`
   customExt:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""
 
   # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext-informationservices`
   customExtInformationservices:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""
 
   # The volume with mountPath: `/opt/tibco/tss/tomcat/certs`
   certificates:
     # Defines an already-existing persistent volume claim.
     existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""
 
   # The volume with mountPath: `/opt/tibco/spotfireconfigtool/deployments`
   deployments:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""
 
 # ===============================
 # Spotfire application configuration
@@ -368,7 +370,7 @@ database:
   # @default -- -
   bootstrap:
     # -- The JDBC URL of the database to be used by Spotfire Server. Evaluated as a template.
-    databaseUrl: "jdbc:postgresql://HOSTNAME/"
+    databaseUrl: "jdbc:postgresql://HOSTNAME/spotfire"
     #  -- The Java driver class of the JDBC driver to be used with underlying database.
     driverClass: "org.postgresql.Driver"
     # -- Username to be created for the Spotfire Server database.
@@ -403,7 +405,7 @@ database:
       key: DBSERVER_ADMIN_PASSWORD
 
     # -- Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. Evaluated as a template.
-    databaseUrl: ""
+    databaseUrl: "jdbc:postgresql://HOSTNAME/"
     # -- Database name to be created to hold the Spotfire Server database schemas.
     spotfiredbDbname: "spotfire"
     # -- Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation
@@ -418,7 +420,8 @@ database:
   upgrade: true
 
 configuration:
-  # -- When to apply configurationScripts, commandScripts and admin user creation. Possible values:
+  # -- When to apply configurationScripts, commandScripts, admin user creation and action log settings.
+  # Possible values:
   # * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release.
   # * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool.
   # * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database.
@@ -552,13 +555,87 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: tibco/spotfire-deployment
         # -- The container image tag to use.
-        tag: "12.4.0-1.4.0"
+        tag: "12.5.0-1.5.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
         # image.pullSecrets -- spotfire-deployment image pull secrets.
         pullSecrets: []
 
+  # -- Action log settings. See [config-action-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-logger.html) for more information.
+  # @default -- File logging enabled, database logging disabled.
+  actionLog:
+    # -- Action log categories and webCategories are a comma separated list of categories. See [config-action-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/action_log_categories.html) for a list of possible categories.
+    # default value when empty is "all"
+    categories: ""
+    webCategories: ""
+    file:
+      # -- Enable write to file. See [config-action-logger --file-logging-enabled](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-logger.html) for more information.
+      enabled: true
+    database:
+      # -- Enable write to database. See [config-action-logger --database-logging-enabled](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-logger.html) for more information.
+      enabled: false
+      # -- Create the actionlog database. See [create-actionlogdb](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-actionlogdb.html) for more information.
+      # @default -- Actionlog database is created only if configuration.actionLog.enabled is true
+      create-actionlogdb:
+        # -- if enabled is true, create the actionlog database
+        enabled: true
+        # -- Name for the Actionlog Database to be created to hold the Actionlog database table.
+        actiondbDbname: "spotfire_actionlog"
+        # -- Admin username for the actionlog database.
+        adminUsername: "postgres"
+        # -- Like `configuration.actionLog.database.config-action-log-database-logger.databaseUrl` but is used for the connection when creating the actionlog database. Evaluated as a template.
+        databaseUrl: "jdbc:postgresql://HOSTNAME/"
+        # -- Admin password for the actionlog database.
+        adminPassword: ""
+        # -- Read spotfire actionlog database password from an existing secret. If set, 'adminPassword' above is not used.
+        # @default -- Not used unless .name is set
+        adminPasswordExistingSecret:
+          ## -- Name of the secret. Evaluated as a template.
+          name: ""
+          ## -- Key to read the spotfire database password from. Evaluated as a template.
+          key: ACTIONDB_ADMIN_PASSWORD
+        # -- For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option.
+        variant: ""
+        # -- Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation
+        # or the actionlog records are being stored on the spotfire database.
+        doNotCreateUser: false
+        oracleTablespacePrefix: ""
+        # -- Specify the value in case of Oracle database, otherwise keep it blank.
+        oracleRootfolder: ""
+        # -- Specifies the timeout, in seconds, for the operation.
+        timeoutSeconds: ""
+      # -- Configure actionlog database. See [config-action-log-database-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information.
+      # @default -- Configuration of actionlog database settings is only applicable if configuration.actionLog.enabled is true
+      config-action-log-database-logger:
+        driverClass: "org.postgresql.Driver"
+        databaseUrl: "jdbc:postgresql://HOSTNAME/spotfire_actionlog"
+        # -- The user to create for actionlog database access
+        username : "spotfire_actionlog"
+        # -- The password to be created for the Spotfire Actionlog database user.
+        # If not provided, this password is automatically generated.
+        password:  ""
+        passwordExistingSecret:
+          ## -- Name of the secret. Evaluated as a template.
+          name: ""
+          ## -- Key to read the spotfire database password from. Evaluated as a template.
+          key: ACTIONDB_PASSWORD
+        # -- Additional Options. See [config-action-log-database-logger - Options](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information.
+        additionalOptions: {}
+          # commit-period: ""
+          # wait-on-full-queue-time: ""
+          # wait-on-empty-queue-time: ""
+          # grace-period: ""
+          # pruning-period: ""
+          # queue-size: ""
+          # batch-size: ""
+          # thread-pool-size: ""
+          # workers: ""
+          # block-on-full-queue: true
+          # prioritized-categories: "" 
+          # monitoring-retention-span: ""
+          # monitoring-average-period: ""
+          # log-local-time: false
 troubleshooting:
   jvm:
     heapDumpOnOutOfMemoryError:
@@ -692,7 +769,7 @@ haproxy:
         # -- For larger files, haproxy tune.bufsize may need to be increased to accommodate the larger size.
         bufSize: 24576
         # -- The maintenance page response string.
-        responseString: "<html><title>Maintenance - TIBCO Spotfire</title><body>Maintenance in progress</body></html>"
+        responseString: "<html><title>Maintenance - </title><body>Maintenance in progress</body></html>"
 
   # -- The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl.
   # @default -- The chart creates a configuration automatically.

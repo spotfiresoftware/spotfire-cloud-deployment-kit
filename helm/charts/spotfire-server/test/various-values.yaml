@@ -150,7 +150,7 @@ configJob:
   ttlSecondsAfterFinished: "3600"
 database:
   bootstrap:
-    databaseUrl: jdbc://server/
+    databaseUrl: jdbc://server/dbname
     driverClass: org.postgresql.Driver
     passwordExistingSecret:
       name: nameOfExistingSecret
@@ -372,13 +372,18 @@ kedaAutoscaling:
 volumes:
   certificates:
     existingClaim: customcertspvc
+    subPath: subpath
   customExt:
     existingClaim: customextpvc
+    subPath: subpath
   deployments:
     existingClaim: deploymentsclaimname
+    subPath: subpath
   customExtInformationservices:
     existingClaim: existingclaim1
+    subPath: subpath
   libraryImportExport:
+    subPath: subpath
     persistentVolumeClaim:
       create: true
       resources:
@@ -409,7 +414,7 @@ configuration:
           - one
           - two
         registry: ""
-        repository: tibco/spotfire-deployment
+        repository: spotfire/deployment
         tag: 12.1.0-1.2.0
     enabled: true
   draining:
@@ -441,6 +446,26 @@ configuration:
   preConfigCommandScripts:
     - name: name
       script: script
+  actionLog:
+    categories: "all"
+    webCategories: "library,admin"
+    file:
+      enabled: true
+    database:
+      enabled: true
+      create-actionlogdb:
+        enabled: true
+        actiondbDbname: "spotfire_actionlog"
+        adminUsername: "actionlogdbAdminUsername"
+        adminPassword: "actionlogdbpassword25"
+        databaseUrl: "actionlogdbAdminurl"
+        doNotCreateUser: false
+      config-action-log-database-logger:
+        databaseUrl: "actionlogdburl"
+        username: "actionlogdbusername"
+        password: "actiondbPassword"
+        additionalOptions:
+          pruning-period: "168"
 extraInitContainers:
   - name: dummy-init
     image: busybox

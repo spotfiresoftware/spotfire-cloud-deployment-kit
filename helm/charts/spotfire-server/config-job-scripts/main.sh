@@ -131,7 +131,6 @@ if [ "${JOB_UPGRADE_DATABASE}" = "true" ]; then
     /opt/tibco/scripts/database-upgrade.sh
 fi
 
-# Configure public address
 logHeader "Configuration and setup"
 
 # If check-prerequisites are met, there is a configured spotfire database hence no new installation
@@ -143,6 +142,7 @@ else
     echo "An existing configuration was NOT found. It is a new installation."
 fi
 
+echo "checking $JOB_WHEN_TO_APPLY_CONFIG"
 # Don't apply configuration if externally managed, unless helm release is installed i.e initial setup
 if [ "${JOB_WHEN_TO_APPLY_CONFIG,,}" = "initialsetup" ] && [ "${is_install}" = "true" ]; then
     apply_configuration="true"
@@ -167,13 +167,10 @@ fi
 if [ "${apply_configuration}" = "true" ]; then
     export_or_create_default_config
 
+    # Configure public address
     if [ ! -z "${SITE_PUBLIC_ADDRESS}" ]; then
         config.sh set-public-address --bootstrap-config=bootstrap.xml --tool-password="${TOOL_PASSWORD}" --site-name="${SITE_NAME}" --url="${SITE_PUBLIC_ADDRESS}"
     fi
-
-    # Configure action logging
-    logSubHeader "Configure action logging"
-    config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/action-logging.txt
 
     # Default kubernetes configuration
     logSubHeader "Applying default kubernetes configuration"
@@ -181,11 +178,15 @@ if [ "${apply_configuration}" = "true" ]; then
 
     pre_config_command_scripts
 
+    # # Configure action logging
+    /opt/tibco/scripts/configure-actionlog.sh
+
     # Custom configuration scripts
     configuration_scripts
 
     # Import config if, but only if it has changed
     import_config
+
 fi
 
 

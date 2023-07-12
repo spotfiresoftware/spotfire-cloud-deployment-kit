@@ -7,6 +7,7 @@ This directory contains the recipes to build and examples to use the [**TIBCO Sp
 - [spotfire-server](charts/spotfire-server/README.md): TIBCO Spotfire Server helm chart.
 - [spotfire-webplayer](charts/spotfire-webplayer/README.md): TIBCO Spotfire Web Player helm chart.
 - [spotfire-automationservices](charts/spotfire-automationservices/README.md): TIBCO Spotfire Automation Services helm chart.
+- [spotfire-rservice](charts/spotfire-rservice/README.md): TIBCO Spotfire Service for R helm chart.
 - [spotfire-pythonservice](charts/spotfire-pythonservice/README.md): TIBCO Spotfire Service for Python helm chart.
 - [spotfire-terrservice](charts/spotfire-terrservice/README.md): TIBCO Enterprise Runtime for R - Server Edition helm chart.
 
@@ -17,7 +18,7 @@ See the respective README files for details and usage examples.
 ## Prerequisites
 
 - You have built the [Spotfire container images](../containers/README.md) or have configured a container repository hosting those container images.
-- Kubernetes 1.23+, a working kubernetes cluster from a ([certified k8s distro](https://www.cncf.io/certification/software-conformance/)).
+- Kubernetes 1.24+, a working kubernetes cluster from a ([certified k8s distro](https://www.cncf.io/certification/software-conformance/)).
 - Helm 3+, for building and deploying the charts.
 
 ## Building the charts

@@ -51,7 +51,7 @@ of doing it.
 6. To install spotfire-webplayer, use the `volumes.customModules.existingClaim`
    value and supply the pvc name.
    ```
-   helm install spotfire-webplayer spotfire/spotfire-webplayer --set volumes.customModules.existingClaim=custom-modules-pvc ...
+   helm install spotfire-webplayer tibco/spotfire-webplayer --set volumes.customModules.existingClaim=custom-modules-pvc ...
    ```
-   Note: spotfire/spotfire-webplayer assumes the helm repo is named spotfire.
+   Note: tibco/spotfire-webplayer assumes the helm repo is named spotfire.
    If you have named it something else, you need to use that name instead.

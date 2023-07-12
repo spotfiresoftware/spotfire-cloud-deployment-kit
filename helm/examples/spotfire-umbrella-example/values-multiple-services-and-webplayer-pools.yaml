@@ -14,6 +14,9 @@ spotfire-webplayer-pool2:
 spotfire-automationservices:
   enabled: true
 
+spotfire-rservice:
+  enabled: true
+
 spotfire-pythonservice:
   enabled: true
 

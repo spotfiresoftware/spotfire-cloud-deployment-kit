@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  creationTimestamp: null
+  labels:
+    {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "rservice")) | nindent 4 }}
+  name: {{- include "spotfire-common.fluenbit-configuration.configmapName" . | nindent 4 }}
+data:
+  tsnm.forward.fluentbit.conf: {{ include "spotfire-common.fluenbit-configuration.tsnm.forward.fluentbit.conf" . | quote }}
+  tsnm.parsers.fluentbit.conf: {{ include "spotfire-common.fluenbit-configuration.tsnm.parsers.fluentbit.conf" . | quote }}
+  tsnm.podannotations.fluentbit.conf: {{ include "spotfire-common.fluenbit-configuration.tsnm.podannotations.fluentbit.conf" . | quote }}
+  tsnm.stdout.fluentbit.conf: {{ include "spotfire-common.fluenbit-configuration.tsnm.stdout.fluentbit.conf" . | quote }}
+  tsnm.tail.fluentbit.conf: {{ include "spotfire-common.fluenbit-configuration.tsnm.tail.fluentbit.conf" . | quote }}

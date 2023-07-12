@@ -7,10 +7,10 @@ set-config-prop --name="lifecycle.changes-monitoring.draining.timeout-seconds" -
 
 {{- if kindIs "map" $property }}
 {{- if kindIs "map" $property.value }}
-set-config-map-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -A{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-map-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -V{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
 
 {{- else if kindIs "slice" $property.value }}
-set-config-list-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -A{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
+set-config-list-prop --name={{ $name | quote }} --item-name={{ $property.itemName | quote }} {{- range $val := $property.value }} -V{{ (tpl (toString $val) $) | quote }} {{- end }} --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
 
 {{- end }}
 {{- else }}

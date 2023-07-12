@@ -7,7 +7,7 @@ PACKAGE_DIR                ?= packages
 REPO_URL                   ?= # http://example.com/helm-repo/
 
 # Charts to package
-CHARTS                      = spotfire-common spotfire-server spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice
+CHARTS                      = spotfire-common spotfire-server spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-rservice
 
 .PHONY: all $(CHARTS) documentation package $(PACKAGE_DIR)/index.yaml clean spotfire-umbrella-example
 
@@ -25,7 +25,7 @@ $(CHARTS) :
 
 # Chart dependencies
 spotfire-server : spotfire-common
-spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice : spotfire-common
+spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-rservice: spotfire-common
 
 clean :
 	rm -rf -- $(PACKAGE_DIR)/
@@ -36,7 +36,7 @@ clean :
 documentation :
 	helm-docs --chart-search-root charts/
 
-spotfire-umbrella-example : spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-server
+spotfire-umbrella-example : spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-rservice spotfire-server
 	helm dependency update examples/$@
 
 # Test targets

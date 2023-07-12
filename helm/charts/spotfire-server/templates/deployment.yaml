@@ -112,18 +112,22 @@ spec:
           {{- if .Values.volumes.certificates.existingClaim }}
           - name: certificates-volume
             mountPath: /opt/tibco/tss/tomcat/certs
+            subPath: {{ .Values.volumes.certificates.subPath | quote }}
           {{- end }}
           {{- if .Values.volumes.customExt.existingClaim }}
           - name: custom-ext
             mountPath: /opt/tibco/tss/tomcat/custom-ext
+            subPath: {{ .Values.volumes.customExt.subPath | quote }}
           {{- end }}
           {{- if .Values.volumes.customExtInformationservices.existingClaim }}
           - name: custom-ext-informationservices
             mountPath: /opt/tibco/tss/tomcat/custom-ext-informationservices
+            subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
           {{- end }}
           {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.existingClaim }}
           - name: library-import-export
             mountPath: /opt/tibco/tss/tomcat/application-data/library
+            subPath: {{ .Values.volumes.libraryImportExport.subPath | quote }}
           {{- end }}
           - name: troubleshooting-volume
             mountPath: /opt/tibco/troubleshooting/

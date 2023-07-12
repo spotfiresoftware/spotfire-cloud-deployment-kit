@@ -15,6 +15,23 @@ database:
 configuration:
   site:
     publicAddress: http://localhost/
+  actionLog:
+    categories: ""
+    webCategories: ""
+    file:
+      enabled: false
+    database:
+      enabled: false
+      create-actionlogdb:
+        enabled: false
+        databaseUrl: "actionlogdbAdminurl"
+        adminPassword: "actionlogdbpassword25"
+        doNotCreateUser: false
+      config-action-log-database-logger:
+        databaseUrl: "actionlogdburl"
+        username: "actionlogdbuser"
+        password: "actionlogdbpassword"
+        additionalOptions: {}
 haproxy:
   enabled: false
 livenessProbe:

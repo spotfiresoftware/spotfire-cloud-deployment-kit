@@ -38,6 +38,48 @@ configuration:
     defaultDeployment:
       deploymentAreaName: productionareaname
       enabled: false
+  actionLog:
+    categories: ""
+    webCategories: ""
+    file:
+      enabled: true
+    database:
+      enabled: true
+      create-actionlogdb:
+        enabled: true
+        actiondbDbname: "spotfire_actionlog"
+        adminUsername: "postgres"
+        adminPassword: ""
+        databaseUrl: "jdbc:postgresql://HOSTNAME/"
+        adminPasswordExistingSecret:
+          name: "action-log-db-adminsecret"
+          key: "actionlogdb-admin-xyz"
+        variant: ""
+        doNotCreateUser: false
+        timeoutSeconds: 30
+      config-action-log-database-logger:
+        driverClass: "org.postgresql.Driver"
+        databaseUrl: "jdbc:postgresql://HOSTNAME/spotfire_actionlog"
+        username : "spotfire_actionlog"
+        password: ""
+        passwordExistingSecret:
+          name: "action-log-db-secret"
+          key: "actionlogdb-password-key"
+        additionalOptions:
+          commit-period: 25
+          wait-on-full-queue-time: true
+          wait-on-empty-queue-time: true
+          grace-period: 19
+          pruning-period: 168
+          queue-size: 25
+          batch-size: 5
+          thread-pool-size: 15
+          workers: 10
+          block-on-full-queue: true
+          prioritized-categories: "library,admin"
+          monitoring-retention-span: 220
+          monitoring-average-period: 10
+          log-local-time: false
 haproxy:
   enabled: true
   podSecurityPolicy:

@@ -9,13 +9,13 @@ This directory contains the official container recipe for **[TIBCO® Enterprise 
 **TIBCO® Enterprise Runtime for R (TERR)** is a high-performance, enterprise-quality statistical engine to provide predictive analytic capabilities.
 TERR enables users to integrate and deploy advanced analytics written in the R language into their applications using an enterprise-quality R-compatible runtime environment.
 
-**TIBCO® Enterprise Runtime for R - Server Edition** (aka TERR service) provides remote execution of TERR data functions, TERR predictive analytics, or TERR custom expressions for users from web client and mobile devices (TIBCO Spotfire® Business Author and Consumer).
+**TIBCO® Enterprise Runtime for R - Server Edition** (aka TERR service) provides remote execution of TERR data functions, TERR predictive analytics, or TERR custom expressions for users from web client and mobile devices (Spotfire® Business Author and Consumer).
 
-**Note**: _TERR service_ is provided as a _TIBCO Spotfire Statistics Services_ component in [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
+**Note**: _TERR service_ is provided as a _Spotfire Server_ component in [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
 
 References:
-- For a quick overview, see the [Introduction to the TIBCO Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html).
-- For more information on the Spotfire product family, see the [TIBCO Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
+- For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html).
+- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
 - For latest specific component documentation, see [TIBCO® Enterprise Runtime for R - Server Edition Installation and Administration](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/terrinstall-homepage.html).
   You can access to documentation for other component versions and other formats in [TIBCO® Enterprise Runtime for R - Server Edition product documentation](https://docs.tibco.com/products/tibco-enterprise-runtime-for-r-server-edition)
 
@@ -51,8 +51,8 @@ docker run -d --rm -e ACCEPT_EUA=Y \
   tibco/spotfire-terrservice
 ```
 
-**Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
-By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the TIBCO Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+**Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 The `spotfire-terrservice` will start with the default configuration from `/opt/tibco/tsnm/nm/services/TERRR/conf/custom.properties` in the container image.
 

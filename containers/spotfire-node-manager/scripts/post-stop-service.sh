@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o verbose
+
 if [ ! -d "/opt/tibco/troubleshooting" ]; then
     echo "Troubleshooting directory /opt/tibco/troubleshooting not found, not performing any post stop actions"
     exit 0;

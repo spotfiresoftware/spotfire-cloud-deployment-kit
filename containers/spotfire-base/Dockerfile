@@ -20,6 +20,8 @@ RUN apt-get update \
   && apt-get upgrade -y \
   && mkdir -p /usr/share/man/man1 \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+     ca-certificates-java \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
      openjdk-17-jre-headless \
      unzip \
      cabextract \

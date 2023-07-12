@@ -60,6 +60,7 @@ spec:
             {{ include "spotfire-server.spotfireadmin.envVars" . | nindent 12 }}
             {{ include "spotfire-server.database.envVars" . | nindent 12 }}
             {{ include "spotfire-server.configVars" . | nindent 12 }}
+            {{ include "spotfire-server.actionLog.envVars" . | nindent 12}}
             {{ include "spotfire-server.database.adminEnvVars" . | nindent 12}}
             - name: LOG_APPENDER
               value: "console"

@@ -1,0 +1,31 @@
+apiVersion: v2
+name: spotfire-rservice
+description: A Helm chart for TIBCO Spotfire® Service for R
+
+type: application
+
+version: 0.1.7
+
+appVersion: "1.16.0"
+
+kubeVersion: ">=1.24.0-0"
+
+home: https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+sources:
+ - https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+
+keywords:
+  - spotfire
+  - R
+  - analytics
+  - data science
+  - data functions
+
+dependencies:
+  - name: spotfire-common
+    repository: file://../spotfire-common
+    version: 0.1.7
+
+annotations:
+  license: Apache 2.0
+  licenseUrl: https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/blob/main/LICENSE

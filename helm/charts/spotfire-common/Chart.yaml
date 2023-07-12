@@ -2,7 +2,7 @@ apiVersion: v2
 name: spotfire-common
 description: A Helm chart with common templates used in TIBCO Spotfire charts.
 type: library
-version: 0.1.6
+version: 0.1.7
 
 home: https://github.com/TIBCO/Spotfire-cloud-deployment-kit
 sources:

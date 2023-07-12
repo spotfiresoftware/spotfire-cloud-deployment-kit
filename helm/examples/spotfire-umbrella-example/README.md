@@ -7,6 +7,7 @@ The chart can deploy the following Spotfire components:
 - [spotfire-server](../../charts/spotfire-server/README.md): TIBCO Spotfire Server helm chart.
 - [spotfire-webplayer](../../charts/spotfire-webplayer/README.md): TIBCO Spotfire Web Player helm chart.
 - [spotfire-automationservices](../../charts/spotfire-automationservices/README.md): TIBCO Spotfire Automation Services helm chart.
+- [spotfire-rservice](../../charts/spotfire-rservice/README.md): TIBCO Spotfire Service for R helm chart.
 - [spotfire-pythonservice](../../charts/spotfire-pythonservice/README.md): TIBCO Spotfire Service for Python helm chart.
 - [spotfire-terrservice](../../charts/spotfire-terrservice/README.md): TIBCO Enterprise Runtime for R - Server Edition helm chart.
 

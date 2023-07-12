@@ -4,11 +4,11 @@ description: A Helm chart for TIBCO Spotfire Web Player.
 
 type: application
 
-version: 0.1.6
+version: 0.1.7
 
-appVersion: "12.4.0"
+appVersion: "12.5.0"
 
-kubeVersion: ">=1.23.0-0"
+kubeVersion: ">=1.24.0-0"
 
 home: 'https://github.com/TIBCO/Spotfire-cloud-deployment-kit'
 
@@ -22,7 +22,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 0.1.6
+    version: 0.1.7
 
 annotations:
   license: Apache 2.0

@@ -39,6 +39,27 @@ SPOTFIREDB_PASSWORD
 {{- end -}}
 
 /*
+Spotfire actionlog database secrets, either an external existingSecret or spotfire managed secret
+*/
+{{- define "spotfire-server.actionlogdatabase.secret.name" -}}
+{{- $actiondbconfig := index .Values.configuration.actionLog.database "config-action-log-database-logger" -}}
+{{- if ($actiondbconfig.passwordExistingSecret.name) }}
+{{- tpl $actiondbconfig.passwordExistingSecret.name $ }}
+{{- else -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "spotfire-server.actionlogdatabase.secret.passwordkey" -}}
+{{- $actiondbconfig := index .Values.configuration.actionLog.database "config-action-log-database-logger" -}}
+{{- if $actiondbconfig.passwordExistingSecret.name -}}
+{{- tpl $actiondbconfig.passwordExistingSecret.key $ }}
+{{- else -}}
+ACTIONDB_PASSWORD
+{{- end -}}
+{{- end -}}
+
+/*
 Spotfire administrator secret name, either an external existingSecret or spotfire managed secret
 */
 {{- define "spotfire-server.spotfireadmin.secret.name" -}}
@@ -174,13 +195,84 @@ Configuration job environment variables
 {{- end -}}
 
 {{/*
+Actionlog configuration environment variables needed to create and configure Actionlog
+*/}}
+{{- define "spotfire-server.actionLog.envVars" -}}
+{{- $actionlog := .Values.configuration.actionLog -}}
+{{- $create := index .Values.configuration.actionLog.database "create-actionlogdb" -}}
+{{- $config := index .Values.configuration.actionLog.database "config-action-log-database-logger" -}}
+- name: ACTIONLOG_FILE_LOGGING
+  value: {{ $actionlog.file.enabled | quote }}
+- name: ACTIONLOG_DB_LOGGING
+  value: {{ $actionlog.database.enabled | quote }}
+- name: ACTIONLOG_CATEGORIES
+  value: {{ $actionlog.categories | quote }}
+- name: ACTIONLOG_WEB_CATEGORIES
+  value: {{ get $actionlog "webCategories" | quote }}
+{{- if $actionlog.database.enabled }}
+{{- if $create.enabled }}
+{{/* create section */}}
+- name: ACTIONDB_CREATE
+  value: {{ get $create "enabled" | quote }}
+- name: ACTIONDB_DBNAME
+  value: {{ get $create "actiondbDbname" | quote }}
+- name: ACTIONDB_ADMIN_URL
+  value: {{ required "Actiondb admin url is required" (tpl $create.databaseUrl $) | quote }}
+- name: ACTIONDB_ADMIN_USERNAME
+  value: {{ get $create "adminUsername" | quote }}
+{{- if $create.adminPasswordExistingSecret.name }}
+- name: ACTIONDB_ADMIN_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ tpl $create.adminPasswordExistingSecret.name $ }}
+      key: {{ tpl $create.adminPasswordExistingSecret.key $ }}
+{{- else }}
+- name: ACTIONDB_ADMIN_PASSWORD
+  value: {{ required "actionlog database adminPassword must be set" (get $create "adminPassword") | quote }}
+{{- end }}
+- name: ACTIONDB_ORACLE_ROOT_FOLDER
+  value: {{ get $create "oracleRootfolder" | quote }}
+- name: ACTIONDB_ORACLE_TABLESPACE_PREFIX
+  value: {{ get $create "oracleTablespacePrefix" | quote }}
+- name: ACTIONDB_VARIANT
+  value: {{ get $create "variant" | quote }}
+- name: ACTIONDB_DO_NOT_CREATE_USER
+  value: {{ get $create "doNotCreateUser" | quote }}
+- name: ACTIONDB_CREATE_TIMEOUT_SECONDS
+  value: {{ get $create "timeoutSeconds" | quote }}
+{{/* end of create section */}}
+{{- end }}
+{{/* start config section */}}
+- name: ACTIONDB_CLASS
+  value: {{ get $config "driverClass" | quote }}
+- name: ACTIONDB_URL
+  value: {{ required "Actiondb url is required" (tpl $config.databaseUrl $) | quote }}
+- name: ACTIONDB_USERNAME
+  value: {{ required "actionlog username is required." (get $config "username")| quote }}
+{{- if $actionlog.database.enabled }}
+- name: ACTIONDB_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "spotfire-server.actionlogdatabase.secret.name" . | quote }}
+      key: {{ include "spotfire-server.actionlogdatabase.secret.passwordkey" . | quote }}
+      optional: false
+{{- end -}}
+{{- if $config.additionalOptions }}
+- name: ACTIONDB_CONFIG_ARGS
+  value: {{ quote }}{{ range $name, $value := $config.additionalOptions }}{{ printf "--%s=%v " $name $value  }}{{ end }}{{ quote }}
+{{ end }}
+{{/* end config section */}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Database admin credentials environment variables needed to create a Spotfire schema
 */}}
 {{- define "spotfire-server.database.adminEnvVars" -}}
 {{- $createdb := (index .Values "database" "create-db") -}}
 - name: SPOTFIREDB_DBNAME
   value: {{ $createdb.spotfiredbDbname | quote }}
-{{- if index $createdb.enabled }}
+{{- if $createdb.enabled }}
 - name: DBSERVER_ADMIN_USERNAME
   value: {{ required "database.create-db.adminUsername must be set" $createdb.adminUsername | quote }}
 {{- if $createdb.adminPasswordExistingSecret.name }}

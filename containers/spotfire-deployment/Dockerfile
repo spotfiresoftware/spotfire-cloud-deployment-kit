@@ -1,5 +1,6 @@
 ARG IMAGE_BUILD_ID=latest
 FROM tibco/spotfire-base:${IMAGE_BUILD_ID} as extract
+ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 
 RUN mkdir -p /opt/tibco/deployment-files
 
@@ -8,7 +9,7 @@ ADD build/Spotfire.Dxp.sdn /opt/tibco/deployment-files
 WORKDIR /opt/tibco/deployment-files/
 
 # Add language packs, excluding the *-netcore.sdn files
-COPY --chown=spotfire:spotfire build/TIB_sfire_server_*_languagepack-multi.zip /tmp
+COPY --chown=spotfire:spotfire build/TIB_sfire_server_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_languagepack-multi.zip /tmp
 RUN unzip -q -u -j /tmp/TIB_sfire_server_*_languagepack-multi.zip -d /opt/tibco/deployment-files/ -x '*-netcore.sdn'
 
 LABEL org.opencontainers.image.title="tibco/spotfire-deployment" \

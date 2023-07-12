@@ -2,19 +2,19 @@
 
 ## About This Image
 
-This directory contains the official container recipe for **[TIBCO Spotfire® Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/the_tibco_spotfire_service_for_python.html)**.
+This directory contains the official container recipe for **[Spotfire® Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/the_tibco_spotfire_service_for_python.html)**.
 
-## What is TIBCO Spotfire® Service for Python?
+## What is Spotfire® Service for Python?
 
-**TIBCO Spotfire® Service for Python** (aka Python service) provides remote execution of Python data functions for users from web client and mobile devices (TIBCO Spotfire® Business Author and Consumer).
+**Spotfire® Service for Python** (Python service) provides remote execution of Python data functions for users from web client and mobile devices (TIBCO Spotfire® Business Author and Consumer).
 
-**Note**: _TIBCO Spotfire Service for Python_ is provided as a _TIBCO Spotfire Statistics Services_ component in [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
+**Note**: _Spotfire Service for Python_ is provided as a _Spotfire Server_ component in [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
 
 References:
-- For a quick overview, see the [Introduction to the TIBCO Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html).
-- For more information on the Spotfire product family, see the [TIBCO Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
-- For latest specific component documentation, see [TIBCO Spotfire® Service for Python Installation and Administration](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall-homepage.html).
-You can access to documentation for other component versions and other formats in [TIBCO Spotfire® Service for Python product documentation](https://docs.tibco.com/products/tibco-spotfire-service-for-python)
+- For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html).
+- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
+- For latest specific component documentation, see [Spotfire® Service for Python Installation and Administration](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall-homepage.html).
+You can access to documentation for other component versions and other formats in [TSpotfire® Service for Python product documentation](https://docs.tibco.com/products/tibco-spotfire-service-for-python)
 
 ## How to build this image
 
@@ -41,13 +41,13 @@ Prerequisites:
 
 ### Start a Python service container
 
-You can start an instance of the **TIBCO Spotfire Service for Python** container with:
+You can start an instance of the **Spotfire Service for Python** container with:
 ```bash
 docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server tibco/spotfire-pythonservice
 ```
 
-**Note**:  This TIBCO Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
-By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the TIBCO Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+**Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
 
 The `spotfire-pythonservice` will start with the default configuration from `/opt/tibco/tsnm/nm/services/PYTHON/conf/custom.properties` in the container image.
 

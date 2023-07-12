@@ -1,3 +1,90 @@
+# Release v1.5.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- TIBCO Spotfire Server 12.5.0
+- TIBCO Spotfire Web Player 12.5.0
+- TIBCO Spotfire Automation Services 12.5.0
+- TIBCO Enterprise Runtime for R - Server Edition 1.16.0
+- TIBCO Spotfire Service for Python 1.16.0
+- TIBCO Spotfire Service for R 1.16.0
+
+
+The recipes are validated with the listed Spotfire products and versions. They could work with other Spotfire versions with modifications.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.1.7 | 12.5.0 | 12.5.0-1.5.0 |
+| spotfire-webplayer | 0.1.7 | 12.5.0 | 12.5.0-1.5.0 |
+| spotfire-automationservices | 0.1.7 | 12.5.0 | 12.5.0-1.5.0 |
+| spotfire-terrservice | 0.1.7 | 1.16.0 | 1.16.0-1.5.0 |
+| spotfire-pythonservice | 0.1.7 | 1.16.0 | 1.16.0-1.5.0 |
+| spotfire-rservice | 0.1.7 | 1.16.0 | 1.16.0-1.5.0 |
+
+Note: The image tag format is \<appVersion\>-\<cdk version\>
+
+## Changes
+
+### General
+
+- Volume mounts for charts now support specifying [subPath](https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath).
+- Added a chart to support deploying the new service TIBCO Spotfire Service for R.
+- Fix provided for the issue "[Unable to build container image spotfire-base due to failure to install openjdk-17-jre-headless](https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/issues/14)."
+- Minimum Kubernetes version required by charts updated to 1.24.0-0.
+- Added  custom configuration for action log database logging for the spotfire-server helm chart. An umbrella-example ( helm/examples/spotfire-umbrella-example/values-actionlogdb ) was added for testing and example purposes.  Various configuration keys are included in under the Values.configuration section of the 
+  Values.yaml file. These keys provide the following capabilities:
+    * Configuring 'Categories and Web Categories'.
+    * Enabling or disabling logging to a database. 
+    * Enabling access and/or creating the action log database.
+- Various other bug fixes and improvements.
+
+### spotfire-server chart 0.1.7
+
+- Added the ability to configure action log settings in spotfire-server to log to a database.
+
+| New key | Old key | Comment |
+| - | - | - |
+| volumes.libraryImportExport.subPath | | Added |
+| volumes.customExt.subPath | | Added |
+| volumes.customExtInformationservices.subPath | | Added |
+| volumes.certificates.subPath | | Added |
+| volumes.deployments.subPath | | Added |
+| configuration.actionLog.\* | | Added |
+
+### spotfire-pythonservice chart 0.1.7
+
+| New key | Old key | Comment |
+| - | - | - |
+| volumes.packages.subPath | | Added |
+
+
+### spotfire-terrservice chart 0.1.7
+
+| New key | Old key | Comment |
+| - | - | - |
+| volumes.packages.subPath | | Added |
+
+
+### spotfire-webplayer chart 0.1.7
+
+| New key | Old key | Comment |
+| - | - | - |
+| volumes.customModules.subPath | | Added |
+
+
+### spotfire-automationservices chart 0.1.7
+
+| New key | Old key | Comment |
+| - | - | - |
+| volumes.customModules.subPath | | Added |
+
+### spotfire-rservice chart 0.1.7
+
+- New.
+
+
 # Release v1.4.0
 
 This release includes recipes for building container images and Helm charts for the following products.

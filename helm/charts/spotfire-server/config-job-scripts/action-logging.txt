@@ -1,2 +1,0 @@
-config-action-logger --categories="all" --file-logging-enabled=true --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
-config-action-log-web-service --categories="all" --configuration="${CONFIGURATION_FILE}" --bootstrap-config="${BOOTSTRAP_FILE}"
