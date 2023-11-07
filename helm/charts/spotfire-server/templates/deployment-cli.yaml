@@ -37,18 +37,18 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
             {{- if .Values.volumes.certificates.existingClaim }}
-            - name: certificates-volume
-              mountPath: /opt/tibco/spotfireconfigtool/certs
+            - name: {{ .Values.volumes.certificates.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/certs
               subPath: {{ .Values.volumes.certificates.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
-            - name: custom-ext
-              mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+            - name: {{ .Values.volumes.customExt.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/custom-ext
               subPath: {{ .Values.volumes.customExt.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExtInformationservices.existingClaim }}
-            - name: custom-ext-informationservices
-              mountPath: /opt/tibco/spotfireconfigtool/custom-ext-informationservices
+            - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/custom-ext-informationservices
               subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
             {{- end }}
             {{- with .Values.cliPod.extraVolumeMounts }}
@@ -78,20 +78,31 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.cliPod.logLevel | quote }}
       volumes:
+        {{- $existingVolumes := dict }}
         {{- if .Values.volumes.certificates.existingClaim }}
-        - name: certificates-volume
+        {{- $claimName := .Values.volumes.certificates.existingClaim }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.certificates.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
         {{- end }}
         {{ if .Values.volumes.customExt.existingClaim -}}
-        - name: custom-ext
+          {{- $claimName := .Values.volumes.customExt.existingClaim  }}
+            {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExt.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         {{ if .Values.volumes.customExtInformationservices.existingClaim -}}
-        - name: custom-ext-informationservices
+          {{- $claimName := .Values.volumes.customExtInformationservices.existingClaim  }}
+            {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
       {{- with .Values.cliPod.nodeSelector }}
       nodeSelector:

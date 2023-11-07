@@ -16,7 +16,7 @@ Toubleshooting volumeMount for spotfire-service deployment
 */}}
 {{- define "spotfire-common.volumes.troubleshooting.volumeMount" }}
 - name: troubleshooting-volume
-  mountPath: /opt/tibco/troubleshooting/
+  mountPath: /opt/spotfire/troubleshooting/
   subPathExpr: $(POD_NAME)
 {{- end }}
 

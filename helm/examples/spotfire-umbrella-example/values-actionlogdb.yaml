@@ -1,5 +1,6 @@
-# This example shows how to set up the Spotfire-server Actionlog so that 
-# actionlogs can be stored to a database, as well as setting 'categories' and 'webCategories'
+# When using this chart, you should override the values in this file or provide
+# a values file with your own values during installation. values-*.yaml for
+# various examples.
 spotfire-server:
   configuration:
     actionLog:
@@ -25,4 +26,3 @@ spotfire-server:
           additionalOptions:
             pruning-period: 168
             log-local-time: false
- 

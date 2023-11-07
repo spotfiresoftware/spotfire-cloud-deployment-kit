@@ -1,14 +1,14 @@
 # spotfire-server
 
-![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 12.5.0](https://img.shields.io/badge/AppVersion-12.5.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.0.0](https://img.shields.io/badge/AppVersion-14.0.0-informational?style=flat-square)
 
-A Helm chart for TIBCO Spotfire Server.
+A Helm chart for Spotfire Server.
 
-**Homepage:** <https://github.com/TIBCO/Spotfire-cloud-deployment-kit>
+**Homepage:** <https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit>
 
 ## Source Code
 
-* <https://github.com/TIBCO/Spotfire-cloud-deployment-kit>
+* <https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit>
 
 ## Requirements
 
@@ -16,13 +16,13 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.7 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.28.* |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.18.* |
+| file://../spotfire-common | spotfire-common | 0.2.0 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.37.* |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.19.* |
 
 ## Overview
 
-This chart deploys the [TIBCO Spotfire® Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 Using this chart, you can also deploy the following:
 - The required Spotfire Server database schemas on a supported database server (for example, Postgres).
@@ -85,8 +85,8 @@ helm install my-release . \
     -f my-values.yml
 ```
 
-**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
@@ -151,7 +151,7 @@ The database is deployed as a container and, by default, the PostgreSQL Helm cha
 
 6. After some minutes, you can access the Spotfire Server web interface in `configuration.site.publicAddress`.
 
-For more information on Spotfire, see the [TIBCO Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation.
+For more information on Spotfire, see the [Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation.
 
 For more information on PostgreSQL deployment using the chart in the example, see the [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql) documentation.
 
@@ -254,7 +254,7 @@ You must understand whether the new Helm chart version comes with a new Spotfire
 
 ##### Checking the manual
 
-See the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
+See the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
 
 ##### Upgrading Spotfire Server and Spotfire services
 
@@ -326,7 +326,7 @@ See the following table for a summary of the possible values, descriptions, and 
 
 **Note**: When set to `always`, the configuration made from tools other than helm might be overwritten when doing a helm upgrade.
 
-**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt](config-job-scripts/default-kubernetes-config.txt). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
+**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt.gotmpl](config-job-scripts/default-kubernetes-config.txt.gotmpl). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
 
 **Note**: If you prefer to manage the configuration externally, you can also set `configuration.preferExistingConfig` to true.
 See the [Values](#values) section for more details.
@@ -390,8 +390,8 @@ you can create a volume with the desired files and use
 `volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/certs` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/certs` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/certs` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/certs` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions to the volume.
 
@@ -404,8 +404,8 @@ you can create a PersistentVolume with the desired files use
 `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/custom-ext` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/custom-ext` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/custom-ext` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/custom-ext` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
@@ -419,8 +419,8 @@ For information on using additional Java library files for Spotfire Server, see:
 To be able to access data from a JDBC-compliant data source with Information Services, use `volumes.customExtInformationservices`:
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
 
 See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for more information.
 
@@ -446,7 +446,7 @@ Test/Spotfire.Dxp.sdn
 Test/Spotfire.Dxp.PythonServiceLinux.sdn
 ```
 
-*mountPath*: `/opt/tibco/spotfireconfigtool/deployments` (config-job pod)
+*mountPath*: `/opt/spotfire/spotfireconfigtool/deployments` (config-job pod)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
@@ -464,7 +464,7 @@ To use a common storage for Spotfire library import and export operations,
 you can use `volumes.libraryImportExport.persistentVolumeClaim` or `volumes.libraryImportExport.existingClaim`
 to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: `/opt/tibco/tss/tomcat/application-data/library` (spotfire-server pod)
+*mountPath*: `/opt/spotfire/spotfireserver/tomcat/application-data/library` (spotfire-server pod)
 
 **Note**: The `spotfire` user needs read and write permissions for the volume.
 
@@ -477,7 +477,7 @@ To persist `spotfire-server` JVM head dumps and information for troubleshooting 
 you can use `volumes.troubleshooting.persistentVolumeClaim` or `volumes.troubleshooting.existingClaim`
 to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: `/opt/tibco/troubleshooting/jvm-heap-dumps` (spotfire-server pod)
+*mountPath*: `/opt/spotfire/troubleshooting/jvm-heap-dumps` (spotfire-server pod)
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
@@ -494,7 +494,7 @@ Example:
 ```yaml
 extraVolumeMounts:
   - name: example
-    mountPath: /opt/tibco/example.txt
+    mountPath: /opt/spotfire/example.txt
     subPath: example.txt
 extraVolumes:
   - name: example
@@ -509,7 +509,7 @@ When `cliPod.enabled` is set to `true`, an always-on Spotfire configuration CLI 
 Example: Get the bash prompt into the configuration CLI pod:
 ```bash
 $ kubectl exec -it $(kubectl get pods -l "app.kubernetes.io/component=cli, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}" ) -- bash
-my-release-cli-859fdc8cdf-d58rf $
+my-release-cli-859fdc8cdf-d58rf $ ./bootstrap.sh   # Run the bootstrap.sh script to create a bootstrap.xml before starting to use config.sh
 ```
 
 For more information, see [Configuration using the command line](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/configuration_using_the_command_line.html).
@@ -538,7 +538,7 @@ For more details, see for example
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. |
+| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | affinity | object | `{}` |  |
 | cliPod.affinity | object | `{}` |  |
 | cliPod.enabled | bool | `true` |  |
@@ -551,8 +551,8 @@ For more details, see for example
 | cliPod.image.pullPolicy | string | `nil` | The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
-| cliPod.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"12.5.0-1.5.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
+| cliPod.image.tag | string | `"14.0.0-2.0.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -569,8 +569,8 @@ For more details, see for example
 | configJob.image.pullPolicy | string | `nil` | The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value. |
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
-| configJob.image.repository | string | `"tibco/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"12.5.0-1.5.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
+| configJob.image.tag | string | `"14.0.0-2.0.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -604,8 +604,8 @@ For more details, see for example
 | configuration.deployment.defaultDeployment.image.pullPolicy | string | `nil` | The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
-| configuration.deployment.defaultDeployment.image.repository | string | `"tibco/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"12.5.0-1.5.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.0.0-2.0.0"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
@@ -648,9 +648,9 @@ For more details, see for example
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.1.2"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.1.8"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
-| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
 | global.spotfire.image.registry | string | `nil` | The global container image registry. Used for  container images unless overridden. |
@@ -698,15 +698,15 @@ For more details, see for example
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`. |
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
-| image.repository | string | `"tibco/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"12.5.0-1.5.0"` | The container image tag to use. |
+| image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
+| image.tag | string | `"14.0.0-2.0.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | ingress.tls | list | `[]` |  |
-| kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details. |
+| kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
 | kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
@@ -718,7 +718,7 @@ For more details, see for example
 | livenessProbe.httpGet.path | string | `"/spotfire/rest/status/getStatus"` |  |
 | livenessProbe.httpGet.port | string | `"http"` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
-| log-forwarder.config.filters | string | Example that drops specific events using [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) | Add custom fluent-bit [filters configuration](https://docs.fluen tbit.io/manual/pipeline/filters). |
+| log-forwarder.config.filters | string | Example that drops specific events using [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) | Add custom fluent-bit [filters configuration](https://docs.fluentbit.io/manual/pipeline/filters). |
 | log-forwarder.config.inputs | string | [tcp input](https://docs.fluentbit.io/manual/pipeline/inputs/tcp) on port 5170 and [forward input](https://docs.fluentbit.io/manual/pipeline/inputs/forward) on port 24224 | fluent-bit [input configuration](https://docs.fluentbit.io/manual/pipeline/inputs). |
 | log-forwarder.config.outputs | string | Logs are written to stdout of the log-forwarder pod. | Override this value with an [output configuration](https://docs.fluentbit.io/manual/pipeline/outputs) to send logs to an external system. |
 | log-forwarder.enabled | bool | `true` | enables or disables the fluent-bit log-forwarder pod. If enabled, it collects logs from the spotfire-server pods and can forward traffic to any output supported by fluent-bit. |
@@ -766,7 +766,7 @@ For more details, see for example
 | startupProbe.periodSeconds | int | `10` |  |
 | tolerations | list | `[]` |  |
 | toolPassword | string | `""` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod. |
-| troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/tibco/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
+| troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/spotfire/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | volumes.certificates.existingClaim | string | `""` |  |
 | volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |

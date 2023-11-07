@@ -16,7 +16,7 @@
 
 ## Overview
 
-This chart deploys the [TIBCO Spotfire® Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 Using this chart, you can also deploy the following:
 - The required Spotfire Server database schemas on a supported database server (for example, Postgres).
@@ -79,8 +79,8 @@ helm install my-release . \
     -f my-values.yml
 ```
 
-**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
@@ -146,7 +146,7 @@ The database is deployed as a container and, by default, the PostgreSQL Helm cha
 
 6. After some minutes, you can access the Spotfire Server web interface in `configuration.site.publicAddress`.
 
-For more information on Spotfire, see the [TIBCO Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation.
+For more information on Spotfire, see the [Spotfire® Server - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/administration.html) documentation.
 
 For more information on PostgreSQL deployment using the chart in the example, see the [Bitnami's PostgreSQL chart](https://artifacthub.io/packages/helm/bitnami/postgresql) documentation.
 
@@ -249,7 +249,7 @@ You must understand whether the new Helm chart version comes with a new Spotfire
 
 ##### Checking the manual
 
-See the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "TIBCO Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
+See the [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) page in the "Spotfire® Server and Environment - Installation and Administration" manual for any specific considerations or instructions related to the version you are upgrading to. This will ensure that you're aware of any known issues or steps that you need to follow to upgrade successfully.
 
 ##### Upgrading Spotfire Server and Spotfire services
 
@@ -321,7 +321,7 @@ See the following table for a summary of the possible values, descriptions, and 
 
 **Note**: When set to `always`, the configuration made from tools other than helm might be overwritten when doing a helm upgrade.
 
-**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt](config-job-scripts/default-kubernetes-config.txt). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
+**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt.gotmpl](config-job-scripts/default-kubernetes-config.txt.gotmpl). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
 
 **Note**: If you prefer to manage the configuration externally, you can also set `configuration.preferExistingConfig` to true.
 See the [Values](#values) section for more details.
@@ -385,8 +385,8 @@ you can create a volume with the desired files and use
 `volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/certs` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/certs` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/certs` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/certs` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions to the volume.
 
@@ -399,8 +399,8 @@ you can create a PersistentVolume with the desired files use
 `volumes.customExt.existingClaim` to set the PersistentVolumeClaim to use.
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/custom-ext` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/custom-ext` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/custom-ext` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/custom-ext` (config-job and cli pods)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
@@ -414,8 +414,8 @@ For information on using additional Java library files for Spotfire Server, see:
 To be able to access data from a JDBC-compliant data source with Information Services, use `volumes.customExtInformationservices`:
 
 *mountPath*:
-- `/opt/tibco/tss/tomcat/custom-ext-informationservices` (spotfire-server pod)
-- `/opt/tibco/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
+- `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices` (spotfire-server pod)
+- `/opt/spotfire/spotfireconfigtool/custom-ext-informationservices` (config-job and cli pods)
 
 See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for more information.
 
@@ -441,7 +441,7 @@ Test/Spotfire.Dxp.sdn
 Test/Spotfire.Dxp.PythonServiceLinux.sdn
 ```
 
-*mountPath*: `/opt/tibco/spotfireconfigtool/deployments` (config-job pod)
+*mountPath*: `/opt/spotfire/spotfireconfigtool/deployments` (config-job pod)
 
 **Note**: The `spotfire` user needs read permissions for the volume.
 
@@ -459,7 +459,7 @@ To use a common storage for Spotfire library import and export operations,
 you can use `volumes.libraryImportExport.persistentVolumeClaim` or `volumes.libraryImportExport.existingClaim`
 to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: `/opt/tibco/tss/tomcat/application-data/library` (spotfire-server pod)
+*mountPath*: `/opt/spotfire/spotfireserver/tomcat/application-data/library` (spotfire-server pod)
 
 **Note**: The `spotfire` user needs read and write permissions for the volume.
 
@@ -472,7 +472,7 @@ To persist `spotfire-server` JVM head dumps and information for troubleshooting 
 you can use `volumes.troubleshooting.persistentVolumeClaim` or `volumes.troubleshooting.existingClaim`
 to control which PersistentVolume or PersistentVolumeClaim to use.
 
-*mountPath*: `/opt/tibco/troubleshooting/jvm-heap-dumps` (spotfire-server pod)
+*mountPath*: `/opt/spotfire/troubleshooting/jvm-heap-dumps` (spotfire-server pod)
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
@@ -489,7 +489,7 @@ Example:
 ```yaml
 extraVolumeMounts:
   - name: example
-    mountPath: /opt/tibco/example.txt
+    mountPath: /opt/spotfire/example.txt
     subPath: example.txt
 extraVolumes:
   - name: example
@@ -504,7 +504,7 @@ When `cliPod.enabled` is set to `true`, an always-on Spotfire configuration CLI 
 Example: Get the bash prompt into the configuration CLI pod:
 ```bash
 $ kubectl exec -it $(kubectl get pods -l "app.kubernetes.io/component=cli, app.kubernetes.io/part-of=spotfire" -o jsonpath="{.items[0].metadata.name}" ) -- bash
-my-release-cli-859fdc8cdf-d58rf $
+my-release-cli-859fdc8cdf-d58rf $ ./bootstrap.sh   # Run the bootstrap.sh script to create a bootstrap.xml before starting to use config.sh
 ```
 
 For more information, see [Configuration using the command line](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/configuration_using_the_command_line.html).

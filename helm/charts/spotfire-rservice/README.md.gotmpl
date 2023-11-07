@@ -16,7 +16,7 @@
 
 ## Overview
 
-This chart deploys the [Spotfire® Service for R](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/rinstall-homepage.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Service for R](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/rinstall/topics/the_tibco_spotfire_service_for_r.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 The R service pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
@@ -53,7 +53,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
     ```
 
 **Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` (or the parameter `global.spotfire.acceptEUA`) to the value `true`.
-By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
@@ -61,7 +61,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Configuration
 
-To set [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm.values.
+To set [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm.values.
 
 Example:
 ```configuration:
@@ -116,10 +116,10 @@ Typically, you want to scale out before all the available capacity is taken.
 Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
 Note that clients requesting a slot typically wait until a slot is available.
 
-For more information, see [Monitoring Spotfire Service for R using JMX](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
+For more information, see [Monitoring Spotfire Service for R using JMX](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
-See [Engine Timeout](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/engine_timeout.html) for more details.
+See [Engine Timeout](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 

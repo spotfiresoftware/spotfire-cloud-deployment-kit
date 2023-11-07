@@ -1,15 +1,15 @@
 # spotfire-umbrella-example
 
-This is an example that you can use as a reference to create an umbrella chart to deploy a complete [TIBCO Spotfire® environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This is an example that you can use as a reference to create an umbrella chart to deploy a complete [Spotfire® environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 The chart can deploy the following Spotfire components:
 
-- [spotfire-server](../../charts/spotfire-server/README.md): TIBCO Spotfire Server helm chart.
-- [spotfire-webplayer](../../charts/spotfire-webplayer/README.md): TIBCO Spotfire Web Player helm chart.
-- [spotfire-automationservices](../../charts/spotfire-automationservices/README.md): TIBCO Spotfire Automation Services helm chart.
-- [spotfire-rservice](../../charts/spotfire-rservice/README.md): TIBCO Spotfire Service for R helm chart.
-- [spotfire-pythonservice](../../charts/spotfire-pythonservice/README.md): TIBCO Spotfire Service for Python helm chart.
-- [spotfire-terrservice](../../charts/spotfire-terrservice/README.md): TIBCO Enterprise Runtime for R - Server Edition helm chart.
+- [spotfire-server](../../charts/spotfire-server/README.md): Spotfire Server helm chart.
+- [spotfire-webplayer](../../charts/spotfire-webplayer/README.md): Spotfire Web Player helm chart.
+- [spotfire-automationservices](../../charts/spotfire-automationservices/README.md): Spotfire Automation Services helm chart.
+- [spotfire-rservice](../../charts/spotfire-rservice/README.md): Spotfire Service for R helm chart.
+- [spotfire-pythonservice](../../charts/spotfire-pythonservice/README.md): Spotfire Service for Python helm chart.
+- [spotfire-terrservice](../../charts/spotfire-terrservice/README.md): Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR service)
 
 ### Deploy multiple services with different configuration using aliases
 

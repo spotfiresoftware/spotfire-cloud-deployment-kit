@@ -72,7 +72,7 @@ function import_config() {
 
 function pre_config_command_scripts() {
     logSubHeader "Running pre-configuration scripts"
-    for f in /opt/tibco/pre-config-command-scripts/*; do
+    for f in /opt/spotfire/pre-config-command-scripts/*; do
         if [ -f "${f}" ]; then
             logSubHeader "Running pre-config step ${f}"
             config.sh run --include-environment --fail-on-undefined-variable "${f}"
@@ -82,7 +82,7 @@ function pre_config_command_scripts() {
 
 function command_scripts() {
     logSubHeader "Running command scripts"
-    for f in /opt/tibco/command-scripts/*; do
+    for f in /opt/spotfire/command-scripts/*; do
         if [ -f "${f}" ]; then
             logSubHeader "Running extra commands steps ${f}"
             config.sh run --include-environment --fail-on-undefined-variable "${f}"
@@ -92,7 +92,7 @@ function command_scripts() {
 
 function configuration_scripts() {
     logSubHeader "Running configuration scripts"
-    for f in /opt/tibco/configuration-scripts/*; do
+    for f in /opt/spotfire/configuration-scripts/*; do
         if [ -f "${f}" ]; then
             logSubHeader "Running config step ${f}"
             config.sh run --include-environment --fail-on-undefined-variable "${f}"
@@ -118,17 +118,17 @@ config.sh version
 # Install database
 if [ "${JOB_CREATE_DATABASE}" = "true" ]; then
     logHeader "Installing database"
-    /opt/tibco/scripts/install-database.sh
+    /opt/spotfire/scripts/install-database.sh
 fi
 
 # Bootstrap
 logHeader "Bootstrapping"
-/opt/tibco/bootstrap.sh
+/opt/spotfire/bootstrap.sh
 
 # Database upgrade
 if [ "${JOB_UPGRADE_DATABASE}" = "true" ]; then
     logHeader "Upgrading database"
-    /opt/tibco/scripts/database-upgrade.sh
+    /opt/spotfire/scripts/database-upgrade.sh
 fi
 
 logHeader "Configuration and setup"
@@ -174,12 +174,12 @@ if [ "${apply_configuration}" = "true" ]; then
 
     # Default kubernetes configuration
     logSubHeader "Applying default kubernetes configuration"
-    config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/default-kubernetes-config.txt
+    config.sh run --include-environment --fail-on-undefined-variable /opt/spotfire/scripts/default-kubernetes-config.txt
 
     pre_config_command_scripts
 
     # # Configure action logging
-    /opt/tibco/scripts/configure-actionlog.sh
+    /opt/spotfire/scripts/configure-actionlog.sh
 
     # Custom configuration scripts
     configuration_scripts
@@ -192,7 +192,7 @@ fi
 
 if [ "${JOB_DO_DEPLOY}" = "true" ]; then
     logSubHeader "Deploying sdn / spk files"
-    /opt/tibco/scripts/deploy.sh
+    /opt/spotfire/scripts/deploy.sh
 fi
 
 if [ "${apply_configuration}" = "true" ]; then
@@ -200,7 +200,7 @@ if [ "${apply_configuration}" = "true" ]; then
     # Add admin user
     if [ "${JOB_CREATE_ADMIN}" = "true" ]; then
         logSubHeader "Creating admin user"
-        config.sh run --include-environment --fail-on-undefined-variable /opt/tibco/scripts/create-user.txt
+        config.sh run --include-environment --fail-on-undefined-variable /opt/spotfire/scripts/create-user.txt
     fi
 
     command_scripts

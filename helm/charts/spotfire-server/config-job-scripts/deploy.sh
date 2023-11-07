@@ -61,8 +61,16 @@ function deployPackages () {
         --delay-interval-seconds="${startupcheck_delay_interval_seconds}"
 
     # Loop through directory and create deployment areas based on folder names
-    for dir in /opt/tibco/spotfireconfigtool/deployments/*/; do
+    echo "Listing deployment folders"
+    ls -lah /opt/spotfire/spotfireconfigtool/deployments/
+
+    for dir in /opt/spotfire/spotfireconfigtool/deployments/*/; do
         if [ -d "${dir}" ]; then
+            if [[ "${LOG_LEVEL^^}" =~ ^(DEBUG|TRACE) ]] ; then
+                echo "Listing content of ${dir}"
+                ls -lah "${dir}"
+            fi
+
             areaname=$(basename "$dir")
             config.sh create-deployment-area \
                 --tool-password "${TOOL_PASSWORD}" \

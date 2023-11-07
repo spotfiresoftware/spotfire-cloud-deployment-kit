@@ -28,7 +28,7 @@ Volume mount configuration for fluent-bit.
   mountPath: /fluent-bit/etc/tsnm.parsers.fluentbit.conf
   subPath: tsnm.parsers.fluentbit.conf
 - name: logs-volume
-  mountPath: /tsnm/logs
+  mountPath: /nodemanager/logs
 {{- end }}
 
 {{/*
@@ -42,7 +42,7 @@ exec:
   - "-i"
   - "tail"
   - "-p"
-  - path=/tsnm/logs/tsnm-terminated
+  - path=/nodemanager/logs/nodemanager-terminated
   - "-o"
   - "exit"
   - "-p"

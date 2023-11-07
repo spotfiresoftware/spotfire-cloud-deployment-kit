@@ -1,42 +1,42 @@
-# Cloud Deployment Kit for TIBCO Spotfire
+# Cloud Deployment Kit for Spotfire
 
 ## Overview
 
-The **Cloud Deployment Kit for TIBCO Spotfire®** provides a reference and starting point for deploying [TIBCO Spotfire®](https://www.tibco.com/products/tibco-spotfire) using [containers](https://www.docker.com/resources/what-container) and [Helm charts](https://helm.sh/) on a [Kubernetes cluster](http://kubernetes.io/).
+The **Cloud Deployment Kit for Spotfire®** provides a reference and starting point for deploying [Spotfire®](https://spotfire.com) using [containers](https://www.docker.com/resources/what-container) and [Helm charts](https://helm.sh/) on a [Kubernetes cluster](http://kubernetes.io/).
 
-This repository contains recipes to build container images and Helm charts for certain **TIBCO Spotfire®** products.
+This repository contains recipes to build container images and Helm charts for certain **Spotfire®** products.
 You can extend and customize these recipes and examples.
 
-This repository does not include TIBCO Spotfire® software or other third party software.
+This repository does not include Spotfire® software or other third party software.
 This repository contains quick guides, templates, configuration examples, and scripts.
 
 The recipes have been validated with the Spotfire® releases identified in [Spotfire components versions](versions.mk).
 They might work for other Spotfire versions with some modifications.
 For more information, see [how versions are related](docs/how-versions-are-related.md).
 
-**Note**: TIBCO Spotfire products are commercially licensed products and are subject to the payment of license fees.
-You must have a valid license for each of the TIBCO Spotfire applications you choose to build and run in a container.
-Additional license fees might be due to TIBCO for the license rights required to deploy a TIBCO product to a Cloud Computing Environment.
-Carefully review the [TIBCO Cloud Computing Environment Licensing Policy (“CCEL Policy")](https://terms.tibco.com/#ccel-policy-12012021) to understand the requirements, including how to calculate the number of Processor Units that you must license when a TIBCO product is deployed in a Cloud Computing Environment.
+**Note**: Spotfire products are commercially licensed products and are subject to the payment of license fees.
+You must have a valid license for each of the Spotfire applications you choose to build and run in a container.
+Additional license fees might be due to Cloud Software Group for the license rights required to deploy a Spotfire product to a Cloud Computing Environment.
+Carefully review the [Cloud Computing Environment Licensing Policy (“CCEL Policy")](https://www.cloud.com/content/dam/cloud/documents/legal/tibco-cloud-computing-environment-licensing-policy.pdf) to understand the requirements, including how to calculate the number of Processor Units that you must license when a Spotfire product is deployed in a Cloud Computing Environment.
 
 ## Prerequisites
 
-- Required TIBCO Spotfire installation packages. If you have a TIBCO account, you can download the packages from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
+- Required Spotfire installation packages. If you have a TIBCO account, you can download the packages from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
 - Kubernetes 1.24+, a working Kubernetes cluster from a [certified K8s distro](https://www.cncf.io/certification/software-conformance/).
 - Helm 3+, for building and deploying the charts.
 - An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman`, or alternative), for building the container images.
 
 ## Components
 
-The following applications have been validated in this _Cloud Deployment Kit (CDK) for TIBCO Spotfire_:
-- TIBCO Spotfire® Server
-- TIBCO Spotfire® Web Player
-- TIBCO Spotfire® Automation Services
-- TIBCO Spotfire® Service for Python
-- TIBCO Spotfire® Service for R
-- TIBCO® Enterprise Runtime for R - Server Edition (TERR™ service)
+The following applications have been validated in this _Cloud Deployment Kit (CDK) for Spotfire_:
+- Spotfire® Server
+- Spotfire® Web Player
+- Spotfire® Automation Services
+- Spotfire® Service for Python
+- Spotfire® Service for R
+- Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR service)
 
-**Note**: For more information on TIBCO Spotfire® and its components, see the [TIBCO Spotfire® Documentation](https://docs.tibco.com/products/tibco-spotfire/).
+**Note**: For more information on Spotfire® and its components, see the [Spotfire® Documentation](https://docs.tibco.com/products/spotfire/).
 
 Using the provided charts, you can also deploy the following:
 - The required Spotfire Server® database schemas on a supported database server (for example, PostgreSQL).
@@ -44,7 +44,7 @@ Using the provided charts, you can also deploy the following:
 - An [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) with routing rules for accessing the configured reverse proxy.
 - Shared storage locations ([Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)) for the Spotfire Library import and export, custom jars, deployment packages, and so on.
 
-**Note**: For information on sizing and supported third party software, see the [System requirements for TIBCO Spotfire® products](https://spotfi.re/sr/).
+**Note**: For information on sizing and supported third party software, see the [System requirements for Spotfire® products](https://spotfi.re/sr/).
 
 ## Basic workflow
 
@@ -55,24 +55,39 @@ Using the provided charts, you can also deploy the following:
 
 # Issues
 
-You are welcome to raise issues and improvements related to this project in the [GitHub Issues tab](https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/issues).
+You are welcome to raise issues and improvements related to this project in the [GitHub Issues tab](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/issues).
 
-For issues related to the TIBCO Spotfire products, use the [TIBCO support channel](https://support.tibco.com/s/).
+For issues related to the Spotfire products, use the [support channel](https://spotfi.re/support).
 
-For improvements related to the TIBCO Spotfire products, use the [TIBCO Ideas portal](https://ideas.tibco.com/).
+For improvements related to the Spotfire products, use the [Ideas portal](https://spotfi.re/ideas).
 
 For issues related to third party products, see their respective documentation.
 
-# License
+# Licenses
 
-This project (_Cloud Deployment Kit for TIBCO Spotfire_) is licensed under the [Apache 2.0 License](LICENSE).
+This project (_Cloud Deployment Kit for Spotfire_) is licensed under the [Apache 2.0 License](LICENSE).
+
+## Spotfire software
+
+When you build and use the Spotfire container images, you fetch and use Spotfire software developed at
+[Cloud Software Group, Inc.](https://www.cloud.com/)
+The Spotfire software running in these containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+
+Each of the Spotfire container images includes the applicable Spotfire application license file(s), 
+which include a copy of the Cloud Software Group, Inc. End User Agreement, 
+and the list of included Open Source Software components with their associated licenses.
+This list was generated using third party software as of the date listed in the file. 
+This list may change with specific application versions of the product and may not be
+complete; it is provided “As-Is.”
+
+See how to [fetch the applicable Spotfire application license file(s) from the container images](./containers/README.md#licenses).
 
 ## Other software
 
 When you build and use the container images, you fetch and use other software components that are subject to their own licenses. 
 See how to [analyze container images to identify included artifacts and their individual licenses](docs/analyze-container-image-licenses.md).
 
-When you build and use the helm charts, you fetch and use other charts that might fetch other container images, each with their own licenses. 
+When you build and use the Helm charts, you fetch and use other charts that might fetch other container images, each with their own licenses. 
 A partial summary of the third party software and licenses used in this project is available [here](docs/third-party-software-licenses.md).
 
 ---

@@ -9,6 +9,6 @@ $accepteua := .Values.global.spotfire.acceptEUA | default .Values.acceptEUA
 - name: ACCEPT_EUA
   value: "Y"
 {{- else -}}
-{{ fail "You must accept the Cloud Software Group, Inc. End User Agreement (https://terms.tibco.com/#end-user-agreement) by setting .Values.acceptEUA or .Values.global.spotfire.acceptEUA to true" }}
+{{ fail "You must accept the Cloud Software Group, Inc. End User Agreement (https://www.cloud.com/legal/terms) by setting .Values.acceptEUA or .Values.global.spotfire.acceptEUA to true" }}
 {{- end -}}
 {{- end -}}

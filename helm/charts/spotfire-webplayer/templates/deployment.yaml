@@ -64,17 +64,17 @@ spec:
           {{- end  }}
           volumeMounts:
           - name: logs-volume
-            mountPath: /opt/tibco/tsnm/nm/logs
+            mountPath: /opt/spotfire/nodemanager/nm/logs
           {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
           {{- if or .Values.volumes.customModules.persistentVolumeClaim.create .Values.volumes.customModules.existingClaim }}
           - name: custom-modules-volume
-            mountPath: /opt/tibco/tsnm/nm/custom-modules
+            mountPath: /opt/spotfire/nodemanager/nm/custom-modules
             subPath: {{ .Values.volumes.customModules.subPath | quote }}
           {{- end }}
           {{- range $filename, $content := .Values.config }}
           {{- if $content }}
           - name: serviceconfig
-            mountPath: /opt/tibco/tsnm/nm/services/WEB_PLAYER/{{ $filename }}
+            mountPath: /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/{{ $filename }}
             subPath: {{ $filename }}
           {{- end }}
           {{- end }}
@@ -103,7 +103,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/bash", "-c", "/opt/tibco/tsnm/scripts/pre-stop-hook.sh {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds }} true >> /proc/1/fd/1 2>&1"]
+                command: ["/bin/bash", "-c", "/opt/spotfire/nodemanager/scripts/pre-stop-hook.sh {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds }} true >> /proc/1/fd/1 2>&1"]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: fluent-bit
@@ -126,7 +126,7 @@ spec:
           - name: FILE_SEPARATOR
             value: /
           - name: TSNM_HOME
-            value: /tsnm
+            value: /nodemanager
           - name: CONTAINER_NAME
             value: spotfire-webplayer
           volumeMounts:

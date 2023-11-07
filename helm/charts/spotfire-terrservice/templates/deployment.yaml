@@ -60,7 +60,7 @@ spec:
           {{- end }}
           volumeMounts:
           - name: logs-volume
-            mountPath: /opt/tibco/tsnm/nm/logs
+            mountPath: /opt/spotfire/nodemanager/nm/logs
           {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
           {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
           - name: packages-volume
@@ -68,7 +68,7 @@ spec:
             subPath: {{ .Values.volumes.packages.subPath | quote }}
           {{- end }}
           - name: serviceconfig
-            mountPath: /opt/tibco/tsnm/nm/services/TERR/conf/additional-custom.properties
+            mountPath: /opt/spotfire/nodemanager/nm/services/TERR/conf/additional-custom.properties
             subPath: additionalCustomProperties
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 10 }}
@@ -95,7 +95,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/bash", "-c", "/opt/tibco/tsnm/scripts/pre-stop-hook.sh {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds }} true >> /proc/1/fd/1 2>&1"]
+                command: ["/bin/bash", "-c", "/opt/spotfire/nodemanager/scripts/pre-stop-hook.sh {{ .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds }} true >> /proc/1/fd/1 2>&1"]
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         - name: fluent-bit
@@ -118,7 +118,7 @@ spec:
           - name: FILE_SEPARATOR
             value: /
           - name: TSNM_HOME
-            value: /tsnm
+            value: /nodemanager
           - name: CONTAINER_NAME
             value: spotfire-terrservice
           volumeMounts:

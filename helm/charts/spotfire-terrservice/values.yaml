@@ -1,12 +1,12 @@
-# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
+# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`.
 acceptEUA:
 
 global:
   spotfire:
-    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
+    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`.
     acceptEUA:
     image:
-      # -- The global container image registry. Used for tibco/spotfire container images, unless it is overridden.
+      # -- The global container image registry. Used for spotfire/ container images, unless it is overridden.
       registry:
       # -- The global container image pull policy.
       pullPolicy: IfNotPresent
@@ -29,9 +29,9 @@ image:
   # -- The image registry for spotfire-server. Overrides global.spotfire.image.registry value.
   registry:
   # -- The spotfire-server image repository.
-  repository: tibco/spotfire-terrservice
+  repository: spotfire/spotfire-terrservice
   # -- The container image tag to use.
-  tag: "1.16.0-1.5.0"
+  tag: "1.17.0-2.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -42,7 +42,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.1.2"
+    tag: "2.1.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -143,7 +143,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details.
+# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details.
 kedaAutoscaling:
   enabled: false
   # -- The interval to check each trigger on.
@@ -190,7 +190,7 @@ extraEnvVarsSecret: ""
 # More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`.
 extraVolumeMounts: []
   # - name: example
-  #   mountPath: /opt/tibco/example.txt
+  #   mountPath: /opt/spotfire/example.txt
   #   subPath: example.txt
 
 # -- Extra volumes for the service container.

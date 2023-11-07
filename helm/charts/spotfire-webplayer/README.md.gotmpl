@@ -16,7 +16,7 @@
 
 ## Overview
 
-This chart deploys the [TIBCO Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 The Spotfire Web Player pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
@@ -53,8 +53,8 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
         -f my-values.yaml
     ```
 
-**Note**: This TIBCO Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the TIBCO Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
+By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
@@ -95,14 +95,14 @@ You can copy the default configuration files from the container image to use the
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
 You can replace the filename to get a copy any of the other container configuration files.
 ```bash
-docker cp $(docker run -e ACCEPT_EUA=Y --detach --rm --entrypoint=sleep tibco/spotfire-webplayer:<imagetag> 5):/opt/tibco/tsnm/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config .
+docker run -it --rm -e ACCEPT_EUA=Y spotfire/spotfire-webplayer:<imagetag> cat /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config
 ```
 
 #### Adding a credentials profile for connectors to services as a file
 
 A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
 
-1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See how in the previous [example](#getting-container-original-configuration-files).)
+1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See how in the previous example.
 2. Update the connector's authentication mode to `WebConfig`.
 3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
     ```
@@ -156,15 +156,17 @@ kedaAutoscaling:
 ```
 
 The `spotfire-webplayer` has the following autoscaling defaults:
-- metric name: `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` (_Health status_ Web Player service performance counter).
-- query: the sum of `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` counters of the Web Player instances for the release name.
+- metric name: `spotfire_Spotfire_Webplayer_Web_Player_health_status` (_Health status_ Web Player service performance counter).
+- query: the sum of `spotfire_Spotfire_Webplayer_Web_Player_health_status` counters of the Web Player instances for the release name.
 
 For any Web Player instance, _Health status_ can present one of the following values:
 - 0: OK. Indicates that the instance is under no pressure.
 - 5: Strained. Indicates that the instance is under pressure but is not a problem.
 - 8: Exhausted. Indicates that the instance is under a higher load, so avoid routing new users to this instance, but current users can keep working in this instance.
 
-With these default settings, if one Web Player instance is strained or exhausted, then another instance is started to scale out the service. If most of them are OK, then the service scales in.
+_Health status_ is a composite metric consisting of a few things. For most common scenarios, it is mainly affected by CPU and memory consumption.
+
+With these default settings (threshold `4`), if one Web Player instance is strained or exhausted, then another instance is started to scale out the service. If most of them are OK, then the service scales in.
 
 For more information, see [Web Player service performance counters](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/web_player_service_performance_counters.html).
 

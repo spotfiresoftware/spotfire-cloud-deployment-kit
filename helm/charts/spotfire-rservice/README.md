@@ -1,14 +1,14 @@
 # spotfire-rservice
 
-![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.17.0](https://img.shields.io/badge/AppVersion-1.17.0-informational?style=flat-square)
 
-A Helm chart for TIBCO Spotfire® Service for R
+A Helm chart for Spotfire® Service for R
 
-**Homepage:** <https://github.com/TIBCO/Spotfire-cloud-deployment-kit>
+**Homepage:** <https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit>
 
 ## Source Code
 
-* <https://github.com/TIBCO/Spotfire-cloud-deployment-kit>
+* <https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit>
 
 ## Requirements
 
@@ -16,11 +16,11 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.1.7 |
+| file://../spotfire-common | spotfire-common | 0.2.0 |
 
 ## Overview
 
-This chart deploys the [Spotfire® Service for R](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/rinstall-homepage.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Service for R](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/rinstall/topics/the_tibco_spotfire_service_for_r.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 The R service pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
@@ -57,7 +57,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
     ```
 
 **Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` (or the parameter `global.spotfire.acceptEUA`) to the value `true`.
-By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement).
+By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
 
@@ -65,7 +65,7 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 
 #### Configuration
 
-To set [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm.values.
+To set [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm.values.
 
 Example:
 ```configuration:
@@ -120,10 +120,10 @@ Typically, you want to scale out before all the available capacity is taken.
 Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
 Note that clients requesting a slot typically wait until a slot is available.
 
-For more information, see [Monitoring Spotfire Service for R using JMX](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
+For more information, see [Monitoring Spotfire Service for R using JMX](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
-See [Engine Timeout](https://docs.tibco.com/pub/sf-rsrv/1.16.0/doc/html/TIB_sf-rsrv_install/_shared/install/topics/engine_timeout.html) for more details.
+See [Engine Timeout](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/engine_timeout.html) for more details.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
@@ -148,7 +148,7 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. |
+| acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | affinity | object | `{}` |  |
 | configuration | object | `{}` | (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html). Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'. |
 | extraEnvVars | list | `[]` | Additional environment variables. |
@@ -159,18 +159,18 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.1.2"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.1.8"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
-| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA. |
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
 | global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
-| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for tibco/spotfire container images, unless it is overridden. |
+| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for spotfire/ container images, unless it is overridden. |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides the global.spotfire.image.registry value. |
-| image.repository | string | `"tibco/spotfire-rservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.16.0-1.5.0"` | The container image tag to use. |
+| image.repository | string | `"spotfire/spotfire-rservice"` | The spotfire-server image repository. |
+| image.tag | string | `"1.17.0-2.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

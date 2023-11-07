@@ -23,24 +23,22 @@ For example, you can find information about the artifacts of the [debian:bullsey
 
 ## Additional software packages
 
-Building images often installs additional software packages (fetched from the official distribution software repositories, from other user-added repositories, or from specific locations), in addition to installing the packages provided by the base image.
+Building images often installs additional software packages (fetched from the official distribution software repositories, from other user added repositories, or from specific locations), in addition to the packages already provided by the base image.
 You can inspect the Dockerfiles to identify these additional packages.
 
-For example, when you read the [spotfire-workerhost Dockerfile](../../containers/spotfire-workerhost/Dockerfile), you see a list of packages that are installed in the image, as specified in the Dockerfile.
+For example, when you read the [spotfire-workerhost Dockerfile](../containers/images/spotfire-workerhost/Dockerfile), you see a list of packages that are installed in the image, as specified in the Dockerfile.
+Each such specified package can, in turn, install other software packages as dependencies.
 
-**Note**:  Each such specified package can, in turn, install other software packages as dependencies.
+**Note**: There are different ways to extract the list of installed packages and other installed artifacts.
+Providing detailed instructions on software license analysis specialized tools is outside the scope of this document.
+Retrieving information on software artifacts other than software packages installed with the package manager tools is also outside the scope of this document.
+The following sections provide basic examples using standard container and package management tools.
 
 ### Manually retrieve installed packages information
 
-The following tasks are outside the scope of this document. 
-- Providing instructions for using specialized tools for analyzing software licenses.
-- Retrieving information about software artifacts, other than software packages installed with the package manager tools.
+You can use the command `dpkg-query` to retrieve the full list of installed packages in a container image.
 
-You can inspect a container image and retrieve its contents with standard container and package management tools.
-
-- Use the command `dpkg-query` to retrieve the full list of installed packages in a container image.
-
-**Example**: To retrieve the list of installed packages in the `debian:bullseye-20220328-slim` image, run the following command:
+**Example**: To retrieve the list of installed packages in the `debian:bullseye-20220328-slim` image:
 ```bash
 $ docker run --rm debian:bullseye-20220328-slim dpkg-query -l
 ```
@@ -71,9 +69,9 @@ ii  debian-archive-keyring  2021.1.1                     all          GnuPG arch
 
 ### Manually retrieve installed packages licenses
 
-- Use the command `dpkg` to  retrieve the license for any package.
+You can use the command `dpkg` to retrieve the license for any installed package.
 
-**Example**: To retrieve the license for the installed package `apt`, run the following command:
+**Example**: To retrieve the license information for the installed package `apt`:
 ```bash
 $ docker run --rm debian:bullseye-20220328-slim sh -c 'cat `dpkg -L apt | grep copyright`'
 ```
@@ -105,9 +103,9 @@ of the GNU General Public License.
 
 ### Manually retrieve installed packages sources
 
-- Use the command `apt-get` to retrieve the source for any package.
+You can use the command `apt-get` to retrieve the source for any installed package.
 
-**Example**: To retrieve the source for the installed package `apt`, run the following command:
+**Example**: To retrieve the source for the installed package `apt`:
 ```bash
 $ docker run --rm debian:bullseye-20220328-slim sh -c "find /etc/apt/sources.list* -type f -exec sed -i -e 'p; s/^deb /deb-src /' '{}' + && apt-get update -qq && apt-get source -qq --print-uris apt=2.2.4"
 ```
@@ -119,45 +117,59 @@ $ docker run --rm debian:bullseye-20220328-slim sh -c "find /etc/apt/sources.lis
 
 ### Manually retrieve installed files
 
-1. Use the command `docker` to extract the contents of a container for further inspection.
+You can use the command `docker` to extract the contents of a container for further inspection.
+Here we show 2 common methods to extract the image contents without running the container.
 
-**Note**: If you create a new container from an image, you can inspect it without running the container. 
+#### Method 1: Using a temporal container image to extract the files
 
-**Example**: To create a temporal container called `temp-container`, which is based on the `unknown-image:latest` image, run the following command:
-```bash
-docker create --name temp-container unknown-image:latest
-```
-
-2. Extract the container file system as a TAR file.
+Create a temporal container image based on the image you want to inspect, and export its whole filesystem (or parts of it).
 
 **Example**:
-```bash
-docker export temp-container > temp-container.tar
-```
 
-Or you can directly extract the files list without creating a TAR archive. 
+1. Create a temporal container image called `temp-container`, based on the `unknown-image:latest` image:
+    ```bash
+    docker create --name temp-container unknown-image:latest
+    ```
+
+2. Extract the whole container image filesystem as a TAR file:
+   ```bash
+    docker export temp-container > temp-container.tar
+    ```
+
+    Or, if you want to list only the included files:
+    ```bash
+    docker export temp-container | tar t > temp-container-files.txt
+    ```
+
+This method is a direct way to extract the image's final filesystem. 
+It provides a **composite view of a container instance's filesystem**.
+
+**Note**: This is the fastest way to list the included files or extract individual files.
+
+#### Method 2: Extract the container image layers as a set of layers
+
+Create a TAR file with all the individual image layers that compose the final container image.
 
 **Example**:
-```bash
-docker export temp-container | tar t > temp-container-files.txt
-```
 
-The above commands create and export the contents of a stopped container. Both commands are direct ways to extract the image’s final file system, which is a composite view of a container instance.
+- Use the command `docker image save` to create a TAR file containing all the container image layers:
+    ```bash
+    docker image save unknown-image:latest > temp-image.tar
+    ```
 
-Alternatively, to create an image TAR file, run the command `docker image save`.
+The TAR file includes a `manifest.json` file, which describes the image's layers and a set of separate directories containing the content of each of the individual layers.
 
-**Example**:
-```bash
-docker image save unknown-image:latest > temp-image.tar
-```
+This method produces an archive that exposes the container image format, not the container instances created from it.
+It provides a **layered view of the container image**.
 
-The above command produces an archive that exposes the image format, not the containers created from it.
-The TAR file includes a `manifest.json` file, which describes the image’s layers and a set of separate directories containing the content of each of the individual layers.
-This method is helpful when you want to evaluate each layer’s role in building the image.
+**Note**: This is useful when you want to evaluate each layer's role in building the image.
 
-- For more information, see the [Docker CLI](https://docs.docker.com/engine/reference/commandline/docker/) documentation.
-- For more information on the container image format, see the [OCI image format specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
+#### Layered view vs composite view
 
-The following diagram illustrates the differences between the layered view and the composite view of a container image.
+The following diagram illustrates the differences between the layered view and the composite view of a container image. 
 
 ![](container-image-views.png)
+
+References:
+- For more information on the docker command arguments, see the [Docker CLI](https://docs.docker.com/engine/reference/commandline/docker/) documentation.
+- For more information on the container image format, see the [OCI image format specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).

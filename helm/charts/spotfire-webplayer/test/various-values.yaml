@@ -40,7 +40,7 @@ image:
   pullSecrets:
     - pullsecret
   registry: my.registry.com
-  repository: tibco/spotfire-webplayer
+  repository: spotfire/spotfire-webplayer
   tag: 12.1.0-1.2.0
 livenessProbe:
   failureThreshold: 10
@@ -113,7 +113,7 @@ extraEnvVarsCM: webplayercm
 extraEnvVarsSecret: webplayersecret
 extraVolumeMounts:
   - name: webplayervolume
-    mountPath: /opt/tibco/services
+    mountPath: /opt/spotfire/services
 extraVolumes:
   - name: webplayervolume
     persistentVolumeClaim:

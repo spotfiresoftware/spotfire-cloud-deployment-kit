@@ -1,3 +1,44 @@
+# Release v2.0.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- Spotfire® Server 14.0.0 LTS
+- Spotfire® Service for Python 1.17.0 LTS
+- Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR™ service) 1.17.0 LTS
+- Spotfire® Web Player 14.0.0 LTS
+- Spotfire® Automation Services 14.0.0 LTS
+- Spotfire® Service for R 1.17.0 LTS
+
+The recipes are validated with the listed Spotfire products and versions.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.2.0 | 14.0.0 | 14.0.0-2.0.0 |
+| spotfire-webplayer | 0.2.0 | 14.0.0 | 14.0.0-2.0.0 |
+| spotfire-automationservices | 0.2.0 | 14.0.0 | 14.0.0-2.0.0 |
+| spotfire-terrservice | 0.2.0 | 1.17.0 | 1.17.0-2.0.0 |
+| spotfire-pythonservice | 0.2.0 | 1.17.0 | 1.17.0-2.0.0 |
+| spotfire-rservice | 0.2.0 | 1.17.0 | 1.17.0-2.0.0 |
+
+Note: The image tag format is \<appVersion\>-\<cdk version\>
+
+## Changes
+
+### General
+
+- A fix is provided for the issue "[Required installation files are not listed](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/issues/18)".
+- A fix is provided for the issue "[Spotfire-webplayer permission denied error](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/issues/15)". 
+- Updated Debian 11 to Debian 12 as the base image layer for Spotfire containers.
+- Licenses are provided for Spotfire images.
+    * Review the licenses as follows: From the containers folder, run the command `make licenses` to export PDF files that contain information about applicable license for the contained software.
+- The tag `subpath` is added for `config-job` volumes.
+- The default Promtheus query for automation-services KEDA autoscaling is corrected.
+- The default metric used for spotfire-webplayer KEDA autoscaling has changed from  `spotfire_TIBCO_Spotfire_Webplayer_Web_Player_health_status` to `spotfire_Spotfire_Webplayer_Web_Player_health_status`.
+- The fluent-bit logging sidecar image has been upgraded to version 2.1.8.
+- Various additional bug fixes.
+
 # Release v1.5.0
 
 This release includes recipes for building container images and Helm charts for the following products.
@@ -30,11 +71,10 @@ Note: The image tag format is \<appVersion\>-\<cdk version\>
 ### General
 
 - Volume mounts for charts now support specifying [subPath](https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath).
-- Added a chart to support deploying the new service TIBCO Spotfire Service for R.
-- Fix provided for the issue "[Unable to build container image spotfire-base due to failure to install openjdk-17-jre-headless](https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/issues/14)."
+- Added a chart to support deploying the new service TIBCO Spotfire Service for R. 
+- Fix provided for the issue "[Unable to build container image spotfire-base due to failure to install openjdk-17-jre-headless](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/issues/14)."
 - Minimum Kubernetes version required by charts updated to 1.24.0-0.
-- Added  custom configuration for action log database logging for the spotfire-server helm chart. An umbrella-example ( helm/examples/spotfire-umbrella-example/values-actionlogdb ) was added for testing and example purposes.  Various configuration keys are included in under the Values.configuration section of the 
-  Values.yaml file. These keys provide the following capabilities:
+- Added  custom configuration for action log database logging for the spotfire-server helm chart. An umbrella-example ( helm/examples/spotfire-umbrella-example/values-actionlogdb ) was added for testing and example purposes.  Various configuration keys are included in under the Values.configuration section of the Values.yaml file. These keys provide the following capabilities:
     * Configuring 'Categories and Web Categories'.
     * Enabling or disabling logging to a database. 
     * Enabling access and/or creating the action log database.
@@ -199,8 +239,8 @@ Note: The image tag format is \<appVersion\>-\<cdk version\>
 ### General
 
 - Various enhancements and bug fixes to the Helm charts and container images.
-- All charts require you to accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true**.
-- All containers require you to accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the environment variable `ACCEPT_EUA` to **Y**.
+- All charts require you to accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting `acceptEUA` or `global.spotfire.acceptEUA` to **true**.
+- All containers require you to accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the environment variable `ACCEPT_EUA` to **Y**.
 - An example umbrella chart that can install an entire Spotfire system, including a database, a Spotfire Server, a Web Player with multiple resource pools, Automation Services, TIBCO Enterprise Runtime for R - Server Edition (a TERR service), and Spotfire Service for Python. See helm/examples/umbrella-chart/README.md for more information.
 
 ### spotfire-server chart 0.1.5

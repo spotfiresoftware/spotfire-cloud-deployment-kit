@@ -22,13 +22,13 @@ spec:
         - name: init-deployment
           image: {{ include "spotfire-server.configuration.deployment.defaultDeployment.image" . }}
           imagePullPolicy: {{ include "spotfire-server.configuration.deployment.defaultDeployment.image.pullPolicy" . }}
-          command: ['sh', '-c', "mkdir -p /opt/tibco/deployments-volume/${DEPLOYMENT_AREA_NAME}; cp /opt/tibco/deployment-files/* /opt/tibco/deployments-volume/${DEPLOYMENT_AREA_NAME}"]
+          command: ['sh', '-c', "mkdir -p /opt/spotfire/deployments-volume/${DEPLOYMENT_AREA_NAME}; cp /opt/spotfire/deployment-files/* /opt/spotfire/deployments-volume/${DEPLOYMENT_AREA_NAME}"]
           env:
             - name: DEPLOYMENT_AREA_NAME
               value: {{ .Values.configuration.deployment.defaultDeployment.deploymentAreaName | quote }}
           volumeMounts:
-            - mountPath: /opt/tibco/deployments-volume
-              name: deployments-volume
+            - mountPath: /opt/spotfire/deployments-volume
+              name: {{ default "deployments" .Values.volumes.deployments.existingClaim }}-volume
       {{- end }}
       {{- if .Values.configJob.extraInitContainers }}
         {{- tpl (toYaml .Values.configJob.extraInitContainers) $ | nindent 8 }}
@@ -39,7 +39,7 @@ spec:
       containers:
         - name: config-job
           command: ["/bin/sh","-c"]
-          args: ["/opt/tibco/scripts/main.sh"]
+          args: ["/opt/spotfire/scripts/main.sh"]
           image: {{ include "spotfire-server.configJob.image" . }}
           imagePullPolicy: {{ include "spotfire-server.configJob.image.pullPolicy" . }}
           envFrom:
@@ -89,34 +89,38 @@ spec:
           resources: {}
           volumeMounts:
             - name: config-job-scripts-volume
-              mountPath: /opt/tibco/scripts/
+              mountPath: /opt/spotfire/scripts/
             {{- if .Values.configuration.commandScripts }}
             - name: command-scripts-volume
-              mountPath: /opt/tibco/command-scripts/
+              mountPath: /opt/spotfire/command-scripts/
             {{- end }}
             {{- if .Values.configuration.preConfigCommandScripts }}
             - name: pre-config-command-scripts-volume
-              mountPath: /opt/tibco/pre-config-command-scripts/
+              mountPath: /opt/spotfire/pre-config-command-scripts/
             {{- end }}
             {{- if .Values.configuration.configurationScripts }}
             - name: configuration-scripts-volume
-              mountPath: /opt/tibco/configuration-scripts/
+              mountPath: /opt/spotfire/configuration-scripts/
             {{- end }}
             {{- if (or .Values.volumes.deployments.existingClaim .Values.configuration.deployment.defaultDeployment.enabled) }}
-            - name: deployments-volume
-              mountPath: /opt/tibco/spotfireconfigtool/deployments
+            - name: {{ default "deployments" .Values.volumes.deployments.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/deployments
+              subPath: {{ .Values.volumes.deployments.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.certificates.existingClaim }}
-            - name: certificates-volume
-              mountPath: /opt/tibco/spotfireconfigtool/certs
+            - name: {{ .Values.volumes.certificates.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/certs
+              subPath: {{ .Values.volumes.certificates.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
-            - name: custom-ext
-              mountPath: /opt/tibco/spotfireconfigtool/custom-ext
+            - name: {{ .Values.volumes.customExt.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/custom-ext
+              subPath: {{ .Values.volumes.customExt.subPath | quote }}
             {{- end }}
             {{- if .Values.volumes.customExtInformationservices.existingClaim }}
-            - name: custom-ext-informationservices
-              mountPath: /opt/tibco/spotfireconfigtool/custom-ext-informationservices
+            - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/custom-ext-informationservices
+              subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
             {{- end }}
             {{- with .Values.configJob.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
@@ -149,28 +153,43 @@ spec:
             name: {{ .Release.Name }}-configuration-scripts
             defaultMode: 0755
         {{- end -}}
+        {{- $existingVolumes := dict }}
         {{- if .Values.volumes.deployments.existingClaim }}
-        - name: deployments-volume
+        {{- $claimName := .Values.volumes.deployments.existingClaim }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.deployments.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
         {{- else if .Values.configuration.deployment.defaultDeployment.enabled }}
         - name: deployments-volume
           emptyDir: {}
         {{- end }}
         {{- if .Values.volumes.certificates.existingClaim }}
-        - name: certificates-volume
+          {{- $claimName := .Values.volumes.certificates.existingClaim  }}
+          {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.certificates.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         {{ if .Values.volumes.customExt.existingClaim -}}
-        - name: custom-ext
+          {{- $claimName := .Values.volumes.customExt.existingClaim  }}
+          {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExt.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         {{ if .Values.volumes.customExtInformationservices.existingClaim -}}
-        - name: custom-ext-informationservices
+          {{- $claimName := .Values.volumes.customExtInformationservices.existingClaim  }}
+          {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
       {{- with .Values.configJob.nodeSelector }}
       nodeSelector:

@@ -17,7 +17,7 @@ image:
   pullSecrets:
     - pullsecret
   registry: your.registry.com
-  repository: tibco/spotfire-rservice
+  repository: spotfire/spotfire-rservice
   tag: 1.13.0-1.2.0
 livenessProbe:
   failureThreshold: 10
@@ -130,7 +130,7 @@ extraVolumes:
       claimName: r-pvc
 extraVolumeMounts:
   - name: rvolume
-    mountPath: /opt/tibco/services
+    mountPath: /opt/spotfire/services
 extraEnvVarsCM: rservicecm
 extraEnvVars:
   - name: rservice

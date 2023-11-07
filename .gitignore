@@ -19,10 +19,12 @@ cache/
 *.exe
 *.tgz
 test-results.xml
-
+venv/
 
 helm/packages/*
 
 **/Chart.lock
 
-containers/scans/*
+sbom/
+cve/
+license-report.csv

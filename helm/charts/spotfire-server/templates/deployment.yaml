@@ -62,7 +62,7 @@ spec:
             preStop:
               exec:
                 command:
-                - /opt/tibco/scripts/pre-stop-hook.sh
+                - /opt/spotfire/scripts/pre-stop-hook.sh
                 - {{ printf "--minimum-draining-seconds=%v" .Values.configuration.draining.minimumSeconds }}
                 - {{ printf "--draining-timeout-seconds=%v" .Values.configuration.draining.timeoutSeconds }}
           {{- end }}
@@ -108,29 +108,30 @@ spec:
             {{- toYaml . | nindent 10 }}
           {{- end }}
           - name: logs-volume
-            mountPath: /opt/tibco/tss/tomcat/logs
+            mountPath: /opt/spotfire/spotfireserver/tomcat/logs
           {{- if .Values.volumes.certificates.existingClaim }}
-          - name: certificates-volume
-            mountPath: /opt/tibco/tss/tomcat/certs
+          - name: {{ .Values.volumes.certificates.existingClaim }}-volume
+            mountPath: /opt/spotfire/spotfireserver/tomcat/certs
             subPath: {{ .Values.volumes.certificates.subPath | quote }}
           {{- end }}
           {{- if .Values.volumes.customExt.existingClaim }}
-          - name: custom-ext
-            mountPath: /opt/tibco/tss/tomcat/custom-ext
+          - name: {{ .Values.volumes.customExt.existingClaim }}-volume
+            mountPath: /opt/spotfire/spotfireserver/tomcat/custom-ext
             subPath: {{ .Values.volumes.customExt.subPath | quote }}
           {{- end }}
           {{- if .Values.volumes.customExtInformationservices.existingClaim }}
-          - name: custom-ext-informationservices
-            mountPath: /opt/tibco/tss/tomcat/custom-ext-informationservices
+          - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
+            mountPath: /opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices
             subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
           {{- end }}
           {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.existingClaim }}
-          - name: library-import-export
-            mountPath: /opt/tibco/tss/tomcat/application-data/library
+          {{- $claimName := ( include "spotfire-server.volumes.library-import-export.pvc.name" . ) }}
+          - name: {{ $claimName}}-volume
+            mountPath: /opt/spotfire/spotfireserver/tomcat/application-data/library
             subPath: {{ .Values.volumes.libraryImportExport.subPath | quote }}
           {{- end }}
           - name: troubleshooting-volume
-            mountPath: /opt/tibco/troubleshooting/
+            mountPath: /opt/spotfire/troubleshooting/
             subPathExpr: $(POD_NAME)
         - name: fluent-bit
           image: "{{ .Values.fluentBitSidecar.image.repository }}:{{ .Values.fluentBitSidecar.image.tag }}"
@@ -152,7 +153,7 @@ spec:
           - name: FILE_SEPARATOR
             value: /
           - name: TSS_HOME
-            value: /tss
+            value: /spotfireserver
           - name: CONTAINER_NAME
             value: spotfire-server
           volumeMounts:
@@ -175,7 +176,7 @@ spec:
             mountPath: /fluent-bit/etc/tss.parsers.fluentbit.conf
             subPath: tss.parsers.fluentbit.conf
           - name: logs-volume
-            mountPath: /tss/logs
+            mountPath: /spotfireserver/logs
           lifecycle:
             preStop:
               exec:
@@ -185,7 +186,7 @@ spec:
                 - "-i"
                 - "tail"
                 - "-p"
-                - path=/tss/logs/tss-terminated
+                - path=/spotfireserver/logs/spotfireserver-terminated
                 - "-o"
                 - "exit"
                 - "-p"
@@ -199,25 +200,40 @@ spec:
         - name: fluent-bit-config
           configMap:
             name: {{ .Release.Name }}-{{ .Chart.Name }}-fluent-bit
+        {{- $existingVolumes := dict }}
         {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.existingClaim }}
-        - name: library-import-export
+        {{- $claimName := ( include "spotfire-server.volumes.library-import-export.pvc.name" . ) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ include "spotfire-server.volumes.library-import-export.pvc.name" . }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
         {{- end }}
         {{- if .Values.volumes.customExt.existingClaim }}
-        - name: custom-ext
+          {{- $claimName := .Values.volumes.customExt.existingClaim  }}
+            {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExt.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         {{- if .Values.volumes.customExtInformationservices.existingClaim }}
-        - name: custom-ext-informationservices
+          {{- $claimName := .Values.volumes.customExtInformationservices.existingClaim  }}
+          {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.customExtInformationservices.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         {{- if .Values.volumes.certificates.existingClaim }}
-        - name: certificates-volume
+          {{- $claimName := .Values.volumes.certificates.existingClaim  }}
+          {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
           persistentVolumeClaim:
-            claimName: {{ .Values.volumes.certificates.existingClaim }}
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
         {{- end }}
         - name: troubleshooting-volume
           {{- if or .Values.volumes.troubleshooting.persistentVolumeClaim.create .Values.volumes.troubleshooting.existingClaim }}

@@ -1,4 +1,4 @@
-# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`.
+# -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`.
 acceptEUA:
 
 # ===============================
@@ -8,7 +8,7 @@ acceptEUA:
 # spotfire-global image settings
 global:
   spotfire:
-    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://terms.tibco.com/#end-user-agreement) by setting the value to `true`. Overrides the value of acceptEUA.
+    # -- (bool) Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`.
     acceptEUA:
     image:
       # -- The global container image registry. Used for  container images unless overridden.
@@ -27,9 +27,9 @@ image:
   # -- The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value.
   registry:
   # -- The spotfire-server image repository.
-  repository: tibco/spotfire-server
+  repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "12.5.0-1.5.0"
+  tag: "14.0.0-2.0.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -41,7 +41,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.1.2"
+    tag: "2.1.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -131,7 +131,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployment for more details.
+# -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details.
 # @default -- Disabled
 kedaAutoscaling:
   enabled: false
@@ -229,9 +229,9 @@ cliPod:
     # -- The image registry for spotfireConfig. Overrides global.spotfire.image.registry value.
     registry:
     # -- The spotfireConfig image repository.
-    repository: tibco/spotfire-config
+    repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.5.0-1.5.0"
+    tag: "14.0.0-2.0.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -278,9 +278,9 @@ configJob:
     # -- The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value.
     registry:
     # -- The spotfireConfig image repository.
-    repository: tibco/spotfire-config
+    repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "12.5.0-1.5.0"
+    tag: "14.0.0-2.0.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -306,7 +306,7 @@ volumes:
     # -- When `persistentVolumeClaim.create` is `false`, then use this value to define an already-existing PVC.
     existingClaim: ""
 
-  # The volume with mountPath: /opt/tibco/tss/tomcat/application-data/library
+  # The volume with mountPath: /opt/spotfire/spotfireserver/tomcat/application-data/library
   libraryImportExport:
     persistentVolumeClaim:
        # -- If `true`, then a `PersistentVolumeClaim` (PVC) is created.
@@ -324,28 +324,28 @@ volumes:
     # -- The subPath of the volume to be used for the volume mount
     subPath: ""
 
-  # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext`
+  # The volume with mountPath: `/opt/spotfire/spotfireserver/tomcat/custom-ext`
   customExt:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
     # -- The subPath of the volume to be used for the volume mount
     subPath: ""
 
-  # The volume with mountPath: `/opt/tibco/tss/tomcat/custom-ext-informationservices`
+  # The volume with mountPath: `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices`
   customExtInformationservices:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
     # -- The subPath of the volume to be used for the volume mount
     subPath: ""
 
-  # The volume with mountPath: `/opt/tibco/tss/tomcat/certs`
+  # The volume with mountPath: `/opt/spotfire/spotfireserver/tomcat/certs`
   certificates:
     # Defines an already-existing persistent volume claim.
     existingClaim: ""
     # -- The subPath of the volume to be used for the volume mount
     subPath: ""
 
-  # The volume with mountPath: `/opt/tibco/spotfireconfigtool/deployments`
+  # The volume with mountPath: `/opt/spotfire/spotfireconfigtool/deployments`
   deployments:
     # -- Defines an already-existing persistent volume claim.
     existingClaim: ""
@@ -553,9 +553,9 @@ configuration:
         # -- The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value.
         registry:
         # -- The spotfire-deployment image repository.
-        repository: tibco/spotfire-deployment
+        repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "12.5.0-1.5.0"
+        tag: "14.0.0-2.0.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -644,7 +644,7 @@ troubleshooting:
       # -- Define a path where the generated dump is exported.
       # By default, this gets mounted in EmptyDir: {} internally, which survives container restarts.
       # In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`.
-      dumpPath: /opt/tibco/troubleshooting/jvm-heap-dumps
+      dumpPath: /opt/spotfire/troubleshooting/jvm-heap-dumps
 
 spotfireServerJava:
   # -- Additional `JAVA_OPTS` for spotfire-server pods.
@@ -682,7 +682,7 @@ haproxy:
     prometheus.io/scrape: "true"
 
   podLabels:
-    #app.kubernetes.io/name: {{ include "spotfire-node-manager.name" . }}
+    #app.kubernetes.io/name: {{ include "spotfire-nodemanager.name" . }}
     #app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/part-of: spotfire
     app.kubernetes.io/component: haproxy
@@ -844,7 +844,7 @@ log-forwarder:
           Buffer_Chunk_Size 1M
           Buffer_Max_Size   6M
 
-    # -- Add custom fluent-bit [filters configuration](https://docs.fluen tbit.io/manual/pipeline/filters).
+    # -- Add custom fluent-bit [filters configuration](https://docs.fluentbit.io/manual/pipeline/filters).
     # @default -- Example that drops specific events using [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep)
     filters: |
       [FILTER]

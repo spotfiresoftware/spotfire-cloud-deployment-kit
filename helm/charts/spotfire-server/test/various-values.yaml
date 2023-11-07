@@ -14,7 +14,7 @@ troubleshooting:
   jvm:
     heapDumpOnOutOfMemoryError:
       enabled: true
-      dumpPath: /opt/tibco/troubleshooting/jvm-heap-dumps
+      dumpPath: /opt/spotfire/troubleshooting/jvm-heap-dumps
 serviceAccount:
   create: true
   name: serviceaccountname
@@ -87,7 +87,7 @@ cliPod:
     pullPolicy: Never
     pullSecrets:
       - pullsecret
-    repository: tibco/spotfire-config
+    repository: spotfire/spotfire-config
     tag: 12.1.0-1.2.0
   podAnnotations:
     firstpodannotation: "1"
@@ -142,7 +142,7 @@ configJob:
       - one
       - two
     registry: ""
-    repository: tibco/spotfire-config
+    repository: spotfire/spotfire-config
     tag: 12.1.0-1.2.0
   podAnnotations:
     firstpodannotation: "1"
@@ -245,7 +245,7 @@ extraEnvVars:
 extraEnvVarsCM: configmapname
 extraEnvVarsSecret: secretname
 image:
-  repository: tibco/spotfire-server
+  repository: spotfire/spotfire-server
   tag: 12.1.0-1.2.0
   registry:
   pullPolicy: Always

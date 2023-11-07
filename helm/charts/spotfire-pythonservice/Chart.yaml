@@ -1,18 +1,18 @@
 apiVersion: v2
 name: spotfire-pythonservice
-description: A Helm chart for TIBCO Spotfire® Service for Python
+description: A Helm chart for Spotfire® Service for Python
 
 type: application
 
-version: 0.1.7
+version: 0.2.0
 
-appVersion: "1.16.0"
+appVersion: "1.17.0"
 
 kubeVersion: ">=1.24.0-0"
 
-home: https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+home: https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit
 sources:
- - https://github.com/TIBCO/Spotfire-cloud-deployment-kit
+ - https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit
 
 keywords:
   - spotfire
@@ -24,8 +24,8 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 0.1.7
+    version: 0.2.0
 
 annotations:
   license: Apache 2.0
-  licenseUrl: https://github.com/TIBCOSoftware/spotfire-cloud-deployment-kit/blob/main/LICENSE
+  licenseUrl: https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/LICENSE

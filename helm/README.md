@@ -2,14 +2,14 @@
 
 ## Overview
 
-This directory contains the recipes to build and examples to use the [**TIBCO Spotfire®**](https://www.tibco.com/products/tibco-spotfire) Helm charts:
+This directory contains the recipes to build and examples to use the [**Spotfire®**](https://www.tibco.com/products/spotfire) Helm charts:
 
-- [spotfire-server](charts/spotfire-server/README.md): TIBCO Spotfire Server helm chart.
-- [spotfire-webplayer](charts/spotfire-webplayer/README.md): TIBCO Spotfire Web Player helm chart.
-- [spotfire-automationservices](charts/spotfire-automationservices/README.md): TIBCO Spotfire Automation Services helm chart.
-- [spotfire-rservice](charts/spotfire-rservice/README.md): TIBCO Spotfire Service for R helm chart.
-- [spotfire-pythonservice](charts/spotfire-pythonservice/README.md): TIBCO Spotfire Service for Python helm chart.
-- [spotfire-terrservice](charts/spotfire-terrservice/README.md): TIBCO Enterprise Runtime for R - Server Edition helm chart.
+- [spotfire-server](charts/spotfire-server/README.md): Spotfire Server helm chart.
+- [spotfire-webplayer](charts/spotfire-webplayer/README.md): Spotfire Web Player helm chart.
+- [spotfire-automationservices](charts/spotfire-automationservices/README.md): Spotfire Automation Services helm chart.
+- [spotfire-rservice](charts/spotfire-rservice/README.md): Spotfire Service for R helm chart.
+- [spotfire-pythonservice](charts/spotfire-pythonservice/README.md): Spotfire Service for Python helm chart.
+- [spotfire-terrservice](charts/spotfire-terrservice/README.md): Spotfire Enterprise Runtime for R - Server Edition helm chart.
 
 See the respective README files for details and usage examples.
 
@@ -59,7 +59,7 @@ Repeat for each of the charts.
 
 ### Customize and extend the charts
 
-These recipes provide a standard, canonical, typical, or vanilla deployment for the TIBCO Spotfire® Platform.
+These recipes provide a standard, canonical, typical, or vanilla deployment for the Spotfire® Platform.
 They are suitable for most of the use case scenarios.
 
 You are welcome to use and modify the recipes and adapt them to your specific use case, in compliance with the Apache License 2.0.
