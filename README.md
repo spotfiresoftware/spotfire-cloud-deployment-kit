@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Cloud Deployment Kit for Spotfire®** provides a reference and starting point for deploying [Spotfire®](https://spotfire.com) using [containers](https://www.docker.com/resources/what-container) and [Helm charts](https://helm.sh/) on a [Kubernetes cluster](http://kubernetes.io/).
+The **Cloud Deployment Kit for Spotfire®** provides a reference and starting point for deploying [Spotfire®](https://www.spotfire.com/) using [containers](https://www.docker.com/resources/what-container) and [Helm charts](https://helm.sh/) on a [Kubernetes cluster](http://kubernetes.io/).
 
 This repository contains recipes to build container images and Helm charts for certain **Spotfire®** products.
 You can extend and customize these recipes and examples.
@@ -36,7 +36,7 @@ The following applications have been validated in this _Cloud Deployment Kit (CD
 - Spotfire® Service for R
 - Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR service)
 
-**Note**: For more information on Spotfire® and its components, see the [Spotfire® Documentation](https://docs.tibco.com/products/spotfire/).
+**Note**: For more information on Spotfire® and its components, see the [Spotfire® Documentation](https://spotfi.re/docs).
 
 Using the provided charts, you can also deploy the following:
 - The required Spotfire Server® database schemas on a supported database server (for example, PostgreSQL).

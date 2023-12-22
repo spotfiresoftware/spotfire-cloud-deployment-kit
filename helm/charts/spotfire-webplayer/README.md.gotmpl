@@ -95,7 +95,7 @@ You can copy the default configuration files from the container image to use the
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
 You can replace the filename to get a copy any of the other container configuration files.
 ```bash
-docker run -it --rm -e ACCEPT_EUA=Y spotfire/spotfire-webplayer:<imagetag> cat /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config
+docker run --rm spotfire/spotfire-webplayer:<imagetag> cat /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config > Spotfire.Dxp.Worker.Web.config
 ```
 
 #### Adding a credentials profile for connectors to services as a file

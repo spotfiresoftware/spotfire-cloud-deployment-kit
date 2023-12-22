@@ -19,7 +19,7 @@ The Spotfire Server:
 
 For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html).
 
-For more information on the Spotfire product family, see the [Spotfire® Documentation](https://docs.tibco.com/products/spotfire/).
+For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs).
 
 ## How to build this image
 

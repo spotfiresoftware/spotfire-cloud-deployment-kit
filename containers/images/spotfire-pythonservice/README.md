@@ -12,7 +12,7 @@ This directory contains the official container recipe for **[Spotfire® Service 
 
 References:
 - For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html).
-- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://docs.tibco.com/products/spotfire/).
+- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs).
 - For latest specific component documentation, see [Spotfire® Service for Python Installation and Administration](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall-homepage.html).
 You can access to documentation for other component versions and other formats in [Spotfire® Service for Python product documentation](https://docs.tibco.com/products/spotfire-service-for-python)
 

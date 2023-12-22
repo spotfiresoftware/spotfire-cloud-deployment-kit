@@ -3,15 +3,18 @@ FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
 ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 ARG SPOTFIRE_DEPLOYMENT_VERSION
 
-RUN mkdir -p /opt/spotfire/deployment-files
+RUN mkdir -p /tmp/deployment-files
 
 # Spotfire.Dxp.sdn
-ADD build/Spotfire.Dxp.sdn /opt/spotfire/deployment-files
-WORKDIR /opt/spotfire/deployment-files/
+ADD build/Spotfire.Dxp.sdn /tmp/deployment-files
 
 # Add language packs, excluding the *-netcore.sdn files
 COPY --chown=spotfire:spotfire build/SPOT_sfire_server_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_languagepack-multi.zip /tmp
-RUN unzip -q -u -j /tmp/SPOT_sfire_server_*_languagepack-multi.zip -d /opt/spotfire/deployment-files/ -x '*-netcore.sdn'
+RUN unzip -q -u -j /tmp/SPOT_sfire_server_*_languagepack-multi.zip -d /tmp/deployment-files/ -x '*-netcore.sdn'
+
+FROM spotfire/spotfire-base:${IMAGE_BUILD_ID}
+WORKDIR /opt/spotfire/deployment-files/
+COPY --chown=spotfire:spotfire --from=extract /tmp/deployment-files/ /opt/spotfire/deployment-files/
 
 LABEL org.opencontainers.image.title="spotfire/deployment" \
     org.opencontainers.image.description="Spotfire® deployment packages helper." \

@@ -96,7 +96,7 @@ You can copy the default configuration files from the container image to use the
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Automation.config`.
 You can replace the file name to get a copy any of the other container configuration files.
 ```bash
-docker run -it --rm -e ACCEPT_EUA=Y spotfire/spotfire-automationservices:<imagetag> cat /opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Automation.config
+docker run --rm spotfire/spotfire-automationservices:<imagetag> cat /opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Automation.config > Spotfire.Dxp.Worker.Automation.config
 ```
 
 #### Custom modules

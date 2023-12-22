@@ -337,7 +337,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS Uptime",
+      "title": "Spotfire Server Uptime",
       "type": "stat"
     },
     {
@@ -443,7 +443,7 @@
           },
           "expr": "max(spotfire_SpotfireServer_ServerMetrics_AuthenticatedSessions{namespace=\"$namespace\"})",
           "interval": "",
-          "legendFormat": "TSS Authenticated Sessions",
+          "legendFormat": "Spotfire Server Authenticated Sessions",
           "refId": "C"
         },
         {
@@ -454,7 +454,7 @@
           "exemplar": true,
           "expr": "sum(spotfire_SpotfireServer_ServerMetrics_Sessions{namespace=\"$namespace\"}) ",
           "interval": "",
-          "legendFormat": "TSS Local Sessions",
+          "legendFormat": "Spotfire Server Local Sessions",
           "refId": "E"
         },
         {
@@ -464,7 +464,7 @@
           },
           "expr": "max(spotfire_ApacheIgnite_Size{counter_instance=\"spotfire-session-store\", namespace=\"$namespace\"})",
           "interval": "",
-          "legendFormat": "TSS Clustered Sessions",
+          "legendFormat": "Spotfire Server Clustered Sessions",
           "refId": "D"
         }
       ],
@@ -1100,7 +1100,7 @@
           "refId": "A"
         }
       ],
-      "title": "Total number of current TSS Requests per \"entry point\"",
+      "title": "Total number of current Spotfire Server Requests per \"entry point\"",
       "type": "timeseries"
     },
     {
@@ -1316,7 +1316,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS G1 Young Generation CollectionTime 1 min rate",
+      "title": "Spotfire Server G1 Young Generation CollectionTime 1 min rate",
       "type": "timeseries"
     },
     {
@@ -1404,7 +1404,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS G1 Young Generation CollectionCount 1 min rate",
+      "title": "Spotfire Server G1 Young Generation CollectionCount 1 min rate",
       "type": "timeseries"
     },
     {
@@ -1495,7 +1495,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS Heap size",
+      "title": "Spotfire Server Heap size",
       "type": "timeseries"
     },
     {
@@ -1688,7 +1688,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS Threads Busy",
+      "title": "Spotfire Server Threads Busy",
       "type": "timeseries"
     },
     {
@@ -1975,7 +1975,7 @@
           "refId": "D"
         }
       ],
-      "title": "TSS Http & WS Request Rate (1 minute)",
+      "title": "Spotfire Server Http & WS Request Rate (1 minute)",
       "type": "timeseries"
     },
     {
@@ -2058,7 +2058,7 @@
           "exemplar": true,
           "expr": "spotfire_SpotfireServer_DataSource_CurrentIdleCount{namespace=\"$namespace\"}",
           "interval": "",
-          "legendFormat": "TSS DB Idle Connections {{pod}}",
+          "legendFormat": "Spotfire Server DB Idle Connections {{pod}}",
           "refId": "A"
         },
         {
@@ -2069,7 +2069,7 @@
           "exemplar": true,
           "expr": "spotfire_SpotfireServer_DataSource_Acquisition1MinuteRate{namespace=\"$namespace\"}",
           "interval": "",
-          "legendFormat": "TSS DB Acquisition1MinuteRate {{pod}}",
+          "legendFormat": "Spotfire Server DB Acquisition1MinuteRate {{pod}}",
           "refId": "B"
         },
         {
@@ -2080,11 +2080,11 @@
           "exemplar": true,
           "expr": "spotfire_SpotfireServer_DataSource_CurrentActiveCount{namespace=\"$namespace\"}",
           "interval": "",
-          "legendFormat": "TSS DB Active Connections {{pod}}",
+          "legendFormat": "Spotfire Server DB Active Connections {{pod}}",
           "refId": "C"
         }
       ],
-      "title": "TSS Database Connections",
+      "title": "Spotfire Server Database Connections",
       "type": "timeseries"
     },
     {
@@ -2770,7 +2770,7 @@
           "refId": "A"
         }
       ],
-      "title": "TSS SOAP Calls Rate 1 min",
+      "title": "Spotfire Server SOAP Calls Rate 1 min",
       "type": "timeseries"
     },
     {

@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.0.0](https://img.shields.io/badge/AppVersion-14.0.0-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.1.0](https://img.shields.io/badge/AppVersion-14.1.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Server.
 
@@ -16,8 +16,8 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.2.0 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.37.* |
+| file://../spotfire-common | spotfire-common | 0.2.1 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.39.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.19.* |
 
 ## Overview
@@ -278,16 +278,16 @@ The Kubernetes job `config-job` uses the Spotfire Server Upgrade Tool. For detai
 
 #### Running custom spotfire-config tool tasks during helm install / upgrade
 
-During a helm release upgrade or install, you can run a custom `spotfire-config` tool task to add a custom configuration or to run custom tasks.
+To add a custom configuration or to run custom tasks during a helm release upgrade or installation, you can run a custom `spotfire-config` tool task.
 There are three types of `config.sh` scripts that you can run:
 
 - `configuration.configurationScripts` - Scripts that modify the Spotfire Server configuration (`configuration.xml`).
 - `configuration.commandScripts` - Scripts that do not modify the Spotfire Server configuration (for example, for creating users, assigning licenses, and so on).
-- `configuration.preConfigCommandScripts` - Same as commandScripts but these command will be run before the configuration is imported.
+- `configuration.preConfigCommandScripts` - The same as commandScripts, except these commands are run before the configuration is imported.
 
 See the [Values](#values) section below for more details.
 
-**Note**: To deploy SDN files during helm upgrade or install, see [Using persistent volumes for deploying SDNs/SPKs](#volume-for-deploying-sdnsspks).
+**Note**: To deploy SDN files during helm upgrade or installation, see [Using persistent volumes for deploying SDNs/SPKs](#volume-for-deploying-sdnsspks).
 
 Example: A `values.yml` snippet configuration for running custom `spotfire-config` tool tasks:
 ```yaml
@@ -307,28 +307,28 @@ configuration:
       script: create-user --bootstrap-config="${BOOTSTRAP_FILE}" --tool-password="${TOOL_PASSWORD}" --username="my_new_user" --password="password" --ignore-existing=true
 ```
 
-You can use environment variables in the scripts. These include, but are not limited to, `CONFIGURATION_FILE`, `BOOTSTRAP_FILE` and `TOOL_PASSWORD`.
+You can use environment variables in the scripts. These include, but are not limited to, `CONFIGURATION_FILE`, `BOOTSTRAP_FILE`, and `TOOL_PASSWORD`.
 
 For more information about `config.sh` scripts, see the Spotfire Server documentation about [scripting a configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
 
 If your scripts require additional environment variables, to add environment variables from existing secrets or configmaps, use the `extraEnvVarsSecret` or `extraEnvVarsCM` chart variables.
 
-#### Managing configuration on helm install / upgrade
+#### Managing configuration on helm upgrade or installation
 
 The key `configuration.apply` controls when to apply the values under the `configuration` key level.
 See the following table for a summary of the possible values, descriptions, and when to use each of them.
 
 | Value | Description | When it is useful |
 |-------|-------------|-------------------|
-| always | Apply on every `helm install` or `helm upgrade`| When you prefer to manage the configuration always using `configuration` keys |
-| initialsetup | Apply only on new Spotfire server installationn, if there is no configuration in the database | When you want to use `configuration` keys for the initial setup of the system, but you prefer to manage the configuration using an external tool |
-| never | Do not apply | When you prefer to manage the configuration externally, without using `configuration` keys |
+| `always` | Apply on every `helm upgrade` or `helm install`| When you prefer to manage the configuration always using `configuration` keys. |
+| `initialsetup` | Apply only on new Spotfire Server installation and if there is no configuration in the database | When you want to use `configuration` keys for the initial setup of the system, but you prefer to manage the configuration using an external tool. |
+| `never` | Do not apply | When you prefer to manage the configuration externally without using `configuration` keys. |
 
 **Note**: When set to `always`, the configuration made from tools other than helm might be overwritten when doing a helm upgrade.
 
-**Note**: It is required that Spotfire database contains a configuration that is compatible this this helm chart and Spotfire running in Kubernetes, see [config-job-scripts/default-kubernetes-config.txt.gotmpl](config-job-scripts/default-kubernetes-config.txt.gotmpl). You need to make sure a compatible configuration is active, either by manually setting a configuration or by using the value `always` or `initialsetup` (only during initial setup) in which case the configuration job will apply the configuration for you.
+**Note**: The Spotfire database must contain a configuration that is compatible with this helm chart and Spotfire running in Kubernetes. See [config-job-scripts/default-kubernetes-config.txt.gotmpl](config-job-scripts/default-kubernetes-config.txt.gotmpl). You must make sure a compatible configuration is active, either by manually setting a configuration, or by using the value `always` or `initialsetup` (only during initial setup), in which case the configuration job applies the configuration for you.
 
-**Note**: If you prefer to manage the configuration externally, you can also set `configuration.preferExistingConfig` to true.
+**Note**: If you prefer to manage the configuration externally, you can set `configuration.preferExistingConfig` to true.
 See the [Values](#values) section for more details.
 
 ## Additional / custom environment variables
@@ -342,7 +342,7 @@ Use these keys to inject environment variables for usage in custom initializatio
 
 Use `extraEnvVarsSecret` or `extraEnvVarsCM` to add environment variables from existing secrets or configMaps.
 
-Example: A `values.yml` snippet configuration for JVM settings for the Spotfire Server:
+Example: A `values.yaml` snippet configuration for JVM settings for the Spotfire Server:
 ```yaml
 extraEnvVars:
   - name: CATALINA_INITIAL_HEAPSIZE
@@ -367,7 +367,7 @@ Setting up volumes permissions is usually handled by the Kubernetes administrato
 
 You can use Kubernetes persistent volumes as a shared storage location for the _Spotfire library_ import and export location, custom jars, deployment packages, certificates, and other purposes.
 
-It is recommended to use predefined chart values for the most common needed Spotfire volumes. See [table](#spotfire-specific-volumes) below.
+Use predefined chart values for the most common needed Spotfire volumes. See [table](#spotfire-specific-volumes) below.
 Using generic volumes is also possible. See section [Spotfire generic volumes](#spotfire-generic-volumes).
 
 ### Spotfire specific volumes
@@ -381,13 +381,13 @@ Using generic volumes is also possible. See section [Spotfire generic volumes](#
 | `volumes.libraryImportExport`          | Common storage for Spotfire library import and export operations             |
 | `volumes.troubleshooting`              | Persist `spotfire-server` JVM head dumps and information for troubleshooting |
 
-**Note**: If a volume is not configured, it will not be used or the mountPath will use an emptyDir volume.
+**Note**: If a volume is not configured, it is not used, or the mountPath uses an emptyDir volume.
 
 #### Volume for certificates
 
 To use self-signed or custom certificates for connecting to LDAPS (such as `.jks` keystore files),
 you can create a volume with the desired files and use
-`volumes.certificates.existingClaim` to set the PersistentVolumeClaim to use.
+`volumes.certificates.existingClaim` to set the PersistentVolumeClaim.
 
 *mountPath*:
 - `/opt/spotfire/spotfireserver/tomcat/certs` (spotfire-server pod)
@@ -516,18 +516,19 @@ For more information, see [Configuration using the command line](https://docs.ti
 
 ## Supported databases configuration
 
-| Database              | driver class                                 | create-db.databaseUrl                                    | bootstrap.databaseUrl                                                | Additional parameters                    |
-|-----------------------|----------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------|------------------------------------------|
-| Postgres              | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             |                                          |
-| Oracle                | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@//databasehost:databaseport/service    | jdbc:oracle:thin:@//databasehost:databaseport/service                | oracleRootfolder, oracleTablespacePrefix |
-| MSSQL                 | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename |                                          |
-| AWS Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
-| Aurora Postgres       | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
-| AWS Oracle            | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@databasehost:databaseport/ORCL         | jdbc:oracle:thin:@databasehost:databaseport/ORCL                     | variant = rds                            |
-| AWS MSSQL             | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = rds                            |
-| Azure Postgres        | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
-| Azure MSSQL           | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure                          |
-| Google Cloud Postgres | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Database                | driver class                                 | create-db.databaseUrl                                    | bootstrap.databaseUrl                                                | Additional parameters                    |
+|-------------------------|----------------------------------------------|----------------------------------------------------------|----------------------------------------------------------------------|------------------------------------------|
+| Postgres                | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             |                                          |
+| Oracle                  | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@//databasehost:databaseport/service    | jdbc:oracle:thin:@//databasehost:databaseport/service                | oracleRootfolder, oracleTablespacePrefix |
+| MSSQL                   | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databasename |                                          |
+| AWS Postgres            | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Aurora Postgres         | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| AWS Oracle              | oracle.jdbc.OracleDriver                     | jdbc:oracle:thin:@databasehost:databaseport/ORCL         | jdbc:oracle:thin:@databasehost:databaseport/ORCL                     | variant = rds                            |
+| AWS MSSQL               | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = rds                            |
+| Azure Postgres          | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/databasename | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Azure MSSQL             | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = azure                          |
+| Google Cloud Postgres   | org.postgresql.Driver                        | jdbc:postgresql://databasehost:databaseport/             | jdbc:postgresql://databasehost:databaseport/databasename             | doNotCreateUser = true                   |
+| Google Cloud SQL Server | com.microsoft.sqlserver.jdbc.SQLServerDriver | jdbc:sqlserver://databasehost:databaseport               | jdbc:sqlserver://databasehost:databaseport;DatabaseName=databaseName | variant = google                         |
 
 For more details, see for example
 - [Postgres JDBC](https://jdbc.postgresql.org/documentation/use/#connecting-to-the-database)
@@ -552,7 +553,7 @@ For more details, see for example
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"14.0.0-2.0.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"14.1.0-2.1.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -570,7 +571,7 @@ For more details, see for example
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"14.0.0-2.0.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"14.1.0-2.1.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -605,7 +606,7 @@ For more details, see for example
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"14.0.0-2.0.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.1.0-2.1.0"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
@@ -648,7 +649,7 @@ For more details, see for example
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.1.8"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.1.10"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
@@ -699,7 +700,7 @@ For more details, see for example
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"14.0.0-2.0.0"` | The container image tag to use. |
+| image.tag | string | `"14.1.0-2.1.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -753,6 +754,7 @@ For more details, see for example
 | replicaCount | int | `1` | The number of Spotfire Server containers. |
 | resources | object | `{}` |  |
 | securityContext | object | `{}` | The securityContext setting for spotfire-server container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
+| service.clusterIP | string | `"None"` |  |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |

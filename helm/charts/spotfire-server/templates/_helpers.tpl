@@ -159,7 +159,11 @@ Database info needed to bootstrap and upgrade server
 - name: SPOTFIREDB_CLASS
   value: {{ required "driver class must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: TOOL_PASSWORD
-  value: {{ default (randAlpha 6) .Values.toolPassword | quote }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
+      key: TOOL_PASSWORD
+      optional: false
 {{- if .Values.configuration.encryptionPassword }}
 - name: ENCRYPTION_PASSWORD
   value: {{ .Values.configuration.encryptionPassword | quote }}

@@ -26,6 +26,11 @@ IMAGE_TARGETS = spotfire-server spotfire-config spotfire-nodemanager spotfire-ba
 				spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice \
 				spotfire-rservice spotfire-deployment
 
+LOCAL_TARGETS = spotfire-base spotfire-workerhost spotfire-nodemanager
+
+# Targets to push
+PUBLISH_TARGETS = $(filter-out $(LOCAL_TARGETS),$(IMAGE_TARGETS))
+
 
 .DEFAULT_GOAL := build
 build : $(IMAGE_TARGETS)
@@ -53,7 +58,7 @@ spotfire-webplayer :                             IMAGE_BUILD_ARGS += "SPOTFIRE_N
 %-spotfire-base spotfire-base :                             IMAGE_TAG  = $(1)
 %-spotfire-config spotfire-config :                         IMAGE_TAG  = $(SPOTFIRE_SERVER_VERSION)-$(1)
 %-spotfire-server spotfire-server :                         IMAGE_TAG  = $(SPOTFIRE_SERVER_VERSION)-$(1)
-%-spotfire-nodemanager spotfire-nodemanager :             IMAGE_TAG  = $(SPOTFIRE_NODEMANAGER_VERSION)-$(1)
+%-spotfire-nodemanager spotfire-nodemanager :               IMAGE_TAG  = $(SPOTFIRE_NODEMANAGER_VERSION)-$(1)
 %-spotfire-workerhost spotfire-workerhost :                 IMAGE_TAG  = $(SPOTFIRE_NETCORE_VERSION)-$(1)
 %-spotfire-pythonservice spotfire-pythonservice :           IMAGE_TAG  = $(SPOTFIRE_PYTHONSERVICE_VERSION)-$(1)
 %-spotfire-terrservice spotfire-terrservice :               IMAGE_TAG  = $(SPOTFIRE_TERRSERVICE_VERSION)-$(1)
@@ -76,7 +81,7 @@ $(IMAGE_TARGETS) :
 # make REGISTRY=registry.com list
 list : IMAGENAME = $(@:list-%=%)
 list : TAG = $(IMAGE_REPOSITORY_PREFIX)/$(IMAGENAME):$(LOCAL_IMAGE_TAG)
-list : $(addprefix list-,$(IMAGE_TARGETS))
+list : $(addprefix list-,$(PUBLISH_TARGETS))
 list-% :
 	@echo $(addsuffix /,$(REGISTRY))$(TAG)
 
@@ -99,7 +104,7 @@ downloads-list :
 
 push promote : REGISTRY ?= $(error REGISTRY is unset)
 push : REMOTE_TARGET = $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$(@:push-%=%):$(DEST_IMAGE_TAG)
-push : $(addprefix push-,$(IMAGE_TARGETS))
+push : $(addprefix push-,$(PUBLISH_TARGETS))
 push-spotfire-% : DEST_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
 push-spotfire-% : DEST_IMAGE_TAG = $(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
 push-spotfire-% :
@@ -108,14 +113,14 @@ push-spotfire-% :
 
 promote : DEST_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
 promote : DEST_IMAGE_TAG = $(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
-promote : $(addprefix promote-,$(IMAGE_TARGETS))
+promote : $(addprefix promote-,$(PUBLISH_TARGETS))
 promote-% :
 	$(DOCKER_CLI) pull $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG)
 	$(DOCKER_CLI) tag $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG) $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
 	$(DOCKER_CLI) push $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
 
 licenses licenses-% : LICENSE_DIR = licenses/$(*)
-licenses : $(addprefix licenses-,$(filter-out spotfire-base spotfire-deployment,$(IMAGE_TARGETS)))
+licenses : $(addprefix licenses-,$(filter-out spotfire-base spotfire-deployment,$(PUBLISH_TARGETS)))
 	$(info Licenses exported to $(LICENSE_DIR))
 	@find $(LICENSE_DIR) -type f
 licenses-% :

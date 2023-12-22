@@ -1,3 +1,11 @@
+{{- if .Values.haproxy.enabled }}
+{{- if ne .Values.service.type "ClusterIP" }}
+{{- fail ".Values.service.type must be ClusterIP if .Values.haproxy.enabled is true" }}
+{{- end }}
+{{- if ne .Values.service.clusterIP "None" }}
+{{- fail ".Values.service.clusterIP must be None if .Values.haproxy.enabled is true" }}
+{{- end }}
+{{- end }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -5,8 +13,10 @@ metadata:
   labels:
     {{- include "spotfire-server.labels" . | nindent 4 }}
 spec:
-  type: ClusterIP
-  clusterIP: None
+  type: {{ .Values.service.type }}
+  {{- if and .Values.service.clusterIP (eq .Values.service.type "ClusterIP") }}
+  clusterIP: {{ .Values.service.clusterIP }}
+  {{- end }}
   publishNotReadyAddresses: {{ .Values.configuration.draining.publishNotReadyAddresses }}
   ports:
     - port: 8080

@@ -4,7 +4,12 @@ Return the proper image name
 */}}
 {{- define "spotfire-common.images.image" -}}
 {{- $repositoryName := .image.repository -}}
-{{- $tag := .image.tag | toString -}}
+{{- $tagOrDigest := .image.tag | toString -}}
+{{- $separator := ":" -}}
+{{- if .image.digest -}}
+  {{- $tagOrDigest = .image.digest | toString -}}
+  {{- $separator = "@" -}}
+{{- end -}}
 {{- $registryName := .image.registry -}}
 {{- if empty $registryName }}
   {{- if .globalPath }}
@@ -14,9 +19,9 @@ Return the proper image name
   {{- end -}}
 {{- end -}}
 {{- if $registryName }}
-{{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
+{{- printf "%s/%s%s%s" $registryName $repositoryName $separator $tagOrDigest -}}
 {{- else -}}
-{{- printf "%s:%s" $repositoryName $tag -}}
+{{- printf "%s%s%s" $repositoryName $separator $tagOrDigest -}}
 {{- end -}}
 {{- end -}}
 

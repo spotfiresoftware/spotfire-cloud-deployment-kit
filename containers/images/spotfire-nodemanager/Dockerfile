@@ -8,7 +8,7 @@ FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
 
 ARG SPOTFIRE_NODEMANAGER_VERSION
 ADD build/spotfirenodemanager-${SPOTFIRE_NODEMANAGER_VERSION}.x86_64.tar.gz /tmp
-RUN rm -rf /tmp/nodemanager-*/jdk/
+RUN rm -rf /tmp/nodemanager-*/jdk/ /tmp/nodemanager-*/nm/upgrade/
 
 #
 # spotfire-nodemanager specific

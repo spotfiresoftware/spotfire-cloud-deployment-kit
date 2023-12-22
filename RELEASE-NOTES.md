@@ -1,3 +1,43 @@
+# Release v2.1.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- Spotfire Server 14.1.0
+- Spotfire Web Player 14.1.0
+- TIBCO Enterprise Runtime for R - Server Edition 1.18.0
+- Spotfire Automation Services 14.1.0
+- Spotfire Service for Python 1.18.0
+- Spotfire Service for R 1.18.0
+
+The recipes are validated with the listed Spotfire products and versions. They could work with other Spotfire versions with modifications.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.2.1 | 14.1.0 | 14.1.0-2.1.0 |
+| spotfire-webplayer | 0.2.1 | 14.1.0 | 14.1.0-2.1.0 |
+| spotfire-automationservices | 0.2.1 | 14.1.0 | 14.1.0-2.1.0 |
+| spotfire-terrservice | 0.2.1 | 1.18.0 | 1.18.0-2.1.0 |
+| spotfire-pythonservice | 0.2.1 | 1.18.0 | 1.18.0-2.1.0 |
+| spotfire-rservice | 0.2.1 | 1.18.0 | 1.18.0-2.1.0 |
+
+Note: The image tag format is \<appVersion\>-\<cdk version\>
+
+## Changes
+
+### General
+- Updated fluentbit chart and sidecar version
+
+### automation-services chart
+- Fixed spotfire-automationservices KEDA autoscaling. Now automationservices pods are created to handle the queue.
+
+### spotfire-server chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| service.clusterIP | | Added to allow setting clusterIP when haproxy is disabled. |
+
 # Release v2.0.0
 
 This release includes recipes for building container images and Helm charts for the following products.

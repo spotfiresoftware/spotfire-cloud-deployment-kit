@@ -2,7 +2,8 @@
 
 ## Overview
 
-This directory contains the recipes to build and examples to use the [**Spotfire®**](https://www.tibco.com/products/spotfire) Helm charts:
+
+This directory contains the recipes to build and examples to use the [**Spotfire®**](https://www.spotfire.com/) Helm charts:
 
 - [spotfire-server](charts/spotfire-server/README.md): Spotfire Server helm chart.
 - [spotfire-webplayer](charts/spotfire-webplayer/README.md): Spotfire Web Player helm chart.

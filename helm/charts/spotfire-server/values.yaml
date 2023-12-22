@@ -29,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.0.0-2.0.0"
+  tag: "14.1.0-2.1.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -41,7 +41,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.1.8"
+    tag: "2.1.10"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -59,8 +59,10 @@ fluentBitSidecar:
 replicaCount: 1
 
 service:
-  ## -- The haproxy deployment service type.
+  ## -- The spotfire server service type. It should be set to ClusterIP when haproxy is enabled (haproxy.enabled).
   type: ClusterIP
+  ## -- It should be set to None when haproxy is enabled (haproxy.enabled)
+  clusterIP: None
 
 serviceAccount:
   # Specifies whether to use a service account.
@@ -231,7 +233,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.0.0-2.0.0"
+    tag: "14.1.0-2.1.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -280,7 +282,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.0.0-2.0.0"
+    tag: "14.1.0-2.1.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -555,7 +557,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.0.0-2.0.0"
+        tag: "14.1.0-2.1.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.

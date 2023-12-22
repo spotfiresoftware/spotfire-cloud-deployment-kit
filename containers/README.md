@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains the recipes to build and examples to use the [**Spotfire® Platform**](https://www.tibco.com/products/spotfire) container images. See the respective README files for details and usage examples.
+This directory contains the recipes to build and examples to use the [**Spotfire® Platform**](https://www.spotfire.com/) container images. See the respective README files for details and usage examples.
 
 **Note**: You can build each image on its own as described in their respective READMEs, or you can use the provided `Makefile` within this directory to build all the images with just one single command (this `Makefile` also takes care of their internal dependencies).
 

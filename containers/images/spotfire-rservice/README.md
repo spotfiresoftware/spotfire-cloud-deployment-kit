@@ -15,7 +15,7 @@ R enables users to integrate and deploy advanced analytics written in the R lang
 
 References:
 - For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html). 
-- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://docs.tibco.com/products/spotfire/). 
+- For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs). 
 - For latest specific component documentation, see [Spotfire® Service for R Installation and Administration](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/index.html).
   You can access to documentation for other component versions and other formats in [Spotfire® Service for R product documentation](https://docs.tibco.com/products/spotfire-service-for-r)
 

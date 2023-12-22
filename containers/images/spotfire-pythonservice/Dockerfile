@@ -1,6 +1,7 @@
 ARG IMAGE_BUILD_ID=latest
 ARG SPOTFIRE_NODEMANAGER_VERSION
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
+ARG PYTHON_VERSION=3.11
 
 #
 # extract Spotfire Python service from sdn distribution file
@@ -19,10 +20,15 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
     --capability="${TSNM_CAPABILITY}" \
     --directory=/tmp/nodemanager-packages \
     --directory-pattern=*.{sdn,spk}
-
 #
 # spotfire-pythonservice specific
 #
+ARG PYTHON_VERSION
+# Remove everything except site-packages which might contain python packages from sdn/spk
+RUN mv /tmp/nodemanager-install/nm/services/PYTHON/python/lib/python${PYTHON_VERSION}/site-packages/ /tmp \
+    && rm -rf /tmp/nodemanager-install/nm/services/PYTHON/python \
+    && mkdir -p /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/ \
+    && mv /tmp/site-packages /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/
 FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID}
 
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
@@ -40,24 +46,25 @@ LABEL org.opencontainers.image.title="spotfire/spotfire-pythonservice" \
     com.spotfire.image.type="commercial" \
     com.spotfire.image.distribution-scope="private"
 
-# Temporarilty change from spotfire to root in order to install additional packages
-USER root
-
 ENV TSNM_CAPABILITY=PYTHON
 
+# Temporarilty change from spotfire to root in order to install python
+USER root
+ARG PYTHON_VERSION
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-  # Workaround for python module requiring libffi6
-  && apt-get install -y --no-install-recommends wget ca-certificates \
-  && wget http://mirrors.edge.kernel.org/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb -O libffi6_3.2.1-8_amd64.deb \
-  && dpkg -i  libffi6_3.2.1-8_amd64.deb \
-  && rm libffi6_3.2.1-8_amd64.deb \
-  # end workaround
+  && apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv \
   && apt-get clean all
+USER spotfire
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/services /opt/spotfire/nodemanager/nm/services
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/config/default.conf /opt/spotfire/nodemanager/nm/config/default.conf
 COPY --chown=spotfire:spotfire entrypoint-python.sh ./
+
+# Set up a python venv for spotfire
+ENV SPOTFIRE_PYTHON_HOME=/opt/spotfire/python
+RUN python${PYTHON_VERSION} -m venv ${SPOTFIRE_PYTHON_HOME} --upgrade-deps \
+  && ${SPOTFIRE_PYTHON_HOME}/bin/python -m pip install spotfire
 
 # Configure logging
 ENV LOGGING_SERVICELOG_SIZE=10MB
@@ -68,10 +75,6 @@ COPY --chown=spotfire:spotfire ./default-container.properties .
 RUN cat default-container.properties >> "/opt/spotfire/nodemanager/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
   && chown spotfire:spotfire "/opt/spotfire/nodemanager/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
   && rm default-container.properties
-
-# Make the command 'python' available
-ENV LD_LIBRARY_PATH=/opt/spotfire/nodemanager/nm/services/PYTHON/python/lib/
-ENV PATH=$PATH:/opt/spotfire/nodemanager/nm/services/PYTHON/python/bin/
 
 USER spotfire
 
