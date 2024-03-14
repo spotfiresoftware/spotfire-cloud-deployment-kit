@@ -8,8 +8,8 @@ This directory contains the official container recipe for **Spotfire® configura
 
 The Spotfire Server configuration tool provides a command-line for Spotfire installation and administration.
 
-**Note**: The configuration tool requires a connection to the Spotfire database in order to configure a Spotfire environment. 
-The [bootstrap.xml](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/creating_the_bootstrap.xml_file.html) 
+**Note**: The configuration tool requires a connection to the Spotfire database in order to configure a Spotfire environment.
+The [bootstrap.xml](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/creating_the_bootstrap.xml_file.html)
 file contains basic information that the server needs to connect to the Spotfire database and retrieve its configuration.
 
 **Note**: Some configuration tool commands also require access to the Spotfire Server instances.
@@ -27,7 +27,7 @@ Prerequisites:
 Steps:
 1. Copy the `spotfireserver-<version>.x86_64.tar.gz` package into the `build/` directory within this directory.
 2. From the `<this-repo>/containers` folder, run `make spotfire-config` to build this image, or `make spotfire-config --dry-run` to just view the commands.
- 
+
 ## How to use this image
 
 You can run the containerized Spotfire configuration tool with:
@@ -38,7 +38,7 @@ docker run -e ACCEPT_EUA=Y --rm spotfire/spotfire-config help
 **Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
 By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
-For configuration tool documentation, check the [Command-line reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/command-line_reference.html) 
+For configuration tool documentation, check the [Command-line reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/command-line_reference.html)
 within the [Spotfire® Server and Environment - Installation and Administration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server-homepage.html) help.
 
 ### Environment variables

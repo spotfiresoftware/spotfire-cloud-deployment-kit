@@ -4,9 +4,9 @@ description: A Helm chart for Spotfire® Service for R
 
 type: application
 
-version: 0.2.1
+version: 0.2.2
 
-appVersion: "1.18.0"
+appVersion: "1.19.0"
 
 kubeVersion: ">=1.24.0-0"
 
@@ -24,7 +24,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 0.2.1
+    version: 0.2.2
 
 annotations:
   license: Apache 2.0

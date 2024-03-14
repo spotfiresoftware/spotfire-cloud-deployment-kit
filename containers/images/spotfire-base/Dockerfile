@@ -1,14 +1,13 @@
 #
 # spotfire-base container for latest released stable Debian
 #
-ARG DEBIAN_TAG=12-slim
+ARG DEBIAN_IMAGE_TAG=12-slim
 
 #
 # common java-base
 #
-FROM debian:$DEBIAN_TAG as spotfire-base
+FROM debian:$DEBIAN_IMAGE_TAG as spotfire-base
 
-ARG DEBIAN_TAG
 LABEL org.opencontainers.image.title="spotfire/spotfire-base" \
     org.opencontainers.image.description="Base image for Spotfire® container images" \
     org.opencontainers.image.url='https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit' \

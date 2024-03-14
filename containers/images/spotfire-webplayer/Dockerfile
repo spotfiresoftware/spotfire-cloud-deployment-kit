@@ -1,10 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_WORKERHOST_IMAGE_TAG
 ARG SPOTFIRE_NETCORE_VERSION
 
 #
 # extract Spotfire Web Player service from sdn distribution file
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_NETCORE_VERSION}-${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} as extract
 ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 ENV TSNM_CAPABILITY=WEB_PLAYER
 RUN mkdir -p /tmp/nodemanager-packages
@@ -26,7 +26,7 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
 #
 # spotfire-webplayer specific
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_NETCORE_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG}
 
 ARG SPOTFIRE_NETCORE_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-webplayer" \

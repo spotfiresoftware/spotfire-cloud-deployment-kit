@@ -6,9 +6,10 @@
 SHELL                       = /bin/bash
 .SHELLFLAGS                 = -o pipefail -c
 
-DOCKER_CLI ?= docker
-#DOCKER_CLI := podman
-#DOCKER_CLI_BUILD_ARGS ?= --pull --no-cache # Any extra argument for 'docker build'
+.DEFAULT_GOAL               = build
+
+DOCKER_CLI ?= docker# podman
+DOCKER_CLI_BUILD_ARGS ?= # --no-cache
 IMAGE_REPOSITORY_PREFIX ?= spotfire
 DOWNLOADS_DIR ?= downloads
 IMAGES_DIR ?= images
@@ -16,82 +17,30 @@ IMAGES_DIR ?= images
 include ../versions.mk
 include build-files.mk
 
-build-files : $(BUILD_FILES)
+#
+# Image dependencies
+#
 
-IMAGE_BUILD_ID ?= $(CLOUD_DEPLOYMENT_KIT_VERSION)
-
-# Images - Default target build: build all images
 .SECONDEXPANSION : $(IMAGE_TARGETS)
+
 IMAGE_TARGETS = spotfire-server spotfire-config spotfire-nodemanager spotfire-base spotfire-workerhost \
-				spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice \
-				spotfire-rservice spotfire-deployment
+                spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice \
+                spotfire-rservice spotfire-deployment
 
-LOCAL_TARGETS = spotfire-base spotfire-workerhost spotfire-nodemanager
-
-# Targets to push
-PUBLISH_TARGETS = $(filter-out $(LOCAL_TARGETS),$(IMAGE_TARGETS))
-
-
-.DEFAULT_GOAL := build
-build : $(IMAGE_TARGETS)
-
-# Build command
-$(IMAGE_TARGETS) : IMAGE_BUILD_ARGS =
-spotfire-base:                                   IMAGE_BUILD_ARGS =  $(addprefix DEBIAN_TAG=,$(DEBIAN_TAG))
-spotfire-server spotfire-config spotfire-nodemanager spotfire-workerhost spotfire-webplayer spotfire-terrservice spotfire-automationservices spotfire-pythonservice spotfire-rservice spotfire-deployment : \
-                                                 IMAGE_BUILD_ARGS =  "IMAGE_BUILD_ID=$(LOCAL_IMAGE_BUILD_ID)"
-spotfire-deployment :                            IMAGE_BUILD_ARGS += "SPOTFIRE_DEPLOYMENT_VERSION=$(SPOTFIRE_DEPLOYMENT_VERSION)"
-spotfire-rservice :                              IMAGE_BUILD_ARGS += "SPOTFIRE_RSERVICE_VERSION=$(SPOTFIRE_RSERVICE_VERSION)"
-spotfire-deployment :                            IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
-spotfire-pythonservice :                         IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
-spotfire-pythonservice spotfire-terrservice spotfire-rservice spotfire-nodemanager spotfire-workerhost : \
-                                                 IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
-spotfire-server spotfire-config :                IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
-spotfire-terrservice :                           IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
-spotfire-webplayer spotfire-automationservices : IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
-spotfire-webplayer :                             IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
-
-
-# TAGS -
-# $(1): IMAGE_BUILD_ID
-%-spotfire-automationservices spotfire-automationservices : IMAGE_TAG  = $(SPOTFIRE_NETCORE_VERSION)-$(1)
-%-spotfire-base spotfire-base :                             IMAGE_TAG  = $(1)
-%-spotfire-config spotfire-config :                         IMAGE_TAG  = $(SPOTFIRE_SERVER_VERSION)-$(1)
-%-spotfire-server spotfire-server :                         IMAGE_TAG  = $(SPOTFIRE_SERVER_VERSION)-$(1)
-%-spotfire-nodemanager spotfire-nodemanager :               IMAGE_TAG  = $(SPOTFIRE_NODEMANAGER_VERSION)-$(1)
-%-spotfire-workerhost spotfire-workerhost :                 IMAGE_TAG  = $(SPOTFIRE_NETCORE_VERSION)-$(1)
-%-spotfire-pythonservice spotfire-pythonservice :           IMAGE_TAG  = $(SPOTFIRE_PYTHONSERVICE_VERSION)-$(1)
-%-spotfire-terrservice spotfire-terrservice :               IMAGE_TAG  = $(SPOTFIRE_TERRSERVICE_VERSION)-$(1)
-%-spotfire-rservice spotfire-rservice :                     IMAGE_TAG  = $(SPOTFIRE_RSERVICE_VERSION)-$(1)
-%-spotfire-webplayer spotfire-webplayer :                   IMAGE_TAG  = $(SPOTFIRE_NETCORE_VERSION)-$(1)
-%-spotfire-deployment spotfire-deployment :                 IMAGE_TAG  = $(SPOTFIRE_DEPLOYMENT_VERSION)-$(1)
-
-# Used when building and pushing
-LOCAL_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
-LOCAL_IMAGE_TAG = $(call IMAGE_TAG,$(LOCAL_IMAGE_BUILD_ID))
-# Used when promoting
-SRC_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
-SRC_IMAGE_TAG = $(call IMAGE_TAG,$(SRC_IMAGE_BUILD_ID))
-
-$(IMAGE_TARGETS) : IMAGENAME = $(IMAGE_REPOSITORY_PREFIX)/$(@):$(LOCAL_IMAGE_TAG)
-$(IMAGE_TARGETS) : BUILD_ARGS = $(DOCKER_CLI_BUILD_ARGS) $(addprefix --build-arg ,$(IMAGE_BUILD_ARGS))
-$(IMAGE_TARGETS) :
-	$(DOCKER_CLI) build $(BUILD_ARGS) --tag $(IMAGENAME) $(IMAGES_DIR)/$(@)
-
-# make REGISTRY=registry.com list
-list : IMAGENAME = $(@:list-%=%)
-list : TAG = $(IMAGE_REPOSITORY_PREFIX)/$(IMAGENAME):$(LOCAL_IMAGE_TAG)
-list : $(addprefix list-,$(PUBLISH_TARGETS))
-list-% :
-	@echo $(addsuffix /,$(REGISTRY))$(TAG)
-
-# Images dependencies
 spotfire-server spotfire-config spotfire-nodemanager spotfire-deployment : spotfire-base
-spotfire-workerhost : spotfire-nodemanager
-spotfire-automationservices spotfire-webplayer : spotfire-workerhost
-spotfire-terrservice spotfire-pythonservice spotfire-rservice : spotfire-nodemanager
+spotfire-terrservice spotfire-pythonservice spotfire-rservice            : spotfire-nodemanager
+spotfire-workerhost                                                      : spotfire-nodemanager
+spotfire-automationservices spotfire-webplayer                           : spotfire-workerhost
 
-# Image should depend on all BUILD_FILES that start with path images/<IMAGE>/build/
+NONLOCAL_TARGETS = $(filter-out spotfire-workerhost spotfire-nodemanager spotfire-base,$(IMAGE_TARGETS))
+
+.PHONY : $(IMAGE_TARGETS)
+
+#
+# Build files - copy files from downloads/ to images/<imagename>/build
+#
+
+# Image should depend on all BUILD_FILES that start with path images/<imagename>/build/
 $(IMAGE_TARGETS) : % : $$(filter images/%/$$(PERCENT),$(BUILD_FILES))
 $(IMAGE_TARGETS) : PERCENT := %
 
@@ -102,32 +51,116 @@ downloads-list : DOWNLOADS_FILES = $(addprefix $(DOWNLOADS_DIR)/,$(sort $(foreac
 downloads-list :
 	@$(foreach file,$(DOWNLOADS_FILES),echo $(file);)
 
-push promote : REGISTRY ?= $(error REGISTRY is unset)
-push : REMOTE_TARGET = $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$(@:push-%=%):$(DEST_IMAGE_TAG)
-push : $(addprefix push-,$(PUBLISH_TARGETS))
-push-spotfire-% : DEST_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
-push-spotfire-% : DEST_IMAGE_TAG = $(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
-push-spotfire-% :
-	$(DOCKER_CLI) tag $(IMAGE_REPOSITORY_PREFIX)/$(@:push-%=%):$(LOCAL_IMAGE_TAG) $(REMOTE_TARGET)
-	$(DOCKER_CLI) push $(REMOTE_TARGET)
+build-files : $(BUILD_FILES)
 
-promote : DEST_IMAGE_BUILD_ID ?= $(IMAGE_BUILD_ID)
-promote : DEST_IMAGE_TAG = $(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
-promote : $(addprefix promote-,$(PUBLISH_TARGETS))
-promote-% :
-	$(DOCKER_CLI) pull $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG)
-	$(DOCKER_CLI) tag $(IMAGE_REPOSITORY_PREFIX)/$*:$(SRC_IMAGE_TAG) $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
-	$(DOCKER_CLI) push $(REGISTRY)/$(IMAGE_REPOSITORY_PREFIX)/$*:$(DEST_IMAGE_TAG)
+.PHONY : build-files downloads-list
 
+#
+# Docker cli build and arguments
+#
+
+.PHONY : build
+build : $(IMAGE_TARGETS)
+
+$(IMAGE_TARGETS) : BUILD_TAG_ARGUMENT = $(IMAGE_REPOSITORY_PREFIX)/$(@):$(IMAGE_TAG)
+$(IMAGE_TARGETS) : BUILD_ARGS = $(DOCKER_CLI_BUILD_ARGS) $(addprefix --build-arg ,$(IMAGE_BUILD_ARGS))
+$(IMAGE_TARGETS) :
+	$(DOCKER_CLI) build $(BUILD_ARGS) --tag $(BUILD_TAG_ARGUMENT) $(IMAGES_DIR)/$(@)
+
+# TAG_SUFFIX can be used to override *_CONTAINER_ITERATION
+TAG_SUFFIX ?= $(or $1,$(IMAGE_BUILD_ID))
+
+SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG   = $(SPOTFIRE_NETCORE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_AUTOMATIONSERVICES_CONTAINER_ITERATION)))
+SPOTFIRE_BASE_IMAGE_TAG                 = $(or $(IMAGE_BUILD_ID),base)
+SPOTFIRE_CONFIG_IMAGE_TAG               = $(SPOTFIRE_SERVER_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_CONFIG_CONTAINER_ITERATION)))
+SPOTFIRE_SERVER_IMAGE_TAG               = $(SPOTFIRE_SERVER_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_SERVER_CONTAINER_ITERATION)))
+SPOTFIRE_NODEMANAGER_IMAGE_TAG          = $(or $(IMAGE_BUILD_ID),nodemanager)
+SPOTFIRE_WORKERHOST_IMAGE_TAG           = $(or $(IMAGE_BUILD_ID),workerhost)
+SPOTFIRE_PYTHONSERVICE_IMAGE_TAG        = $(SPOTFIRE_PYTHONSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_PYTHONSERVICE_CONTAINER_ITERATION)))
+SPOTFIRE_TERRSERVICE_IMAGE_TAG          = $(SPOTFIRE_TERRSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_TERRSERVICE_CONTAINER_ITERATION)))
+SPOTFIRE_RSERVICE_IMAGE_TAG             = $(SPOTFIRE_RSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_RSERVICE_CONTAINER_ITERATION)))
+SPOTFIRE_WEBPLAYER_IMAGE_TAG            = $(SPOTFIRE_NETCORE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_WEBPLAYER_CONTAINER_ITERATION)))
+SPOTFIRE_DEPLOYMENT_IMAGE_TAG           = $(SPOTFIRE_DEPLOYMENT_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_WEBPLAYER_CONTAINER_ITERATION)))
+
+%potfire-automationservices : IMAGE_TAG = $(SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG)
+%potfire-base :               IMAGE_TAG = $(SPOTFIRE_BASE_IMAGE_TAG)
+%potfire-config :             IMAGE_TAG = $(SPOTFIRE_CONFIG_IMAGE_TAG)
+%potfire-server :             IMAGE_TAG = $(SPOTFIRE_SERVER_IMAGE_TAG)
+%potfire-nodemanager :        IMAGE_TAG = $(SPOTFIRE_NODEMANAGER_IMAGE_TAG)
+%potfire-workerhost :         IMAGE_TAG = $(SPOTFIRE_WORKERHOST_IMAGE_TAG)
+%potfire-pythonservice :      IMAGE_TAG = $(SPOTFIRE_PYTHONSERVICE_IMAGE_TAG)
+%potfire-terrservice :        IMAGE_TAG = $(SPOTFIRE_TERRSERVICE_IMAGE_TAG)
+%potfire-rservice :           IMAGE_TAG = $(SPOTFIRE_RSERVICE_IMAGE_TAG)
+%potfire-webplayer :          IMAGE_TAG = $(SPOTFIRE_WEBPLAYER_IMAGE_TAG)
+%potfire-deployment :         IMAGE_TAG = $(SPOTFIRE_DEPLOYMENT_IMAGE_TAG)
+
+# --build-arg image tags
+$(IMAGE_TARGETS) :                                                         IMAGE_BUILD_ARGS =
+spotfire-base:                                                             IMAGE_BUILD_ARGS += $(addprefix DEBIAN_IMAGE_TAG=,$(DEBIAN_IMAGE_TAG))
+spotfire-server spotfire-config spotfire-nodemanager spotfire-deployment : IMAGE_BUILD_ARGS += "SPOTFIRE_BASE_IMAGE_TAG=$(SPOTFIRE_BASE_IMAGE_TAG)"
+spotfire-pythonservice spotfire-terrservice spotfire-rservice :            IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
+spotfire-workerhost :                                                      IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
+spotfire-webplayer spotfire-automationservices :                           IMAGE_BUILD_ARGS += "SPOTFIRE_WORKERHOST_IMAGE_TAG=$(SPOTFIRE_WORKERHOST_IMAGE_TAG)"
+
+# --build-arg product versions
+spotfire-nodemanager :                                                     IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
+spotfire-server spotfire-config :                                          IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
+spotfire-webplayer spotfire-automationservices :                           IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
+spotfire-webplayer spotfire-automationservices spotfire-deployment :       IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
+spotfire-terrservice :                                                     IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
+spotfire-rservice :                                                        IMAGE_BUILD_ARGS += "SPOTFIRE_RSERVICE_VERSION=$(SPOTFIRE_RSERVICE_VERSION)"
+spotfire-pythonservice :                                                   IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
+
+#
+# pull, tag, push, list
+#
+# REMOTE_IMAGE_BUILD_ID: push this destination build id
+# LOCAL_IMAGE_BUILD_ID: push this source build id
+
+REMOTE_IMAGE_REFERENCE    = $(addsuffix /,$(CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(REMOTE_IMAGE_BUILD_ID))
+LOCAL_IMAGE_REFERENCE     = $(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(LOCAL_IMAGE_BUILD_ID))
+
+push : CONTAINER_REGISTRY ?= $(error CONTAINER_REGISTRY is unset)
+push : $(addprefix push-,$(NONLOCAL_TARGETS))
+push-% :
+	$(DOCKER_CLI) tag $(LOCAL_IMAGE_REFERENCE) $(REMOTE_IMAGE_REFERENCE)
+	$(DOCKER_CLI) push $(REMOTE_IMAGE_REFERENCE)
+
+# make CONTAINER_REGISTRY=registry.com list
+list-images : $(addprefix list-image-,$(NONLOCAL_TARGETS))
+list-image-% :
+	@echo $(REMOTE_IMAGE_REFERENCE)
+
+# Pull target
+pull : $(addprefix pull-,$(NONLOCAL_TARGETS))
+pull-% :
+	$(DOCKER_CLI) pull $(REMOTE_IMAGE_REFERENCE)
+
+# source <(make --silent list-tags)
+list-tags : create_var_assignment = $(if $(filter $(EXPORT),1),export ,)$(shell echo '$(*)' | tr '[:lower:]-' '[:upper:]_')_$(1)=$(2)
+list-tags : $(addprefix list-tag-,$(NONLOCAL_TARGETS))
+list-tag-% :
+	@echo $(call create_var_assignment,IMAGE_TAG,$(IMAGE_TAG))
+
+.PHONY : push push-% list list-%
+	
+#
+# additional targets
+#
 licenses licenses-% : LICENSE_DIR = licenses/$(*)
-licenses : $(addprefix licenses-,$(filter-out spotfire-base spotfire-deployment,$(PUBLISH_TARGETS)))
+licenses : $(addprefix licenses-,$(filter-out spotfire-base spotfire-deployment,$(NONLOCAL_TARGETS)))
 	$(info Licenses exported to $(LICENSE_DIR))
 	@find $(LICENSE_DIR) -type f
 licenses-% :
 	mkdir -p $(LICENSE_DIR)
-	tc=$$($(DOCKER_CLI) create "$(IMAGE_REPOSITORY_PREFIX)/$(*):$(LOCAL_IMAGE_TAG)"); \
+	tc=$$($(DOCKER_CLI) create "$(IMAGE_REPOSITORY_PREFIX)/$(*):$(IMAGE_TAG)"); \
 	$(DOCKER_CLI) export $${tc} | tar --strip-components=3 -C $(LICENSE_DIR) --wildcards -x "*license.pdf"; \
 	$(DOCKER_CLI) rm $${tc}
+
+# echos the value of given variable
+# make variable VAR=SPOTFIRE_DEPLOYMENT_VERSION
+variable :
+	@echo "$(value $(VAR))"
 
 clean :
 	$(info Cleaning build directories)
@@ -135,4 +168,4 @@ clean :
 	rm -f $(IMAGES_DIR)/**/build/*
 	rm -rf licenses/
 
-.PHONY : build push push-% $(IMAGE_TARGETS) clean build-files licenses licenses-% list list-% downloads-list
+.PHONY : clean licenses licenses-% variable

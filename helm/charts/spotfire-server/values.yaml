@@ -29,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.1.0-2.1.0"
+  tag: "14.2.0-1"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -41,7 +41,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "2.1.10"
+    tag: "2.2.2"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -233,7 +233,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.1.0-2.1.0"
+    tag: "14.2.0-1"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -282,7 +282,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.1.0-2.1.0"
+    tag: "14.2.0-1"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -511,7 +511,7 @@ configuration:
     #  itemName: parameter
     #  value: {"portHeader": "X-Forwarded-Port", "proxiesHeader": "X-Forwarded-By"}
     #
-    # List example: 
+    # List example:
     # set-config-list-prop --name="security.allowed-http-methods" --item-name="method-name" -VGET -VHEAD -VPOST -VPUT -VDELETE -VPATCH
     # security.allowed-http-methods:
     #   itemName: method-name
@@ -557,7 +557,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.1.0-2.1.0"
+        tag: "14.2.0-1"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -634,7 +634,7 @@ configuration:
           # thread-pool-size: ""
           # workers: ""
           # block-on-full-queue: true
-          # prioritized-categories: "" 
+          # prioritized-categories: ""
           # monitoring-retention-span: ""
           # monitoring-average-period: ""
           # log-local-time: false
@@ -667,15 +667,6 @@ haproxy:
   service:
     # -- Sets the service haproxy service proxies traffic to the spotfire-server service. ClusterIP or LoadBalancer.
     type: ClusterIP
-
-  # Temporary workaround to address an issue in chart version 1.7.0. See
-  # https://github.com/haproxytech/helm-charts/commit/bcb6d2621192d409c00e03db4ca351b26d2dfc01#diff-c1b4de66e84520a1bd950f258cc22cfebe60117c19a4af830b27f15fd7858dad.
-  extraVolumeMounts:
-    - name: chart-fix
-      mountPath: /tmp/chart/fix
-  extraVolumes:
-    - name: chart-fix
-      emptyDir: {}
 
   # -- Prometheus annotations. Should match the haproxy.config settings.
   podAnnotations:

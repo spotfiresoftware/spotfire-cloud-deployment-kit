@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.18.0](https://img.shields.io/badge/AppVersion-1.18.0-informational?style=flat-square)
+![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.19.0](https://img.shields.io/badge/AppVersion-1.19.0-informational?style=flat-square)
 
 A Helm chart for Spotfire® Service for Python
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.2.1 |
+| file://../spotfire-common | spotfire-common | 0.2.2 |
 
 ## Overview
 
@@ -79,7 +79,7 @@ python -m pip install --target=/local/path/to/packages -r requirements.txt
 
 #### Installing Python packages directly to a PersistentVolume using a Kubernetes Job
 
-The file [deploy-packages-to-pv-with-job.yaml](deploy-packages-to-pv-with-job.yaml) is an example of how to use a Kubernetes Job, PersistentVolumeClaim, and ConfigMap to create and populate a PersistentVolume containing Python packages. 
+The file [deploy-packages-to-pv-with-job.yaml](deploy-packages-to-pv-with-job.yaml) is an example of how to use a Kubernetes Job, PersistentVolumeClaim, and ConfigMap to create and populate a PersistentVolume containing Python packages.
 
 You might need to change some values in the file. For example, change the storageClassName for PersistentVolumeClaim to StorageClass from 'nfs-client' to one that exists in your environment. The full set of commands would look something like the following example.
 
@@ -179,7 +179,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 |-----|------|---------|-------------|
 | acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | affinity | object | `{}` |  |
-| configuration | object | `{}` | (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html).  Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'. |
+| configuration | object | `{}` | (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html). Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'. |
 | extraEnvVars | list | `[]` | Additional environment variables. |
 | extraEnvVarsCM | string | `""` | The name of the ConfigMap containing additional environment variables. |
 | extraEnvVarsSecret | string | `""` | The name of the Secret containing extra additional environment variables. |
@@ -188,7 +188,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.1.10"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"2.2.2"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
@@ -199,7 +199,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.18.0-2.1.0"` | The container image tag to use. |
+| image.tag | string | `"1.19.0-1"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

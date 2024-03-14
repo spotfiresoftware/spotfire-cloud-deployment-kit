@@ -20,6 +20,13 @@ $(CHARTS) :
 	helm dependency update charts/$@
 	helm package charts/$@ -d $(PACKAGE_DIR)
 
+push : HELM_PUSH_REMOTE ?= $(error HELM_PUSH_REMOTE must be set e.g. oci://registry.example.com/)
+push : $(PACKAGE_DIR)/*.tgz
+	for chart in $^; do \
+		helm push $${chart} $(HELM_PUSH_REMOTE) $(HELM_PUSH_FLAGS); \
+	done
+
+
 spotfire-umbrella-example :
 	helm dependency update examples/$@
 	helm package examples/$@ -d $(PACKAGE_DIR)

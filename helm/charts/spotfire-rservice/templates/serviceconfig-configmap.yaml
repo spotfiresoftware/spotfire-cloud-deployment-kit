@@ -8,7 +8,7 @@ metadata:
     {{- include "spotfire-common.spotfire-service.labels" (merge . (dict "componentName" "rservice")) | nindent 4 }}
   name: {{ .Release.Name }}-{{ .Chart.Name }}-serviceconfig
 data:
-  additionalCustomProperties: | 
+  additionalCustomProperties: |
   {{- range $key, $value := .Values.configuration }}
     {{$key}}: {{$value}}
   {{ end }}

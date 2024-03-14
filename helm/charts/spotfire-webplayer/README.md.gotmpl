@@ -16,7 +16,7 @@
 
 ## Overview
 
-This chart deploys the [Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_tibco_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+This chart deploys the [Spotfire® Web Player](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) service on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
 The Spotfire Web Player pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
@@ -172,7 +172,7 @@ For more information, see [Web Player service performance counters](https://docs
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` to allow time for draining sessions when scaling in.
 
-To mitigate toggling scenarios, you can control the KEDA scale down policy. 
+To mitigate toggling scenarios, you can control the KEDA scale down policy.
 For example, to scale down only one pod per hour:
 ```
 kedaAutoscaling:

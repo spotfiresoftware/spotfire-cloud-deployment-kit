@@ -11,10 +11,10 @@ install_postgress() {
     if [ "$INSTALL_POSTGRES_DRIVER" != "Y" ]; then
         return 0
     fi
- 
+
     apt-get install -y odbc-postgresql
 }
-# MariaDB ODBC driver  
+# MariaDB ODBC driver
 install_mariadb() {
     if [ "$INSTALL_MARIADB_DRIVER" != "Y" ]; then
         return 0
@@ -29,7 +29,7 @@ fi
 
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get install -y --no-install-recommends gnupg2 
+apt-get install -y --no-install-recommends gnupg2
 touch /etc/odbcinst.ini
 
 install_postgress

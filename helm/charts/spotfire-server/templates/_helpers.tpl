@@ -180,7 +180,7 @@ Spotfire administration username and password
   valueFrom:
     secretKeyRef:
       name: {{ include "spotfire-server.spotfireadmin.secret.name" . | quote }}
-      key: {{ include "spotfire-server.spotfireadmin.secret.passwordkey" . | quote }} 
+      key: {{ include "spotfire-server.spotfireadmin.secret.passwordkey" . | quote }}
       optional: false
 {{- end -}}
 

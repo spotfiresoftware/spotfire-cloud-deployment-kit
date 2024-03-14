@@ -73,10 +73,10 @@ When you build and use the Spotfire container images, you fetch and use Spotfire
 [Cloud Software Group, Inc.](https://www.cloud.com/)
 The Spotfire software running in these containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
-Each of the Spotfire container images includes the applicable Spotfire application license file(s), 
-which include a copy of the Cloud Software Group, Inc. End User Agreement, 
+Each of the Spotfire container images includes the applicable Spotfire application license file(s),
+which include a copy of the Cloud Software Group, Inc. End User Agreement,
 and the list of included Open Source Software components with their associated licenses.
-This list was generated using third party software as of the date listed in the file. 
+This list was generated using third party software as of the date listed in the file.
 This list may change with specific application versions of the product and may not be
 complete; it is provided “As-Is.”
 
@@ -84,15 +84,15 @@ See how to [fetch the applicable Spotfire application license file(s) from the c
 
 ## Other software
 
-When you build and use the container images, you fetch and use other software components that are subject to their own licenses. 
+When you build and use the container images, you fetch and use other software components that are subject to their own licenses.
 See how to [analyze container images to identify included artifacts and their individual licenses](docs/analyze-container-image-licenses.md).
 
-When you build and use the Helm charts, you fetch and use other charts that might fetch other container images, each with their own licenses. 
+When you build and use the Helm charts, you fetch and use other charts that might fetch other container images, each with their own licenses.
 A partial summary of the third party software and licenses used in this project is available [here](docs/third-party-software-licenses.md).
 
 ---
 
-Copyright 2022-2023 Cloud Software Group, Inc.
+Copyright 2022-2024 Cloud Software Group, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

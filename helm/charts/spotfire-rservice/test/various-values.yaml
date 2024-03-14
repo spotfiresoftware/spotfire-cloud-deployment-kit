@@ -58,7 +58,6 @@ startupProbe:
 tolerations: ""
 volumes:
   troubleshooting:
-    existingClaim: existingclaim1
     persistentVolumeClaim:
       create: true
       resources:
@@ -68,7 +67,6 @@ volumes:
       volumeName: volumename
   packages:
     subPath: subpath
-    existingClaim: existingclaim2
     persistentVolumeClaim:
       create: true
       resources:

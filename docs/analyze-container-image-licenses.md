@@ -141,7 +141,7 @@ Create a temporal container image based on the image you want to inspect, and ex
     docker export temp-container | tar t > temp-container-files.txt
     ```
 
-This method is a direct way to extract the image's final filesystem. 
+This method is a direct way to extract the image's final filesystem.
 It provides a **composite view of a container instance's filesystem**.
 
 **Note**: This is the fastest way to list the included files or extract individual files.
@@ -166,7 +166,7 @@ It provides a **layered view of the container image**.
 
 #### Layered view vs composite view
 
-The following diagram illustrates the differences between the layered view and the composite view of a container image. 
+The following diagram illustrates the differences between the layered view and the composite view of a container image.
 
 ![](container-image-views.png)
 

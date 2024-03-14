@@ -69,10 +69,10 @@ and the [Grafana documentation](https://grafana.com/oss/grafana/).
 
 #### Configuring
 
-1. [Add a metrics datasource](https://grafana.com/tutorials/grafana-fundamentals/?utm_source=grafana_gettingstarted#add-a-metrics-data-source) pointing to your Prometheus server. 
-For example, set the Prometheus Data Source HTTP URL to "http://prometheus-server.monitor.svc.cluster.local:80" 
-(the address to access the Prometheus server within your cluster that was displayed when you deployed the Prometheus Helm chart) 
-and select "Save & test". 
+1. [Add a metrics datasource](https://grafana.com/tutorials/grafana-fundamentals/?utm_source=grafana_gettingstarted#add-a-metrics-data-source) pointing to your Prometheus server.
+For example, set the Prometheus Data Source HTTP URL to "http://prometheus-server.monitor.svc.cluster.local:80"
+(the address to access the Prometheus server within your cluster that was displayed when you deployed the Prometheus Helm chart)
+and select "Save & test".
 2. [Import a dashboard](https://grafana.com/docs/grafana/latest/dashboards/export-import/) using a previously exported dashboard as a JSON file, or by dashboard ID.
-    - Start exploring with the [Spotfire Platform](examples/monitoring/Spotfire-Platform-grafana-dashboard.json) dashboard example. 
+    - Start exploring with the [Spotfire Platform](examples/monitoring/Spotfire-Platform-grafana-dashboard.json) dashboard example.
     - Try out other community [Grafana dashboards](https://grafana.com/grafana/dashboards/).

@@ -1,9 +1,9 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_BASE_IMAGE_TAG
 
 #
 # extract Spotfire Server from tss package
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
@@ -12,7 +12,7 @@ RUN rm -rf /tmp/spotfireserver-*.x86_64/jdk/
 #
 # spotfire-server specific
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as spotfire-server
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as spotfire-server
 
 ARG SPOTFIRE_SERVER_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-server" \

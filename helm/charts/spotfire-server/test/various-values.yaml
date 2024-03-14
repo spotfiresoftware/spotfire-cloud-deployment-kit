@@ -227,12 +227,6 @@ haproxy:
       queue: 60s
       server: 30m
       tunnel: 31m
-  extraVolumeMounts:
-    - name: chart-fix
-      mountPath: /tmp/chart/fix
-  extraVolumes:
-    - name: chart-fix
-      emptyDir: {}
 extraVolumeMounts:
   - name: volume
     mountPath: /volume

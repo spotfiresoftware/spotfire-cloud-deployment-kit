@@ -23,7 +23,7 @@
     Name                forward
     Match               tsnm.*
 
-    # For load balancing and failover 
+    # For load balancing and failover
     # see https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/upstream-servers
     # Upstream          tss.upstream.fluentbit.conf
 
@@ -31,7 +31,7 @@
     # storage.type              filesystem
     # storage.total_limit_size  10M
 
-    # For detailed information 
+    # For detailed information
     # see https://docs.fluentbit.io/manual/pipeline/outputs/forward
     Host                ${FLUENTBIT_FORWARD_HOST}
     Port                ${FLUENTBIT_FORWARD_PORT}

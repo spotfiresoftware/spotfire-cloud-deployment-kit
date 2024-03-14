@@ -1,11 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
-ARG SPOTFIRE_NODEMANAGER_VERSION
+ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_TERRSERVICE_VERSION
 
 #
 # extract Spotfire TERR service from sdn distribution file
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} as extract
 
 ENV TSNM_CAPABILITY=TERR
 
@@ -23,7 +22,7 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
 #
 # spotfire-terrservice specific
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
 
 ARG SPOTFIRE_TERRSERVICE_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-terrservice" \
@@ -58,7 +57,7 @@ COPY --chown=spotfire:spotfire entrypoint-terr.sh ./
 COPY --chown=spotfire:spotfire ./default-container.properties .
 RUN cat default-container.properties >> "/opt/spotfire/nodemanager/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
   && chown spotfire:spotfire "/opt/spotfire/nodemanager/nm/services/${TSNM_CAPABILITY}/conf/custom.properties" \
-  && rm default-container.properties 
+  && rm default-container.properties
 
 USER spotfire
 

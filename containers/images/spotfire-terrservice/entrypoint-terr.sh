@@ -6,6 +6,6 @@ if [ -f "nm/services/${TSNM_CAPABILITY}/conf/additional-custom.properties" ]; th
     cat "nm/services/${TSNM_CAPABILITY}/conf/additional-custom.properties" >> "nm/services/${TSNM_CAPABILITY}/conf/custom.properties"
 else
     echo "File nm/services/${TSNM_CAPABILITY}/conf/additional-custom.properties not found. No additional properties to add to nm/services/${TSNM_CAPABILITY}/conf/custom.properties"
-fi 
+fi
 
 exec ./entrypoint.sh

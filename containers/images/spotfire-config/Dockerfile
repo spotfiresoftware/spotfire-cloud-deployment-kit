@@ -1,9 +1,9 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_BASE_IMAGE_TAG
 
 #
 # extract Spotfire config-tool from spotfireserver package
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
@@ -12,7 +12,7 @@ RUN java -jar /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/tomcat/webap
 #
 # spotfire-config specific
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as spotfire-config
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as spotfire-config
 
 ARG SPOTFIRE_SERVER_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-config" \

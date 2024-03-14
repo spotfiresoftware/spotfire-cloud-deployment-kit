@@ -2,7 +2,7 @@
 
 ## About This Image
 
-This directory contains the official container recipe for **Spotfire® Automation Services**. 
+This directory contains the official container recipe for **Spotfire® Automation Services**.
 
 ## What is Spotfire Automation Services?
 
@@ -16,7 +16,7 @@ For more information on the Spotfire product family, see the [Spotfire® Documen
 
 **Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
 
-You can also build this image individually. 
+You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
@@ -57,8 +57,8 @@ docker run -d --rm -e ACCEPT_EUA=Y \
   spotfire/spotfire-automationservices
 ```
 
-For more information, see [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html) 
-and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html). 
+For more information, see [Service configuration files](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_configuration_files.html)
+and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/service_logs.html).
 
 ### Environment variables
 

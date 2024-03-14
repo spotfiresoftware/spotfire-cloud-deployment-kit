@@ -39,7 +39,7 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-            - name: backend 
+            - name: backend
               protocol: TCP
               containerPort: 9443
             - name: registration
@@ -137,7 +137,7 @@ spec:
           image: "{{ .Values.fluentBitSidecar.image.repository }}:{{ .Values.fluentBitSidecar.image.tag }}"
           imagePullPolicy: "{{ .Values.fluentBitSidecar.image.pullPolicy }}"
           securityContext:
-            {{- toYaml .Values.fluentBitSidecar.securityContext | nindent 12 }}          
+            {{- toYaml .Values.fluentBitSidecar.securityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: 2020

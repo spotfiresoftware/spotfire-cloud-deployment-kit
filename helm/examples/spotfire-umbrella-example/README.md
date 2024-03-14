@@ -1,51 +1,59 @@
 # spotfire-umbrella-example
 
-This is an example that you can use as a reference to create an umbrella chart to deploy a complete [Spotfire® environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-The chart can deploy the following Spotfire components:
+An umbrella chart that can install a Spotfire environment with optional components such as a database and Spotfire services. It comes with a few example values files.
 
-- [spotfire-server](../../charts/spotfire-server/README.md): Spotfire Server helm chart.
-- [spotfire-webplayer](../../charts/spotfire-webplayer/README.md): Spotfire Web Player helm chart.
-- [spotfire-automationservices](../../charts/spotfire-automationservices/README.md): Spotfire Automation Services helm chart.
-- [spotfire-rservice](../../charts/spotfire-rservice/README.md): Spotfire Service for R helm chart.
-- [spotfire-pythonservice](../../charts/spotfire-pythonservice/README.md): Spotfire Service for Python helm chart.
-- [spotfire-terrservice](../../charts/spotfire-terrservice/README.md): Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR service)
+## Requirements
 
-### Deploy multiple services with different configuration using aliases
+Kubernetes: `>=1.24.0-0`
 
-This umbrella chart uses the [alias field in Chart dependencies](https://helm.sh/docs/topics/charts/#alias-field-in-dependencies)
-as an example of usage of different Spotfire service instances with different configuration settings within the same deployment.
-For example, you might deploy separate Spotfire Web Player pools, or deploy different groups of services belonging to separated Spotfire sites or deployment areas.
+| Repository | Name | Version |
+|------------|------|---------|
+| file://../../charts/spotfire-automationservices/ | spotfire-automationservices | 0.2.2 |
+| file://../../charts/spotfire-pythonservice/ | spotfire-pythonservice | 0.2.2 |
+| file://../../charts/spotfire-rservice/ | spotfire-rservice | 0.2.2 |
+| file://../../charts/spotfire-server/ | spotfire-server | 0.2.2 |
+| file://../../charts/spotfire-terrservice/ | spotfire-terrservice | 0.2.2 |
+| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool1(spotfire-webplayer) | 0.2.2 |
+| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool2(spotfire-webplayer) | 0.2.2 |
+| https://charts.bitnami.com/bitnami | postgresql | 12.1.2 |
 
-Example: With the provided `Chart.yaml`, you can deploy 2 different Web Player pools, identified in the `values.yaml` file by different values for alias.
-```yaml
-- name: spotfire-webplayer
-  repository: file://../spotfire-webplayer/
-  version: 0.1.0
-  alias: spotfire-webplayer-pool1
-  condition: spotfire-webplayer-pool1.enabled
-- name: spotfire-webplayer
-  repository: file://../spotfire-webplayer/
-  version: 0.1.0
-  alias: spotfire-webplayer-pool2
-  condition: spotfire-webplayer-pool2.enabled
-```
+## Values
 
-**Note**: You can use alias, such as in the default `Chart.yaml` definition, to create more deployments; for example, to deploy different sets of services for different Spotfire sites.
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| global.spotfire.acceptEUA | string | `nil` |  |
+| postgresql.enabled | bool | `true` |  |
+| postgresql.primary.persistence.enabled | bool | `false` |  |
+| spotfire-automationservices.enabled | bool | `false` |  |
+| spotfire-automationservices.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-automationservices.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-pythonservice.enabled | bool | `false` |  |
+| spotfire-pythonservice.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-pythonservice.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-rservice.enabled | bool | `false` |  |
+| spotfire-rservice.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-rservice.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-server.configuration.site.publicAddress | string | `"http://localhost/"` |  |
+| spotfire-server.database.bootstrap.databaseUrl | string | `"jdbc:postgresql://{{ .Release.Name }}-postgresql/"` |  |
+| spotfire-server.database.bootstrap.driverClass | string | `"org.postgresql.Driver"` |  |
+| spotfire-server.database.create-db.adminPasswordExistingSecret.key | string | `"postgres-password"` |  |
+| spotfire-server.database.create-db.adminPasswordExistingSecret.name | string | `"{{ .Release.Name }}-postgresql"` |  |
+| spotfire-server.database.create-db.adminUsername | string | `"postgres"` |  |
+| spotfire-server.database.create-db.databaseUrl | string | `"jdbc:postgresql://{{ .Release.Name }}-postgresql/"` |  |
+| spotfire-server.database.create-db.enabled | bool | `true` |  |
+| spotfire-terrservice.enabled | bool | `false` |  |
+| spotfire-terrservice.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-terrservice.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-webplayer-pool1.enabled | bool | `false` |  |
+| spotfire-webplayer-pool1.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-webplayer-pool1.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-webplayer-pool1.webplayerConfig.resourcePool | string | `"pool1"` |  |
+| spotfire-webplayer-pool2.enabled | bool | `false` |  |
+| spotfire-webplayer-pool2.logging.logForwarderAddress | string | `"{{ .Release.Name }}-log-forwarder"` |  |
+| spotfire-webplayer-pool2.nodemanagerConfig.serverBackendAddress | string | `"{{ .Release.Name }}-spotfire-server"` |  |
+| spotfire-webplayer-pool2.webplayerConfig.resourcePool | string | `"pool2"` |  |
 
-### Postgresql database
-
-By default, spotfire-umbrella-example chart deploys a PostgreSQL database using the [bitnami/postgresql](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) helm chart and automatically configures the Spotfire Server to use it. No extra configuration is needed unless you want to use an external database. See [../database-values](../database-values/) for examples on how to connect to an external database. To disable the PostgreSQL database deployment, set `spotfire-server.postgresql.enabled` to `false`.
-
-Note: Using the PostgreSQL database like this is not recommended for production use. Make sure you know how to back up and restore your data when using this chart for other than testing purposes. Persistance is disabled by default for the PostgreSQL database.
-### values-*.yaml example files
-
-Each `values-*.yaml` file in this directory is an example of how to configure the umbrella chart to deploy a specific set of Spotfire services. You can use any of these files as a starting point, modify them, and then install the results:
-
-```bash
-helm install my-release spotfire-umbrella-example --set global.spotfire.acceptEUA=true --values values-....yaml
-```
-
-If you want to see NOTES.txt output for all the subcharts, use the command line argument `--render-subchart-notes`.
-
-Read the comments in each example file to understand what it does and how to configure it.
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.7.0](https://github.com/norwoodj/helm-docs/releases/v1.7.0)

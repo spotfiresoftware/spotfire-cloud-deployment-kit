@@ -1,10 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_BASE_IMAGE_TAG
 ARG SPOTFIRE_NODEMANAGER_VERSION
 
 #
 # extract Spotfire node manager from nodemanager package
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
 
 ARG SPOTFIRE_NODEMANAGER_VERSION
 ADD build/spotfirenodemanager-${SPOTFIRE_NODEMANAGER_VERSION}.x86_64.tar.gz /tmp
@@ -13,7 +13,7 @@ RUN rm -rf /tmp/nodemanager-*/jdk/ /tmp/nodemanager-*/nm/upgrade/
 #
 # spotfire-nodemanager specific
 #
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as spotfire-nodemanager
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as spotfire-nodemanager
 
 ARG SPOTFIRE_NODEMANAGER_VERSION
 LABEL org.opencontainers.image.title="spotfire/nodemanager" \
@@ -45,7 +45,7 @@ ENV NODEMANAGER_REDIRECT_STDOUTERR="N" \
     NODEMANAGER_COMMUNICATION_PORT=9443 \
     SERVER_BACKEND_REGISTRATION_PORT=9080 \
     SERVER_BACKEND_COMMUNICATION_PORT=9443
-    
+
 
 # Set up default values for node manager logging
 ENV LOGGING_NMLOG_SIZE=10MB \

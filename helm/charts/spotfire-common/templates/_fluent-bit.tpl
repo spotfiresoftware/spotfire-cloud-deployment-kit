@@ -1,4 +1,4 @@
-{{/* 
+{{/*
 Fluent-bit configmap name
 */}}
 {{- define "spotfire-common.fluenbit-configuration.configmapName" -}}

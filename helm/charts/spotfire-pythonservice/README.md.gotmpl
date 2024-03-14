@@ -71,11 +71,11 @@ You can populate a packages folder by following the instructions in [Installing 
 python -m pip install --target=/local/path/to/packages -r requirements.txt
 ```
 
-**Note:** For spotfire-pythonservice to use the packages, the packages must be copied to a PersistentVolume that you create and then provide to the helm chart during installation. 
+**Note:** For spotfire-pythonservice to use the packages, the packages must be copied to a PersistentVolume that you create and then provide to the helm chart during installation.
 
-#### Installing Python packages directly to a PersistentVolume using a Kubernetes Job 
+#### Installing Python packages directly to a PersistentVolume using a Kubernetes Job
 
-The file [deploy-packages-to-pv-with-job.yaml](deploy-packages-to-pv-with-job.yaml) is an example of how to use a Kubernetes Job, PersistentVolumeClaim, and ConfigMap to create and populate a PersistentVolume containing Python packages.  
+The file [deploy-packages-to-pv-with-job.yaml](deploy-packages-to-pv-with-job.yaml) is an example of how to use a Kubernetes Job, PersistentVolumeClaim, and ConfigMap to create and populate a PersistentVolume containing Python packages.
 
 You might need to change some values in the file. For example, change the storageClassName for PersistentVolumeClaim to StorageClass from 'nfs-client' to one that exists in your environment. The full set of commands would look something like the following example.
 
@@ -83,9 +83,9 @@ You might need to change some values in the file. For example, change the storag
 # kubectl will create the PersistentVolumeClaim 'packages-pvc' pointing to PersistentVolume containing the installed Python packages.
 kubectl apply . -f deploy-packages-to-pv-with-job.yaml
 
-# When you install the spotfire-pythonservice Helm chart, pass in packages-pvc. 
+# When you install the spotfire-pythonservice Helm chart, pass in packages-pvc.
 helm install my-release --set volumes.packages=packages-pvc <... additional helm install arguments>
-``` 
+```
 #### Configuration
 
 To set [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your Helm values.

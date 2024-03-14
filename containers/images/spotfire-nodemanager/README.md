@@ -2,17 +2,17 @@
 
 ## About This Image
 
-This directory contains the official container recipe for **Spotfire® node manager**. 
+This directory contains the official container recipe for **Spotfire® node manager**.
 
 ## What is Spotfire node manager?
 
 **Spotfire® node manager** is the service used for controlling the Spotfire services.
 
 The Spotfire node manager can manage the following Spotfire services:
-- **Spotfire® Web Player** service: enables users to perform analyses from a web browser. 
+- **Spotfire® Web Player** service: enables users to perform analyses from a web browser.
 - **Spotfire® Automation Services**: allows scheduling custom jobs.
 - **Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR™ service)**: allows additional calculations and advanced analytics using Spotfire Enterprise Runtime for R (a/k/a TERR™).
-- **Spotfire® Service for Python**: allows additional calculations and advanced analytics using Python. 
+- **Spotfire® Service for Python**: allows additional calculations and advanced analytics using Python.
 
 For more information, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_quick_start_help/server/topics/introduction_to_the_spotfire_environment.html).
 
@@ -50,7 +50,7 @@ By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree tha
 ### Adding services to the node manager
 
 Prerequisites:
-- You have deployed the corresponding Spotfire distribution package (.sdn) to the Spotfire Server. 
+- You have deployed the corresponding Spotfire distribution package (.sdn) to the Spotfire Server.
 For instructions, see [Deploying client packages to Spotfire Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deploying_client_packages_to_spotfire_server.html).
 
 As with on-premises deployment, you can manually add Spotfire services to be managed by the Spotfire node manager as described below.
@@ -58,7 +58,7 @@ As with on-premises deployment, you can manually add Spotfire services to be man
 **IMPORTANT**: This image recipe is provided only for reference and testing purposes.
 Installation of Spotfire services in this image requires installation of additional software and changes to the Spotfire services configuration.
 Instead of installing services in this image, use the specialized container images to run the Spotfire services.
-For example, the [spotfire-pythonservice](../spotfire-pythonservice/README.md) or the [spotfire-webplayer](../spotfire-webplayer/README.md). 
+For example, the [spotfire-pythonservice](../spotfire-pythonservice/README.md) or the [spotfire-webplayer](../spotfire-webplayer/README.md).
 
 **Note**: A Spotfire service running on a node manager runs in a separate process.
 
@@ -74,7 +74,7 @@ docker run -d --rm -e ACCEPT_EUA=Y \
   spotfire/spotfire-nodemanager
 ```
 
-For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html). 
+For more information, see [Automatically installing services](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/automatically_installing_services_and_instances.html).
 
 **Note**: Do not mount over `/opt/spotfire/nodemanager/nm/config/default.conf` (as described in the product documentation), because this file is deleted during startup. Instead, follow the example provided above.
 

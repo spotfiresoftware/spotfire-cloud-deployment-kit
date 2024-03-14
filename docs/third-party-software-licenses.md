@@ -16,4 +16,3 @@ This table displays a partial listing of some core third party software componen
 | Docker               | optional | Apache 2.0  | https://github.com/docker/docker/blob/master/LICENSE          |
 | Kubernetes           | optional | Apache 2.0  | https://github.com/kubernetes/kubernetes/blob/master/LICENSE  |
 | Helm                 | optional | Apache 2.0  | https://github.com/helm/helm/blob/main/LICENSE                |
-

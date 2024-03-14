@@ -2,7 +2,7 @@
 
 ## About This Image
 
-This directory contains the official container recipe for **Spotfire® Web Player**. 
+This directory contains the official container recipe for **Spotfire® Web Player**.
 
 ## What is Spotfire Web Player?
 

@@ -30,9 +30,9 @@ of doing it.
 3. Push the image to a docker registry so it's available to your kubernetes
    cluster.
    ```
-   DOCKER_REGISTRY=your-docker-registry.example.com
-   docker tag webplayer-custom-modules:latest ${DOCKER_REGISTRY}/webplayer-custom-modules
-   docker push ${DOCKER_REGISTRY}/webplayer-custom-modules
+   CONTAINER_REGISTRY=your-docker-registry.example.com
+   docker tag webplayer-custom-modules:latest ${CONTAINER_REGISTRY}/webplayer-custom-modules
+   docker push ${CONTAINER_REGISTRY}/webplayer-custom-modules
    ```
 
 4. Update the `unpack-modules-to-pvc.yaml` file with the correct storage class,

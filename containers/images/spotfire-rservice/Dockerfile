@@ -1,11 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
-ARG SPOTFIRE_NODEMANAGER_VERSION
+ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_RSERVICE_VERSION
 
 #
 # extract Spotfire R service from sdn distribution file
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} as extract
 
 ENV TSNM_CAPABILITY=R
 
@@ -23,7 +22,7 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
 #
 # spotfire-rservice specific
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
 
 ARG SPOTFIRE_RSERVICE_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-rservice" \

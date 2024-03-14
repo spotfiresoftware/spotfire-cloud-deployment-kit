@@ -1,5 +1,6 @@
-ARG IMAGE_BUILD_ID=latest
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID} as extract
+ARG SPOTFIRE_BASE_IMAGE_TAG
+
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
 ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 ARG SPOTFIRE_DEPLOYMENT_VERSION
 
@@ -12,7 +13,7 @@ ADD build/Spotfire.Dxp.sdn /tmp/deployment-files
 COPY --chown=spotfire:spotfire build/SPOT_sfire_server_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_languagepack-multi.zip /tmp
 RUN unzip -q -u -j /tmp/SPOT_sfire_server_*_languagepack-multi.zip -d /tmp/deployment-files/ -x '*-netcore.sdn'
 
-FROM spotfire/spotfire-base:${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG}
 WORKDIR /opt/spotfire/deployment-files/
 COPY --chown=spotfire:spotfire --from=extract /tmp/deployment-files/ /opt/spotfire/deployment-files/
 

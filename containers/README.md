@@ -27,7 +27,7 @@ This directory contains the recipes to build and examples to use the [**Spotfire
     ```
 
 The provided `Makefile` builds all the container images taking care of the building dependencies.
-You can build each of the containers images separately if you want. 
+You can build each of the containers images separately if you want.
 You can find details on how to build each container image in their respective READMEs.
 
 ### Push the images to a container registry
@@ -36,7 +36,7 @@ After building the container images, you can push them to a container registry t
 
 For example, to push the images to your container registry in 127.0.0.1:32000:
 ```bash
-make REGISTRY=127.0.0.1:32000 push
+make CONTAINER_REGISTRY=127.0.0.1:32000 push
 ```
 
 **Note**: You are responsible for ensuring that your use of the container image complies with your license for the Spotfire product(s) contained in the image, including any limitations that prevent you from publishing the image for use by others, whether internally or externally.
@@ -44,18 +44,23 @@ make REGISTRY=127.0.0.1:32000 push
 ### Customizing and extending the images
 
 These recipes provide a standard, canonical, typical or vanilla deployment for the Spotfire® Platform.
-They are suitable for most of the use case scenarios. 
+They are suitable for most of the use case scenarios.
 
-You are welcome to use modify the recipes and adapt them to your specific use case, in compliance with the Apache License 2.0. 
+You are welcome to use modify the recipes and adapt them to your specific use case, in compliance with the Apache License 2.0.
 However, we recommend that you proceed by extending these images, rather than modifying them.
 To extend the images, create your recipes that use these official container images as base layer (using `FROM spotfire/<image-name>:<image-tag>`).
 This will make it easier for you to update your images when new official recipes are released.
 
 ### Licenses
 
-After building the container images, you can export the applicable Spotfire license files containing information about applicable license for the contained software.
+After building the container images, you can view or export the Spotfire license files that contain information about licenses for the contained software. The following example finds the license files contained within a spotfire image.
 ```bash
-make licenses
+# Set up the spotfire image name and tag.
+SPOTFIRE_IMAGE=<image-name:image-tag>
+id=$(docker create spotfire/$SPOTFIRE_IMAGE)
+docker export $id | tar xvf - --wildcards "opt/spotfire/*.pdf"
+docker rm $id
+# The 'license files' will be extracted under the $(pwd)/opt/spotfire folder
 ```
 
 See [here](../README.md#licenses) for more information on the applicable licenses for this project (_Cloud Deployment Kit for Spotfire_) and for the software included in the built container images.

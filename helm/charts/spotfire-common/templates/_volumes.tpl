@@ -43,7 +43,7 @@ Spotfire workerhost services custom modules pvc name
 
 
 {{/*
-Spotfire service troubleshooting persistentVolumeClaim  
+Spotfire service troubleshooting persistentVolumeClaim
 Example usage:
 include "spotfire-common.volumes.troubleshooting.persistentVolumeClaim" (merge . (dict "componentName" "automationservices"))
 */}}

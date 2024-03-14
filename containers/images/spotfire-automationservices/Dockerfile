@@ -1,10 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_WORKERHOST_IMAGE_TAG
 ARG SPOTFIRE_NETCORE_VERSION
 
 #
 # extract Spotfire Automation Services service from sdn distribution file
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_NETCORE_VERSION}-${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} as extract
 
 RUN mkdir -p /tmp/nodemanager-packages
 
@@ -23,7 +23,7 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
 #
 # spotfire-automationservices specific
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_NETCORE_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG}
 
 ARG SPOTFIRE_NETCORE_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-automationservices" \

@@ -14,6 +14,6 @@ fi
 
 # Make sure to fill the fluent-bit buffers for prestop hook
 for i in {1..20}
-do 
+do
     echo "DONE" >> /opt/spotfire/nodemanager/nm/logs/nodemanager-terminated
 done

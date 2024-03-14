@@ -40,7 +40,7 @@ Steps:
 Requirements:
 - In order to bootstrap (initial setup) the **spotfire-server** container you need connectivity access to a working database server configured with the Spotfire database schemas and valid credentials.
 
-**Note**: The Spotfire database needs to have configured valid schemas corresponding to the same Spotfire release. 
+**Note**: The Spotfire database needs to have configured valid schemas corresponding to the same Spotfire release.
 
 **Note**: The Spotfire database schemas can be created with the [spotfire-config](../spotfire-config/README.md) container.
 
@@ -61,7 +61,7 @@ docker run -d --rm -p8080:8080 \
 **Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
 By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
-For example, starting a Spotfire Server container instance connecting to a Spotfire database using Postgresql as underlying database server: 
+For example, starting a Spotfire Server container instance connecting to a Spotfire database using Postgresql as underlying database server:
 
 ```bash
 docker run -d --rm -p8080:8080 \
@@ -74,19 +74,19 @@ docker run -d --rm -p8080:8080 \
   spotfire/spotfire-server
 ```
 
-**Note**: For details on variables for connecting to other supported databases, 
+**Note**: For details on variables for connecting to other supported databases,
 see [Database drivers and database connection
-](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/database_drivers_and_database_connection_urls.html) 
+](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/database_drivers_and_database_connection_urls.html)
 
 ### Environment variables
 
 #### Database connection
 
 It is required to provide the Spotfire database connection details.
- 
+
 - `SPOTFIREDB_CLASS` - See **--driver-class** for [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _org.postgresql.Driver_
-- `SPOTFIREDB_URL` - See **--database-url** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help. 
+- `SPOTFIREDB_URL` - See **--database-url** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _jdbc:postgresql://server:5432/spotfire_server_
 - `SPOTFIREDB_USERNAME` - See **--username** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _spotfire_.
@@ -119,7 +119,7 @@ The following variables define the default logging:
 - `LOGGING_JSON_HOST` - Forward logs as json messages to this hostname. Default: *Unset* (disabled).
 - `LOGGING_JSON_PORT` - Forward logs as json messages to this port. Default: `5170`.
 - `LOGGING_HTTPREQUESTS_ENABLED`- Logs information about each http request. Default: *Unset* (enabled)
-- `LOGGING_LOGLEVEL` - Set to `debug`, `minimal` or `trace` to adjust the logging level. 
+- `LOGGING_LOGLEVEL` - Set to `debug`, `minimal` or `trace` to adjust the logging level.
 Defaults to empty value meaning "info" level logging.
 For more information, see [Server and node logging levels](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/server_and_node_logging_levels.html).
 - `LOGGING_SERVERLOG_SIZEPOLICY` - See **serverLogSizePolicy** in the [Log4j2
@@ -162,7 +162,7 @@ The **spotfire-server** container uses [log4j2](https://logging.apache.org/log4j
 The logging configuration is stored in the `log4j2.xml` file.
 The default configuration uses the [log4j Socket Appender](https://logging.apache.org/log4j/2.x/manual/appenders.html#SocketAppender).
 
-You can modify the default configuration using any of the existing [log4j2 Appenders](https://logging.apache.org/log4j/2.x/manual/appenders.html) to forward the logs to your preferred logging collector. 
+You can modify the default configuration using any of the existing [log4j2 Appenders](https://logging.apache.org/log4j/2.x/manual/appenders.html) to forward the logs to your preferred logging collector.
 
 For doing that, you can for example mount your custom `log4j2.xml`:
 ```bash
@@ -192,20 +192,20 @@ For more information on importing and exporting, see:
 
 You can add additional jar files to the Spotfire server.
 
-For example 
+For example
 - Additional JDBC drivers to be used by Spotfire Server can be added into the following folder.: `/opt/spotfire/spotfireserver/tomcat/custom-ext`.
 
    You can do this by mounting a volume into that path.
-   For example: 
+   For example:
    ```bash
    docker run ... -v /local/path/to/custom-ext:/opt/spotfire/spotfireserver/tomcat/custom-ext/
    ```
 
-- Additional JDBC drivers to be used by Information Services can be 
+- Additional JDBC drivers to be used by Information Services can be
 added into the following folder: `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices`.
 
    You can do this by mounting a volume into that path.
-   For example: 
+   For example:
    ```bash
    docker run ... -v /local/path/to/custom-ext-informationservices:/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices/
    ```

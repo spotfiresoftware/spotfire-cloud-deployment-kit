@@ -1,10 +1,10 @@
-ARG IMAGE_BUILD_ID=latest
+ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_NODEMANAGER_VERSION
 
 #
 # spotfire-workerhost specific
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
 
 # Reuses most labels from nodemanager
 LABEL org.opencontainers.image.title="spotfire/spotfire-workerhost" \

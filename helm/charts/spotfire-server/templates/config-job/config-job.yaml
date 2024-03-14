@@ -7,7 +7,7 @@ metadata:
     {{- include "spotfire-server.labels" . | nindent 4 }}
   annotations:
 spec:
-  ttlSecondsAfterFinished: {{ .Values.configJob.ttlSecondsAfterFinished }} 
+  ttlSecondsAfterFinished: {{ .Values.configJob.ttlSecondsAfterFinished }}
   template:
     metadata:
       {{- with .Values.configJob.podAnnotations }}

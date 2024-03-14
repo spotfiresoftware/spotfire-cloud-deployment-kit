@@ -2,37 +2,37 @@ apiVersion: v2
 name: spotfire-umbrella-example
 description: An umbrella chart that can install a Spotfire environment with optional components such as a database and Spotfire services. It comes with a few example values files.
 type: application
-version: 0.1.4
+version: 0.1.5
 kubeVersion: ">=1.24.0-0"
 dependencies:
   - name: spotfire-server
     repository: file://../../charts/spotfire-server/
-    version: 0.2.1
+    version: 0.2.2
   - name: spotfire-webplayer
     alias: spotfire-webplayer-pool1
     repository: file://../../charts/spotfire-webplayer/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-webplayer-pool1.enabled
   - name: spotfire-webplayer
     alias: spotfire-webplayer-pool2
     repository: file://../../charts/spotfire-webplayer/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-webplayer-pool2.enabled
   - name: spotfire-automationservices
     repository: file://../../charts/spotfire-automationservices/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-automationservices.enabled
   - name: spotfire-terrservice
     repository: file://../../charts/spotfire-terrservice/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-terrservice.enabled
   - name: spotfire-rservice
     repository: file://../../charts/spotfire-rservice/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-rservice.enabled
   - name: spotfire-pythonservice
     repository: file://../../charts/spotfire-pythonservice/
-    version: 0.2.1
+    version: 0.2.2
     condition: spotfire-pythonservice.enabled
   - name: postgresql
     condition: postgresql.enabled

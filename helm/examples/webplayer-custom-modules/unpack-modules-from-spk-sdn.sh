@@ -8,7 +8,7 @@ function print_usage() {
   echo ""
   echo "Unpacks SDN and SPK files in a suitable folder structure for Spotfire Web Player and Automation Services."
   echo "Requires: unzip, xmllint, cabextract"
-  echo "Example: $0 my-custom-module.sdn my-custom-module.spk /tmp/my-custom-modules" 
+  echo "Example: $0 my-custom-module.sdn my-custom-module.spk /tmp/my-custom-modules"
 }
 
 # Check that all required commands are available.

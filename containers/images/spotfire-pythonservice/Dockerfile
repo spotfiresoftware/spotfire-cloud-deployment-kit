@@ -1,12 +1,11 @@
-ARG IMAGE_BUILD_ID=latest
-ARG SPOTFIRE_NODEMANAGER_VERSION
+ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG=1
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
 ARG PYTHON_VERSION=3.11
 
 #
 # extract Spotfire Python service from sdn distribution file
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID} as extract
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} as extract
 
 ENV TSNM_CAPABILITY=PYTHON
 
@@ -29,7 +28,7 @@ RUN mv /tmp/nodemanager-install/nm/services/PYTHON/python/lib/python${PYTHON_VER
     && rm -rf /tmp/nodemanager-install/nm/services/PYTHON/python \
     && mkdir -p /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/ \
     && mv /tmp/site-packages /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_VERSION}-${IMAGE_BUILD_ID}
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
 
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-pythonservice" \
@@ -55,16 +54,18 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
   && apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv \
   && apt-get clean all
+
+# Set up a python venv for spotfire
+ENV SPOTFIRE_PYTHON_HOME=/opt/python-env
+RUN mkdir -p ${SPOTFIRE_PYTHON_HOME} \
+  && chown spotfire:spotfire ${SPOTFIRE_PYTHON_HOME}
 USER spotfire
+RUN python${PYTHON_VERSION} -m venv ${SPOTFIRE_PYTHON_HOME} --upgrade-deps \
+  && ${SPOTFIRE_PYTHON_HOME}/bin/python -m pip install spotfire
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/services /opt/spotfire/nodemanager/nm/services
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/config/default.conf /opt/spotfire/nodemanager/nm/config/default.conf
 COPY --chown=spotfire:spotfire entrypoint-python.sh ./
-
-# Set up a python venv for spotfire
-ENV SPOTFIRE_PYTHON_HOME=/opt/spotfire/python
-RUN python${PYTHON_VERSION} -m venv ${SPOTFIRE_PYTHON_HOME} --upgrade-deps \
-  && ${SPOTFIRE_PYTHON_HOME}/bin/python -m pip install spotfire
 
 # Configure logging
 ENV LOGGING_SERVICELOG_SIZE=10MB

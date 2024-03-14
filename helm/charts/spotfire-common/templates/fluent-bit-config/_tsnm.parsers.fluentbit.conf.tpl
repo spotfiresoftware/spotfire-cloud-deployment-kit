@@ -8,7 +8,7 @@
     Time_Key       Timestamp
     Time_Format    %Y-%m-%dT%H:%M:%S,%L%z
 
-[PARSER]    
+[PARSER]
     Name           tsnm.performancemonitoringlog
     Format         regex
 
@@ -45,7 +45,7 @@
     Format          regex
 
     Regex           /^(?<Level>[^;]+);(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}[^;]+);(?<UtcTimestampString>\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2},\d{3});(?<ServiceId>[^;]*);(?<InstanceId>[^;]*);(?<Thread>[^;]*);(((?<User>.+) (?<WAT>WAT \d+))|(?<User>[^;]*));((?<SessionId>[^;]*);){0,1}(?<Logger>[^;]*);"(?<Message>.+)/
-    
+
     Time_Key       Timestamp
     Time_Format    %Y-%m-%dT%H:%M:%S,%L%z
 
@@ -54,7 +54,7 @@
     Format          regex
 
     Regex           /^(?<Level>[^;]+);(?<HostName>[^;]+);(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}[^;]+);(?<UtcTimestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3});(?<CounterCategory>[^;]*);(?<CounterName>[^;]*);(?<CounterInstance>[^;]*);(?<Value>[^;]*);(?<InstanceId>[^;]*);(?<ServiceId>.*)$/
-    
+
     Time_Key        Timestamp
     Time_Format     %Y-%m-%dT%H:%M:%S,%L%z
     Types           Value:float
@@ -64,7 +64,7 @@
     Format          regex
 
     Regex           /^(?<Level>[^;]+);(?<HostName>[^;]+);(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}[^;]+);(?<UtcTimestampString>\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2},\d{3});(?<EndTimeString>\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2},\d{3});(?<Duration>[^;]+);(?<SessionId>[^;]*);(?<IPAddress>[^;]*);(?<UserName>[^;]*);(?<Operation>[^;]*);(?<AnalysisId>[^;]*);(?<Argument>[^;]*);(?<Status>[^;]*);(?<InstanceId>[^;]*);(?<ServiceId>.*)$/
-    
+
     Time_Key        Timestamp
     Time_Format     %Y-%m-%dT%H:%M:%S,%L%z
     Types           Duration:float
@@ -74,7 +74,7 @@
     Format          regex
 
     Regex           /^(?<Level>[^;]+);(?<HostName>[^;]*);(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}[^;]+);(?<UtcTimestampString>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3});(?<SessionId>[^;]*);(?<IPAddress>[^;]*);(?<UserName>[^;]*);(?<Operation>[^;]*);(?<AnalysisId>[^;]*);(?<Argument>[^;]*);(?<Status>[^;]*);(?<InstanceId>[^;]*);(?<ServiceId>[^;]*)$/
-    
+
     Time_Key        Timestamp
     Time_Format     %Y-%m-%dT%H:%M:%S,%L%z
 

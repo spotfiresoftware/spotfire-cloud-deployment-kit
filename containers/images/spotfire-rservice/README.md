@@ -6,7 +6,7 @@ This directory contains the official container recipe for **[Spotfire® Service 
 
 ## What is Spotfire® Service for R?
 
-**R** is a statistical engine to provide predictive analytic capabilities. 
+**R** is a statistical engine to provide predictive analytic capabilities.
 R enables users to integrate and deploy advanced analytics written in the R language into their applications.
 
 **Spotfire® Service for R** (R service) provides remote execution of R data functions, R predictive analytics, or R custom expressions for users from web client and mobile devices (Spotfire® Business Author and Consumer).
@@ -66,13 +66,13 @@ docker run -d --rm -e ACCEPT_EUA=Y \
 ```
 
 Example of an `additional-custom.properties` file:
-``` 
+```
 # The maximum number of R engine sessions that are allowed to run concurrently in the R service.
 engine.session.max: 5
 
 # The number of R engines preallocated and available for new sessions in the R service queue.
 engine.queue.size: 10
-``` 
+```
 - For more information, see [Configuring Spotfire Service for R](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/configuring_the_service.html).
 
 ### Environment variables
