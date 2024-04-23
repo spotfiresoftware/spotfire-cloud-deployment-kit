@@ -125,9 +125,11 @@ push : $(addprefix push-,$(NONLOCAL_TARGETS))
 push-% :
 	$(DOCKER_CLI) tag $(LOCAL_IMAGE_REFERENCE) $(REMOTE_IMAGE_REFERENCE)
 	$(DOCKER_CLI) push $(REMOTE_IMAGE_REFERENCE)
+	# $(DOCKER_CLI) rmi $(REMOTE_IMAGE_REFERENCE)
 
 # make CONTAINER_REGISTRY=registry.com list
 list-images : $(addprefix list-image-,$(NONLOCAL_TARGETS))
+list-images : $(if $(ALL),$(addprefix list-image-,$(IMAGE_TARGETS)))
 list-image-% :
 	@echo $(REMOTE_IMAGE_REFERENCE)
 
@@ -163,7 +165,9 @@ variable :
 	@echo "$(value $(VAR))"
 
 clean :
-	$(info Cleaning build directories)
+	for image in $$(make list-images ALL=true --silent); do \
+		$(DOCKER_CLI) image inspect $$image >/dev/null 2>&1 && $(DOCKER_CLI) rmi $${image};\
+	done || :
 	rm -f $(BUILD_FILES)
 	rm -f $(IMAGES_DIR)/**/build/*
 	rm -rf licenses/

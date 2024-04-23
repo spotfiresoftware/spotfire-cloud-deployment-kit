@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-terrservice
   # -- The container image tag to use.
-  tag: "1.19.0-1"
+  tag: "1.20.0-1"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -204,7 +204,13 @@ extraVolumes: []
 extraInitContainers: []
   # - name: dummy-init
   #   image: busybox
-  #   command: ['echo', "hey"]
+  #   command: ["sleep", "infinity"]
+
+# -- Additional sidecar containers to add to the service pod.
+extraContainers: []
+  # - name: dummy-sidecar
+  #   image: busybox
+  #   command: ["sleep", "infinity"]
 
 volumes:
   packages:

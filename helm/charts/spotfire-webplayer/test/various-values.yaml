@@ -124,6 +124,12 @@ extraInitContainers:
     command:
       - echo
       - hey
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 logging:
   logLevel: info
   logForwarderAddress: mytss-log-forwarder

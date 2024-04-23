@@ -131,6 +131,9 @@ spec:
           lifecycle:
             preStop:
             {{- include "spotfire-common.fluenbit-configuration.tsnm.prestop.exec" . | indent 14 }}
+      {{- if .Values.extraContainers }}
+        {{- tpl (toYaml .Values.extraContainers) $ | nindent 8 }}
+      {{- end }}
       volumes:
         {{- with .Values.extraVolumes }}
           {{- toYaml . | nindent 8 }}

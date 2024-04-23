@@ -116,6 +116,12 @@ extraInitContainers:
     command:
       - echo
       - hey
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 securityContext:
   privileged: false
   runAsNonRoot: true

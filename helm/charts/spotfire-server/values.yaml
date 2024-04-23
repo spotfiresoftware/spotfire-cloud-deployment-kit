@@ -29,7 +29,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.2.0-1"
+  tag: "14.3.0-1"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -181,6 +181,16 @@ extraEnvVarsSecret: ""
 # -- Additional init containers to add to Spotfire server pod.
 # More info: `kubectl explain deployment.spec.template.spec.initContainers`
 extraInitContainers: []
+  # - name: dummy-init
+  #   image: busybox
+  #   command: ["sleep", "infinity"]
+ 
+# -- Additional sidecar containers to add to the Spotfire server pod.
+# More info: `kubectl explain deployment.spec.template.spec.containers`
+extraContainers: []
+  # - name: dummy-sidecar
+  #   image: busybox
+  #   command: ["sleep", "infinity"]
 
 # -- Extra volumeMounts for the spotfire-server container.
 # More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`
@@ -233,7 +243,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.2.0-1"
+    tag: "14.3.0-1"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -247,7 +257,7 @@ configJob:
   # -- Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset.
   logLevel: ""
   # -- Set the length of time in seconds to keep job and its logs until the job is removed.
-  ttlSecondsAfterFinished: 3600
+  ttlSecondsAfterFinished: 7200
   # -- Additional environment variables for all spotfire-server pods to use.
   #  - name: NAME
   #    value: value
@@ -282,7 +292,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.2.0-1"
+    tag: "14.3.0-1"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -557,7 +567,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.2.0-1"
+        tag: "14.3.0-1"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.

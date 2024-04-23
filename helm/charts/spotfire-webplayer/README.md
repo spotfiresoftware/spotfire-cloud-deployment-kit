@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.2.0](https://img.shields.io/badge/AppVersion-14.2.0-informational?style=flat-square)
+![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.3.0](https://img.shields.io/badge/AppVersion-14.3.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.2.2 |
+| file://../spotfire-common | spotfire-common | 0.2.3 |
 
 ## Overview
 
@@ -124,6 +124,12 @@ For more information, see [Credentials profiles for connectors](https://docs.tib
 
 The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
+### Adding additional ODBC drivers for Spotfire Connectors
+
+If you want to use certain Spotfire connectors that are not available in the default image, you will need to install the required ODBC driver for the connector in the image. Please refer to the [README.md file for the spotfire-webplayer container image](../../../containers/images/spotfire-webplayer/README.md) for detailed instructions on how to extend the image and add additional ODBC drivers.
+
+Once you have extended the image and included the necessary ODBC drivers, you must push the modified image to a registry that can be accessed by the Kubernetes cluster. Finally, update the `spotfire.image.*` values in your configuration to point to the new image.
+
 ### Uninstalling
 
 To uninstall/delete the `my-release` deployment:
@@ -216,6 +222,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | config."Spotfire.Dxp.Worker.Core.config" | string | `""` | A custom [Spotfire.Dxp.Worker.Core.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.core.config_file.html). |
 | config."Spotfire.Dxp.Worker.Host.dll.config" | string | `""` | A custom Spotfire.Dxp.Worker.Host.dll.config. See [Spotfire.Dxp.Worker.Host.exe.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.host.exe.config_file.html). |
 | config."Spotfire.Dxp.Worker.Web.config" | string | `""` | A custom [Spotfire.Dxp.Worker.Web.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.web.config_file.html). |
+| extraContainers | list | `[]` | Additional sidecar containers to add to the service pod. |
 | extraEnvVars | list | `[]` | Additional environment variables. |
 | extraEnvVarsCM | string | `""` | The name of the ConfigMap containing additional environment variables. |
 | extraEnvVarsSecret | string | `""` | The name of the Secret containing extra additional environment variables. |
@@ -235,7 +242,7 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"14.2.0-1"` | The container image tag to use. |
+| image.tag | string | `"14.3.0-1"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

@@ -1,6 +1,6 @@
-# Spotfire CDK configuration with AWS services
+# Spotfire cloud deployment kit (CDK) configuration with amazon web services
 
-The following articles provide instructions for configuring and integrating the Spotfire CDK in AWS EKS with various other AWS supported services.
+The following articles provide instructions for configuring and integrating the Spotfire CDK in AWS elastic kubernetes services (EKS) with various other Amazon supported services.
 
 - [Configuring AWS Load Balancer Controller (as ingress)](./alb-ingress.md)
 

@@ -191,6 +191,9 @@ spec:
                 - "exit"
                 - "-p"
                 - "flush_count=1"
+      {{- if .Values.extraContainers }}
+        {{- tpl (toYaml .Values.extraContainers) $ | nindent 8 }}
+      {{- end }}
       volumes:
       {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}

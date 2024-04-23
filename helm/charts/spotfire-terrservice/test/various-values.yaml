@@ -96,6 +96,12 @@ extraInitContainers:
     command:
       - echo
       - hey
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 kedaAutoscaling:
   pollingInterval: 90
   cooldownPeriod: 100

@@ -122,6 +122,12 @@ extraInitContainers:
     command:
       - echo
       - hey
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 extraVolumes:
   - name: rvolume
     persistentVolumeClaim:

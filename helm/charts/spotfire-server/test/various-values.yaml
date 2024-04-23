@@ -37,6 +37,12 @@ affinity:
               values:
                 - S1
         topologyKey: topology.kubernetes.io/zone
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 cliPod:
   enabled: true
   logLevel: TRACE

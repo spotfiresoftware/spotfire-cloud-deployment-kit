@@ -1,3 +1,68 @@
+
+# Release v2.3.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- Spotfire Server 14.3.0
+- Spotfire Web Player 14.3.0
+- Spotfire Automation Services 14.3.0
+- Spotfire Enterprise Runtime for R - Server Edition 1.20.0
+- Spotfire Service for R 1.20.0
+- Spotfire Service for Python 1.20.0
+
+The recipes are validated with the listed Spotfire products and versions. They could work with other Spotfire versions with modifications.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.2.3 | 14.3.0 | 14.3.0-1 |
+| spotfire-webplayer | 0.2.3 | 14.3.0 | 14.3.0-1 |
+| spotfire-automationservices | 0.2.3 | 14.3.0 | 14.3.0-1 |
+| spotfire-terrservice | 0.2.3 | 1.20.0 | 1.20.0-1 |
+| spotfire-rservice | 0.2.3 | 1.20.0 | 1.20.0-1 |
+| spotfire-pythonservice | 0.2.3 | 1.20.0 | 1.20.0-1 |
+
+## Changes
+
+- TSCDK-372 Added support for adding extra sidecar containers in the charts.
+
+### spotfire-server chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the server pod. |
+
+### spotfire-pythonservice chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the service pod. |
+
+### spotfire-terrservice chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the service pod. |
+
+### spotfire-webplayer chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the service pod. |
+
+### spotfire-automationservices chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the service pod. |
+
+### spotfire-rservice chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| extraContainers | - | Additional sidecar containers to add to the service pod. |
+
 # Release v2.2.0
 
 This release includes recipes for building container images and Helm charts for the following products.

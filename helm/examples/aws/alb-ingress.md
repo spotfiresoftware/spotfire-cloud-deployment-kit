@@ -37,7 +37,7 @@ ingress:
   enabled: true
   className: alb
   hosts:
-    - host: "<your domain name>"
+    - host: "<Your domain name>"
       paths:
       - path: /
         pathType: Prefix
@@ -83,7 +83,7 @@ ingress:
   enabled: true
   className: alb
   hosts:
-    - host: "<your domain name>"
+    - host: "<Your domain name>"
       paths:
       - path: /
         pathType: Prefix

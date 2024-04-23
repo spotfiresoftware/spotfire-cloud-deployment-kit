@@ -103,6 +103,12 @@ docker run --rm spotfire/spotfire-automationservices:<imagetag> cat /opt/spotfir
 
 The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
+### Adding additional ODBC drivers for Spotfire Connectors
+
+If you want to use certain Spotfire connectors that are not available in the default image, you will need to install the required ODBC driver for the connector in the image. Please refer to the [README.md file for the spotfire-automationservices container image](../../../containers/images/spotfire-automationservices/README.md) for detailed instructions on how to extend the image and add additional ODBC drivers.
+
+Once you have extended the image and included the necessary ODBC drivers, you must push the modified image to a registry that can be accessed by the Kubernetes cluster. Finally, update the `spotfire.image.*` values in your configuration to point to the new image.
+
 ### Uninstalling
 
 To uninstall/delete the `my-release` deployment:

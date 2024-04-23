@@ -3,6 +3,8 @@ apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: {{ printf "%s-%s-keda" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "spotfire-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion:    apps/v1

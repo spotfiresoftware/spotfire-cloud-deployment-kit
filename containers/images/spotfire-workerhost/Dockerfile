@@ -54,9 +54,6 @@ RUN apt-get update \
     fonts-ipafont-mincho \
     fonts-roboto \
     fonts-unfonts-core \
-  # Malloc
-    libjemalloc2 \
-    libtcmalloc-minimal4 \
   && apt-get clean all
 
 # .NET Core runtime

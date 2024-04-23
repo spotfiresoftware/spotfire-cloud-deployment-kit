@@ -136,6 +136,12 @@ extraEnvVars:
   - name: pythonservice
     value: VALUE
 extraEnvVarsSecret: pythonservicesecret
+extraContainers:
+  - name: dummy-container
+    image: debian
+    command:
+      - echo
+      - hello world
 logging:
   logForwarderAddress: mytss-log-forwarder
   logLevel: trace

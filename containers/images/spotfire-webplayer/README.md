@@ -34,9 +34,37 @@ Steps:
 3. From the `<this-repo>/containers` folder, run `make spotfire-webplayer` to build this image, or `make spotfire-webplayer --dry-run` to just view the commands.
 
 ### Adding custom Spotfire packages
+
 Custom packages (SPKs) can include a cobranding package, for example.  You must use the Spotfire® Package Builder console to create the cobranding package for your containerized Web Player. See [Creating and deploying a cobranding package](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire_cobranding_help/cobranding/topics/creating_and_deploying_a_cobranding_package.html) for more information.
 
 At build time, put custom spk files in the `build/` folder.
+
+### Adding additional ODBC drivers
+
+Some Spotfire connectors will not be available in the default image unless you install required ODBC driver for the connector.
+To install additional ODBC drivers container image, you can create a custom Dockerfile. Here's a basic example of how you can do this:
+
+```Dockerfile
+# Start from the default image
+FROM spotfire-webplayer:tag
+
+# Switch to root user to install additional packages
+USER root
+
+# Install the ODBC driver
+RUN echo "Add installation steps here"
+
+# Switch back to the spotfire user
+USER spotfire
+```
+
+Replace `spotfire-webplayer:tag` with the name and tag of the default spotfire-webplayer image. This image needs to be available before you can use it as a base image for your custom image. After creating this Dockerfile, you can build your custom image with the following command:
+
+```bash
+docker build -t custom_image:tag -f Dockerfile .
+```
+
+Replace `custom_image:tag` with the name and tag you want to give to your custom image. You can then use this image to start a container with the additional ODBC driver installed.
 
 ## How to use this image
 

@@ -45,7 +45,7 @@ clean :
 	find . -iname "*.lock" -type f -exec rm -rf -- {} \;
 
 documentation :
-	helm-docs --chart-search-root charts/
+	helm-docs --chart-search-root .
 
 # Test targets
 include test.mk
