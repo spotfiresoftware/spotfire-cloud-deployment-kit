@@ -112,7 +112,7 @@ spotfire-rservice :                                                        IMAGE
 spotfire-pythonservice :                                                   IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
 
 #
-# pull, tag, push, list
+# tag, push, list
 #
 # REMOTE_IMAGE_BUILD_ID: push this destination build id
 # LOCAL_IMAGE_BUILD_ID: push this source build id
@@ -120,23 +120,18 @@ spotfire-pythonservice :                                                   IMAGE
 REMOTE_IMAGE_REFERENCE    = $(addsuffix /,$(CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(REMOTE_IMAGE_BUILD_ID))
 LOCAL_IMAGE_REFERENCE     = $(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(LOCAL_IMAGE_BUILD_ID))
 
-push : CONTAINER_REGISTRY ?= $(error CONTAINER_REGISTRY is unset)
 push : $(addprefix push-,$(NONLOCAL_TARGETS))
+push-% : CONTAINER_REGISTRY ?= $(error CONTAINER_REGISTRY is unset)
 push-% :
 	$(DOCKER_CLI) tag $(LOCAL_IMAGE_REFERENCE) $(REMOTE_IMAGE_REFERENCE)
 	$(DOCKER_CLI) push $(REMOTE_IMAGE_REFERENCE)
-	# $(DOCKER_CLI) rmi $(REMOTE_IMAGE_REFERENCE)
+	$(DOCKER_CLI) rmi $(REMOTE_IMAGE_REFERENCE)
 
 # make CONTAINER_REGISTRY=registry.com list
 list-images : $(addprefix list-image-,$(NONLOCAL_TARGETS))
 list-images : $(if $(ALL),$(addprefix list-image-,$(IMAGE_TARGETS)))
 list-image-% :
 	@echo $(REMOTE_IMAGE_REFERENCE)
-
-# Pull target
-pull : $(addprefix pull-,$(NONLOCAL_TARGETS))
-pull-% :
-	$(DOCKER_CLI) pull $(REMOTE_IMAGE_REFERENCE)
 
 # source <(make --silent list-tags)
 list-tags : create_var_assignment = $(if $(filter $(EXPORT),1),export ,)$(shell echo '$(*)' | tr '[:lower:]-' '[:upper:]_')_$(1)=$(2)

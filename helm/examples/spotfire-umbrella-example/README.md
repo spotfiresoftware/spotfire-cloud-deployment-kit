@@ -1,6 +1,6 @@
 # spotfire-umbrella-example
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 An umbrella chart that can install a Spotfire environment with optional components such as a database and Spotfire services. It comes with a few example values files.
 
@@ -10,13 +10,13 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../../charts/spotfire-automationservices/ | spotfire-automationservices | 0.2.3 |
-| file://../../charts/spotfire-pythonservice/ | spotfire-pythonservice | 0.2.3 |
-| file://../../charts/spotfire-rservice/ | spotfire-rservice | 0.2.3 |
-| file://../../charts/spotfire-server/ | spotfire-server | 0.2.3 |
-| file://../../charts/spotfire-terrservice/ | spotfire-terrservice | 0.2.3 |
-| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool1(spotfire-webplayer) | 0.2.3 |
-| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool2(spotfire-webplayer) | 0.2.3 |
+| file://../../charts/spotfire-automationservices/ | spotfire-automationservices | 0.2.4 |
+| file://../../charts/spotfire-pythonservice/ | spotfire-pythonservice | 0.2.4 |
+| file://../../charts/spotfire-rservice/ | spotfire-rservice | 0.2.4 |
+| file://../../charts/spotfire-server/ | spotfire-server | 0.2.4 |
+| file://../../charts/spotfire-terrservice/ | spotfire-terrservice | 0.2.4 |
+| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool1(spotfire-webplayer) | 0.2.4 |
+| file://../../charts/spotfire-webplayer/ | spotfire-webplayer-pool2(spotfire-webplayer) | 0.2.4 |
 | https://charts.bitnami.com/bitnami | postgresql | 12.1.2 |
 
 ## Values

@@ -1,3 +1,44 @@
+# Release v2.4.0
+
+This release includes recipes for building container images and Helm charts for the following products.
+
+- Spotfire Server 14.4.0
+- Spotfire Web Player 14.4.0
+- Spotfire Automation Services 14.4.0
+- Spotfire Enterprise Runtime for R - Server Edition 1.21.0
+- Spotfire Service for R 1.21.0
+- Spotfire Service for Python 1.21.0
+
+The recipes are validated with the listed Spotfire products and versions. They could work with other Spotfire versions with modifications.
+
+Version mapping table:
+
+| Chart name | Chart version | appVersion | Image tag |
+| ---------- | ------------- | ---------- | --------- |
+| spotfire-server | 0.2.4 | 14.4.0 | 14.4.0-1 |
+| spotfire-webplayer | 0.2.4 | 14.4.0 | 14.4.0-1 |
+| spotfire-automationservices | 0.2.4 | 14.4.0 | 14.4.0-1 |
+| spotfire-terrservice | 0.2.4 | 1.21.0 | 1.21.0-1 |
+| spotfire-rservice | 0.2.4 | 1.21.0 | 1.21.0-1 |
+| spotfire-pythonservice | 0.2.4 | 1.21.0 | 1.21.0-1 |
+
+## Changes
+- TSCDK-420 The config-job in the spotfire-server helm chart fails when using the values configuration.deployment.enabled=true and configuration.deployment.defaultDeployment.enabled=false.
+
+### General
+
+- Updated R to version 4.4
+- Added "ingressClassName" to Spotfire server values file. Reference:  
+https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/  
+
+
+### spotfire-server chart
+
+| New key | Old key | Comment |
+| - | - | - |
+| ingressClassName | - | IngressClass that will be be used for the Ingress (Kubernetes 1.18+). |
+
+
 
 # Release v2.3.0
 
@@ -26,6 +67,7 @@ Version mapping table:
 ## Changes
 
 - TSCDK-372 Added support for adding extra sidecar containers in the charts.
+- TSS-33916 Improvements to node-to-server trust exchange.
 
 ### spotfire-server chart
 

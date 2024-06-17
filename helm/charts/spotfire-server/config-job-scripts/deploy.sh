@@ -61,8 +61,15 @@ function deployPackages () {
         --delay-interval-seconds="${startupcheck_delay_interval_seconds}"
 
     # Loop through directory and create deployment areas based on folder names
-    echo "Listing deployment folders"
-    ls -lah /opt/spotfire/spotfireconfigtool/deployments/
+    dir="/opt/spotfire/spotfireconfigtool/deployments/"
+
+    if [ -d "$dir" ]; then
+        echo "Listing deployment folders."
+        ls -lah "$dir"
+    else
+        echo "Directory $dir does not exist. Will not deploy packages."
+        exit 0
+    fi
 
     for dir in /opt/spotfire/spotfireconfigtool/deployments/*/; do
         if [ -d "${dir}" ]; then
