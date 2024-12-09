@@ -1,10 +1,11 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_WORKERHOST_IMAGE_TAG
 ARG SPOTFIRE_NETCORE_VERSION
 
 #
 # extract Spotfire Web Player service from sdn distribution file
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} as extract
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} AS extract
 ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
 ENV TSNM_CAPABILITY=WEB_PLAYER
 RUN mkdir -p /tmp/nodemanager-packages

@@ -1,0 +1,97 @@
+global:
+  spotfire:
+    # -- Set to `true` to accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+    acceptEUA:
+
+
+# -- See [spotfire-server README.md](../spotfire-server/README.md) for configuration options
+# @default -- -
+spotfire-server:
+  # -- -
+  # @default -- The default database values are intended for use with the included PostgreSQL chart, postgresql.enabled=true. 
+  database:
+    bootstrap:
+      #username: 
+      #password: 
+      databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/"
+      driverClass: "org.postgresql.Driver"
+    create-db:
+      enabled: true
+      adminUsername: "postgres"
+      #adminPassword:
+      adminPasswordExistingSecret:
+        name: "{{ .Release.Name }}-postgresql"
+        key: "postgres-password"
+      databaseUrl: "jdbc:postgresql://{{ .Release.Name }}-postgresql/"
+
+  configuration:
+    site:
+      # -- -
+      publicAddress: ""
+
+
+# -- See [PostgreSQL Helm Chart](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) documentation.
+# <br>
+# <br>
+# ⚠️ Warning: The PostgreSQL chart is included as an example and is intended
+# for demo and testing purposes only. It is important to note that the
+# spotfire Helm chart does not take responsibility for data persistence in the
+# Spotfire database. It is your responsibility to ensure that you have a
+# proper data persistence strategy in place. Failure to do so may result in
+# data loss. Please make sure you are familiar with the documentation of your
+# chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate
+# measures to ensure data persistence.
+# @default -- -
+postgresql:
+  # -- Enable or disable the PostgreSQL database component
+  enabled: false
+
+# -- See [spotfire-webplayer README.md](../spotfire-webplayer/README.md) for configuration options
+# @default -- -
+spotfire-webplayer:
+  # -- Enable or disable the Spotfire Web Player component
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+# -- See [spotfire-automationservices README.md](../spotfire-automationservices/README.md) for configuration options
+# @default -- -
+spotfire-automationservices:
+  # -- Enable or disable the Spotfire Automation Services component
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+# -- See [spotfire-rservice README.md](../spotfire-rservice/README.md) for configuration options
+# @default -- -
+spotfire-rservice:
+  # -- Enable or disable the Spotfire R Service component
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+# -- See [spotfire-pythonservice README.md](../spotfire-pythonservice/README.md) for configuration options
+# @default -- -
+spotfire-pythonservice:
+  # -- Enable or disable the Spotfire Python Service component
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"
+
+# -- See [spotfire-terrservice README.md](../spotfire-terrservice/README.md) for configuration options
+# @default -- -
+spotfire-terrservice:
+  # -- Enable or disable the Spotfire TERR Service component
+  enabled: false
+  nodemanagerConfig:
+    serverBackendAddress: "{{ .Release.Name }}-spotfire-server"
+  logging:
+    logForwarderAddress: "{{ .Release.Name }}-log-forwarder"

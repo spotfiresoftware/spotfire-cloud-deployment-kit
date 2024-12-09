@@ -1,3 +1,4 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_NODEMANAGER_VERSION
 

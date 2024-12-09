@@ -1,8 +1,8 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_BASE_IMAGE_TAG
 
-FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 ARG SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION
-ARG SPOTFIRE_DEPLOYMENT_VERSION
 
 RUN mkdir -p /tmp/deployment-files
 
@@ -17,6 +17,7 @@ FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG}
 WORKDIR /opt/spotfire/deployment-files/
 COPY --chown=spotfire:spotfire --from=extract /tmp/deployment-files/ /opt/spotfire/deployment-files/
 
+ARG SPOTFIRE_DEPLOYMENT_VERSION
 LABEL org.opencontainers.image.title="spotfire/deployment" \
     org.opencontainers.image.description="Spotfire® deployment packages helper." \
     org.opencontainers.image.version="${SPOTFIRE_DEPLOYMENT_VERSION}" \

@@ -1,4 +1,5 @@
 # Files needed in <image-dir>/build by the various targets
+# Run "make downloads-list" in the containers/ directory to see the list of files that need to be downloaded
 BUILD_FILES = images/spotfire-automationservices/build/Spotfire.Dxp.netcore-linux.sdn \
               images/spotfire-config/build/spotfireserver-$(SPOTFIRE_SERVER_VERSION).x86_64.tar.gz \
               images/spotfire-deployment/build/Spotfire.Dxp.sdn \

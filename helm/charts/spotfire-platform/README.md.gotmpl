@@ -1,0 +1,99 @@
+{{ template "chart.header" . }}
+
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+## Overview
+
+The Spotfire Helm chart is an umbrella chart that includes multiple components for deploying a Spotfire analytics platform. It consists of the following components:
+
+- [spotfire-server](../spotfire-server/README.md)
+- [spotfire-webplayer](../spotfire-webplayer/README.md)
+- [spotfire-automationservices](../spotfire-automationservices/README.md)
+- [spotfire-terrservice](../spotfire-terrservice/README.md)
+- [spotfire-rservice](../spotfire-rservice/README.md)
+- [spotfire-pythonservice](../spotfire-pythonservice/README.md)
+- [PostgreSQL database](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) ⚠️  
+
+Warning: The PostgreSQL chart is included as an example and is intended for demo and testing purposes only. It is important to note that the spotfire Helm chart does not take responsibility for data persistence in the Spotfire database. It is your responsibility to ensure that you have a proper data persistence strategy in place. Failure to do so may result in data loss. Please make sure you are familiar with the documentation of your chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate measures to ensure data persistence.
+
+Note: For more advanced configurations, where you need multiple instances of a single chart, such as two web players with different configurations, you can either deploy the chart directly to add another instance or create new umbrella that suits your needs.  The 'publicAddress' field is required.
+
+## Installation
+
+```bash
+helm install my-release . --render-subchart-notes --set global.spotfire.acceptEUA=true \
+    --set postgresql.enabled=true \
+    --set spotfire-webplayer.enabled=true \
+    --set spotfire-automationservices.enabled=true \
+    --set spotfire-terrservice.enabled=true \
+    --set spotfire-rservice.enabled=true \
+    --set spotfire-pythonservice.enabled=true \
+    --set spotfire-server.configuration.site.publicAddress=http://localhost/
+```
+
+This will deploy the Spotfire platform with all components enabled using the embedded PostgreSQL database.
+
+### Using an external Spotfire database
+
+To use an external database, you need to provide the database connection details to the database. We will use a PostgreSQL database for this example but you can use any other database supported by Spotfire.
+
+First, install the [PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) chart using Helm: 
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install spotfiredatabase bitnami/postgresql \
+  --version 15 \
+  --set primary.persistence.enabled=false \
+  --set primary.resourcesPreset=small \
+  --set global.postgresql.auth.postgresPassword=PostgresAdminPassword
+```
+
+It will create a new non-persistent PostgreSQL database with the password `PostgresAdminPassword` and the service name `spotfiredatabase-postgresql`.
+
+Create a file named `spotfire-database.yaml` with the following content:
+
+```yaml
+spotfire-server:
+  database:
+    bootstrap:
+      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
+      driverClass: "org.postgresql.Driver"
+      username: "spotfire"
+      password: "SpotfireDatabasePassword"
+    create-db:
+      enabled: true
+      adminUsername: "postgres"
+      adminPassword: "PostgresAdminPassword"
+      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
+      adminPasswordExistingSecret:
+        name: ""
+        key: ""
+```
+
+If needed, adjust the values in the file to match your database configuration. 
+
+Then install the chart with the release name `my-release` using the database configuration:
+
+```bash
+helm install my-release . --render-subchart-notes --set postgresql.enabled=false --set global.spotfire.acceptEUA=true --values spotfire-database.yaml
+```
+
+Note that the `postgresql.enabled` parameter is set to `false` to disable the embedded PostgreSQL database.
+
+## Usage
+
+For detailed usage instructions, please refer to the README.md files of the individual components.
+
+{{ template "chart.valuesSection" . }}

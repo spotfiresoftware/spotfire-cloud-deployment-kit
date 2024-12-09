@@ -31,7 +31,17 @@ frontend stats
     option dontlog-normal
     {{- end }}
 
+    # external health check (/health) and readiness (/up)
+    acl acl_backend_down nbsrv(spotfire) lt 1
+    http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health && acl_backend_down }
+    http-request return status 200 content-type "text/plain" string "OK" if { path /health }
+
+    http-request return status 200 content-type "text/plain" string "OK" if { path /up }
+
+    # Prometheus metrics
     http-request use-service prometheus-exporter if { path {{ index .Values "podAnnotations" "prometheus.io/path" }} }
+
+    # Stats
     stats enable
     stats uri /stats
     stats refresh 10s

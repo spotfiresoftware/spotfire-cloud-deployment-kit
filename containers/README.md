@@ -6,15 +6,6 @@ This directory contains the recipes to build and examples to use the [**Spotfire
 
 **Note**: You can build each image on its own as described in their respective READMEs, or you can use the provided `Makefile` within this directory to build all the images with just one single command (this `Makefile` also takes care of their internal dependencies).
 
-## Prerequisites
-
-- [Required **Spotfire** installation packages](build-files.mk). You can download them from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
-- A **Linux host** with admin permissions to build and execute the containers.
-  You can use a bare metal installed server, a virtual machine, or WSL on Windows.
-- An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman` or alternative), for building the container images.
-
-**Note**: Spotfire® is a commercial product. You must have a valid license for each of the Spotfire components you choose to build and run as containers.
-
 ## Build the images
 
 1. Copy the required files into the `<this-repo>/containers/downloads` directory.

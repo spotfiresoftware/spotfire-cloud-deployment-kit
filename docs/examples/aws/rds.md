@@ -48,17 +48,17 @@ kubectl create secret generic "<RDS admin secret name>" --from-literal=DBSERVER_
 Replace the variables in "<>" with the appropriate values.
 ```bash
 helm install my-release . \
-  --set database.bootstrap.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>/spotfire" \
+  --set database.bootstrap.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>:<port>/spotfire" \
   --set database.create-db.adminUsername="<RDS database admin username>" \
   --set database.create-db.adminPasswordExistingSecret.name="<RDS database admin secret name>" \
   --set database.create-db.adminPasswordExistingSecret.key="DBSERVER_ADMIN_PASSWORD" \
-  --set database.create-db.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>/" \
+  --set database.create-db.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>:<port>/" \
   --set database.create-db.spotfiredbDbname=spotfire \
   --set database.create-db.enabled=<Set this to true if the Spotfire database is not created yet and you want to create it. Set this to false if the Spotfire database is migrated and is already created.> \
   ....
 
 ```
-For more information, see the ["Installing" section in the Readme for the `spotfire-server` helm chart](./../../charts/spotfire-server/README.md#installing).
+For more information, see the ["Installing" section in the Readme for the `spotfire-server` helm chart](../../../helm/charts/spotfire-server/README.md#installing).
 
 
 ### Option 2: Spotfire deployment with RDS secrets as helm values
@@ -68,13 +68,13 @@ Install the `spotfire-server` helm chart with the following additional values.
 Replace the variables in "<>" with the appropriate values.
 ```bash
 helm install my-release . \
-  --set database.bootstrap.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>/spotfire" \
+  --set database.bootstrap.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>:<port>/spotfire" \
   --set database.create-db.adminUsername="<RDS database admin username>" \
   --set database.create-db.adminPassword="<RDS database admin password>" \
-  --set database.create-db.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>/" \
+  --set database.create-db.databaseUrl="jdbc:postgresql://<RDS database instance endpoint>:<port>/" \
   --set database.create-db.spotfiredbDbname=spotfire \
   --set database.create-db.enabled=<Set this to true if the Spotfire database is not created yet and you want to create it. Set this to false if the Spotfire database is migrated and is already created.> \
   ....
 ```
 
-For more information, see the ["Installing" section in the Readme for the `spotfire-server` helm chart](./../../charts/spotfire-server/README.md#installing).
+For more information, see the ["Installing" section in the Readme for the `spotfire-server` helm chart](../../../helm/charts/spotfire-server/README.md#installing).

@@ -1,9 +1,10 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_BASE_IMAGE_TAG
 
 #
 # extract Spotfire Server from tss package
 #
-FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as extract
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
@@ -12,7 +13,7 @@ RUN rm -rf /tmp/spotfireserver-*.x86_64/jdk/
 #
 # spotfire-server specific
 #
-FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} as spotfire-server
+FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS spotfire-server
 
 ARG SPOTFIRE_SERVER_VERSION
 LABEL org.opencontainers.image.title="spotfire/spotfire-server" \
@@ -57,5 +58,7 @@ EXPOSE 8080 9443 9080 9081 5701 5702 5703
 USER spotfire
 
 # Logging
-RUN config.sh apply-xdt-transformation --input-file=/opt/spotfire/spotfireserver/tomcat/spotfire-config/log4j2.xml --transformation-file=config/log4j2.xml.rolling.transformation.xml
+RUN config.sh apply-xdt-transformation --input-file=/opt/spotfire/spotfireserver/tomcat/spotfire-config/log4j2.xml --transformation-file=config/log4j2.xml.rolling.transformation.xml \
+  && config.sh apply-xdt-transformation --input-file=/opt/spotfire/spotfireserver/tomcat/spotfire-config/log4j2-is.xml --transformation-file=config/log4j2-is.xml.rolling.transformation.xml
+
 CMD ["/opt/spotfire/entrypoint.sh", "/opt/spotfire/spotfireserver/tomcat/bin/catalina.sh", "run"]

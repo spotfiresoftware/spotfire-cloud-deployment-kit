@@ -32,13 +32,3 @@ cat > /opt/spotfire/spotfireserver/tomcat/spotfire-config/log4j2-custom.xml << E
 </Configuration>
 
 EOF
-
-# Script to enable special logging config if LOGGING_JSON_HOST is set, before
-# starting tomcat
-if [ -z "${LOGGING_JSON_HOST}" ]; then
-    exit 0
-fi
-
-# Add the socket appender to log4j2.xml
-echo "Enabling logging to ${LOGGING_JSON_HOST}:${LOGGING_JSON_PORT:-5170}"
-config.sh apply-xdt-transformation --input-file=/opt/spotfire/spotfireserver/tomcat/spotfire-config/log4j2.xml --transformation-file=config/log4j2.xml.socket-appender.transformation.xml

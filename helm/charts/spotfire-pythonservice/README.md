@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 0.2.4](https://img.shields.io/badge/Version-0.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.21.0](https://img.shields.io/badge/AppVersion-1.21.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.21.1](https://img.shields.io/badge/AppVersion-1.21.1-informational?style=flat-square)
 
 A Helm chart for Spotfire® Service for Python
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.2.4 |
+| file://../spotfire-common | spotfire-common | 0.3.0 |
 
 ## Overview
 
@@ -171,15 +171,19 @@ See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command document
 
 When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
 
-Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [RELEASE-NOTES.md](../../../RELEASE-NOTES.md) for details.
+Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for more information.
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
+| global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
+| global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
+| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for spotfire/ container images, unless it is overridden. |
 | acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
 | affinity | object | `{}` |  |
-| configuration | object | `{}` | (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html). Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'. |
+| configuration | object | `{}` | Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html). Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'. |
 | extraContainers | list | `[]` | Additional sidecar containers to add to the service pod. |
 | extraEnvVars | list | `[]` | Additional environment variables. |
 | extraEnvVarsCM | string | `""` | The name of the ConfigMap containing additional environment variables. |
@@ -189,18 +193,14 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"2.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"3.1.6"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
-| global.spotfire.acceptEUA | bool | `nil` | Accept the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms) by setting the value to `true`. |
-| global.spotfire.image.pullPolicy | string | `"IfNotPresent"` | The global container image pull policy. |
-| global.spotfire.image.pullSecrets | list | `[]` | The global container image pull secrets. |
-| global.spotfire.image.registry | string | `nil` | The global container image registry. Used for spotfire/ container images, unless it is overridden. |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.21.0-1"` | The container image tag to use. |
+| image.tag | string | `"1.21.1-1"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

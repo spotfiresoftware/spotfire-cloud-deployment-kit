@@ -2,7 +2,7 @@ apiVersion: v2
 name: spotfire-common
 description: A Helm chart with common templates used in  charts.
 type: library
-version: 0.2.4
+version: 0.3.0
 
 home: https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit
 sources:

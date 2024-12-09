@@ -129,6 +129,9 @@ logHeader "Bootstrapping"
 if [ "${JOB_UPGRADE_DATABASE}" = "true" ]; then
     logHeader "Upgrading database"
     /opt/spotfire/scripts/database-upgrade.sh
+else
+    logHeader "Skipping database upgrade step"
+    echo "The server will fail to start if the database requires an upgrade and 'database.upgrade' has been set to false."
 fi
 
 logHeader "Configuration and setup"

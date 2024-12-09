@@ -21,10 +21,12 @@ Carefully review the [Cloud Computing Environment Licensing Policy (“CCEL Poli
 
 ## Prerequisites
 
-- Required Spotfire installation packages. If you have a TIBCO account, you can download the packages from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
-- Kubernetes 1.24+, a working Kubernetes cluster from a [certified K8s distro](https://www.cncf.io/certification/software-conformance/).
-- Helm 3+, for building and deploying the charts.
-- An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman`, or alternative), for building the container images.
+- **Spotfire Installation Packages**: Required packages are listed in [containers/build-files.mk](containers/build-files.mk). You can download them from [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
+- **Linux Host**: A Linux host with permissions to build and execute the containers. This can be a bare metal server, a virtual machine, or WSL on Windows.
+- **OCI-Compliant Container Image Building Tool**: An OCI-compliant tool like `docker` or `podman` for building the container images.
+- **GNU Make 3.82+**: Ensure `make` is installed on your system to use the provided Makefiles for building the images and charts.
+- **Kubernetes 1.24+**: A working Kubernetes cluster from a [certified K8s distro](https://www.cncf.io/certification/software-conformance/) (required for deploying the charts and containers).
+- **Helm 3+**: For building and deploying the charts (required for deploying the charts and containers).
 
 ## Components
 
@@ -60,6 +62,16 @@ You are welcome to raise issues and improvements related to this project in the 
 For issues related to the Spotfire products, use the [support channel](https://spotfi.re/support).
 
 For improvements related to the Spotfire products, use the [Ideas portal](https://spotfi.re/ideas).
+
+When reporting issues or seeking help make sure to collect as much relevant information as possible. Example of such information include:
+
+- Description of the issue, including any error messages
+- Steps to reproduce the issue, including commands and values used
+- Time and date, identifiers such as usernames, file paths
+- Helm, container and Kubernetes versions 
+- Any other relevant information
+
+The script [generate-troubleshooting-bundle.sh](utilities/generate-troubleshooting-bundle.sh) can be used as starting point when collecting information from a Spotfire Helm deployment.
 
 For issues related to third party products, see their respective documentation.
 

@@ -1,0 +1,9 @@
+
+spotfire-server enabled: true
+spotfire-webplayer enabled: {{ (index .Values "spotfire-webplayer").enabled }}
+spotfire-automationservices enabled: {{ (index .Values "spotfire-automationservices").enabled }}
+spotfire-rservice enabled: {{ (index .Values "spotfire-rservice").enabled }}
+spotfir-terrservice enabled {{ (index .Values "spotfire-terrservice").enabled }}
+spotfire-pythonservice enabled: {{ (index .Values "spotfire-pythonservice").enabled }}
+
+Tip: Run 'helm install' or 'helm upgrade' with '--render-subchart-notes' to see the notes of the subcharts.

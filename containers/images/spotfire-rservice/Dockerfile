@@ -1,10 +1,11 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_RSERVICE_VERSION
 
 #
 # extract Spotfire R service from sdn distribution file
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} as extract
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} AS extract
 
 ENV TSNM_CAPABILITY=R
 

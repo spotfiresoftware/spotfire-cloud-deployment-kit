@@ -5,10 +5,7 @@
 # the name of the spotfire-server, for each service. This technique works because the
 # value is evaluated as a gotemplate string during helm installation or upgrade.
 
-spotfire-webplayer-pool1:
-  enabled: true
-
-spotfire-webplayer-pool2:
+spotfire-webplayer:
   enabled: true
 
 spotfire-automationservices:

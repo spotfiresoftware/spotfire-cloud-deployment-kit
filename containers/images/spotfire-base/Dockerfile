@@ -6,7 +6,7 @@ ARG DEBIAN_IMAGE_TAG=12-slim
 #
 # common java-base
 #
-FROM debian:$DEBIAN_IMAGE_TAG as spotfire-base
+FROM debian:${DEBIAN_IMAGE_TAG} AS spotfire-base
 
 LABEL org.opencontainers.image.title="spotfire/spotfire-base" \
     org.opencontainers.image.description="Base image for Spotfire® container images" \

@@ -1,4 +1,4 @@
-# This example enables autoscaling with keda for the spotfire-webplayer-pool1,
+# This example enables autoscaling with keda for the spotfire-webplayer,
 # spotfire-automationservices, spotfire-rservice, spotfire-terrservice, and spotfire-pythonservice.
 
 # It requires keda and prometheus to be installed in your cluster, as well as a prometheus server.
@@ -8,7 +8,7 @@
 
 # See more information about keda autoscaling in the respecitve Helm chart documentation
 
-spotfire-webplayer-pool1:
+spotfire-webplayer:
   kedaAutoscaling:
     enabled: true
     advanced:

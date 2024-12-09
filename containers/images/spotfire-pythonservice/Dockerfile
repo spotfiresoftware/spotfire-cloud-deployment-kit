@@ -1,11 +1,12 @@
-ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG=1
+# check=skip=InvalidDefaultArgInFrom;error=true
+ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
 ARG PYTHON_VERSION=3.11
 
 #
 # extract Spotfire Python service from sdn distribution file
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} as extract
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} AS extract
 
 ENV TSNM_CAPABILITY=PYTHON
 

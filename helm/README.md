@@ -5,6 +5,7 @@
 
 This directory contains the recipes to build and examples to use the [**Spotfire®**](https://www.spotfire.com/) Helm charts:
 
+- [spotfire-platform](charts/spotfire-platform/README.md): A complete Spotfire environment with a Spotfire server and optional Spotfire services listed below.
 - [spotfire-server](charts/spotfire-server/README.md): Spotfire Server helm chart.
 - [spotfire-webplayer](charts/spotfire-webplayer/README.md): Spotfire Web Player helm chart.
 - [spotfire-automationservices](charts/spotfire-automationservices/README.md): Spotfire Automation Services helm chart.
@@ -12,15 +13,9 @@ This directory contains the recipes to build and examples to use the [**Spotfire
 - [spotfire-pythonservice](charts/spotfire-pythonservice/README.md): Spotfire Service for Python helm chart.
 - [spotfire-terrservice](charts/spotfire-terrservice/README.md): Spotfire Enterprise Runtime for R - Server Edition helm chart.
 
-See the respective README files for details and usage examples. For specific examples see [examples](./examples/README.md) folder.
+See the respective README files for details and usage examples. For more examples see the [examples](../docs/examples) folder.
 
 **Note**: There are other recipes in the `charts` directory not listed here. They are used internally for better template reusability, and they include common software requirements and functions.
-
-## Prerequisites
-
-- You have built the [Spotfire container images](../containers/README.md) or have configured a container repository hosting those container images.
-- Kubernetes 1.24+, a working kubernetes cluster from a ([certified k8s distro](https://www.cncf.io/certification/software-conformance/)).
-- Helm 3+, for building and deploying the charts.
 
 ## Building the charts
 

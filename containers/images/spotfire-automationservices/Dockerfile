@@ -1,10 +1,12 @@
+# check=skip=InvalidDefaultArgInFrom;error=true
+
 ARG SPOTFIRE_WORKERHOST_IMAGE_TAG
 ARG SPOTFIRE_NETCORE_VERSION
 
 #
 # extract Spotfire Automation Services service from sdn distribution file
 #
-FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} as extract
+FROM spotfire/spotfire-workerhost:${SPOTFIRE_WORKERHOST_IMAGE_TAG} AS extract
 
 RUN mkdir -p /tmp/nodemanager-packages
 

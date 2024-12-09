@@ -11,6 +11,6 @@
         maxDays="1"
         suffix=".log"
         requestAttributesEnabled="true"
-        pattern="date time c-ip x-R(spotfire.user) x-S(spotfire.session-number) x-R(spotfire.request-id) cs-method cs-uri-stem cs-uri-query sc-status bytes time-taken x-H(protocol) x-H(scheme)"
+        pattern="date time c-ip x-R(spotfire.user) x-S(spotfire.session-number) x-R(spotfire.request-id) cs-method cs-uri-stem cs-uri-query sc-status bytes time-taken-fracsec x-H(protocol) x-H(scheme)"
     />
 </Context>

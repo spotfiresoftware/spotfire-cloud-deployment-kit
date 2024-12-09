@@ -1,0 +1,8 @@
+global:
+  spotfire:
+    acceptEUA: true
+
+spotfire-server:
+  configuration:
+    site:
+      publicAddress: "https://example.domain"

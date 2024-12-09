@@ -116,8 +116,6 @@ documentation pages.
 
 The following variables define the default logging:
 
-- `LOGGING_JSON_HOST` - Forward logs as json messages to this hostname. Default: *Unset* (disabled).
-- `LOGGING_JSON_PORT` - Forward logs as json messages to this port. Default: `5170`.
 - `LOGGING_HTTPREQUESTS_ENABLED`- Logs information about each http request. Default: *Unset* (enabled)
 - `LOGGING_LOGLEVEL` - Set to `debug`, `minimal` or `trace` to adjust the logging level.
 Defaults to empty value meaning "info" level logging.
@@ -134,9 +132,6 @@ configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/
 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `10MB`
 - `LOGGING_TOMCATLOGS_DEFAULTROLLOVER` - See **tomcatLogsDefaultRollover** in the [Log4j2
 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `1d`
-
-
-If `LOGGING_JSON_HOST` is set, Spotfire will forward logs to a remote logging collector/forwarder (e.g. fluentbit, fluentd, etc.).
 
 #### Other variables
 
