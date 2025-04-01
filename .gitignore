@@ -9,22 +9,29 @@ cache/
 *.tmp
 .idea
 .vagrant
-.vscode
 .DS_Store
-.vscode/*
+.vscode/
 
+# Containers
 *.tar.gz
 *.sdn
 *.zip
 *.exe
 *.tgz
-test-results.xml
-venv/
 
+# Helm
 helm/packages/*
+helm/**/Chart.lock
 
-**/Chart.lock
-
+# Scans
 sbom/
 cve/
 license-report.csv
+
+# mkdocs
+.cache/
+site/
+
+# Python cache
+**/__pycache__/
+*.pyc

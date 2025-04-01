@@ -68,55 +68,52 @@ $(IMAGE_TARGETS) : BUILD_ARGS = $(DOCKER_CLI_BUILD_ARGS) $(addprefix --build-arg
 $(IMAGE_TARGETS) :
 	$(DOCKER_CLI) build --platform $(ARCH_TARGET) $(BUILD_ARGS) --tag $(BUILD_TAG_ARGUMENT) $(IMAGES_DIR)/$(@)
 
-# TAG_SUFFIX can be used to override *_CONTAINER_ITERATION
-TAG_SUFFIX ?= $(or $1,$(IMAGE_BUILD_ID))
+# TAG_SUFFIX can be called with an optional argument to override IMAGE_BUILD_ID when requiring different values, useful when pushing images
+TAG_SUFFIX = v$(SPOTFIRE_CDK_VERSION)$(addprefix -,$(or $(1),$(IMAGE_BUILD_ID)))
 
-SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG   = $(SPOTFIRE_NETCORE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_AUTOMATIONSERVICES_CONTAINER_ITERATION)))
-SPOTFIRE_BASE_IMAGE_TAG                 = $(or $(IMAGE_BUILD_ID),base)
-SPOTFIRE_CONFIG_IMAGE_TAG               = $(SPOTFIRE_SERVER_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_CONFIG_CONTAINER_ITERATION)))
-SPOTFIRE_SERVER_VERSION ?= 1.0.0
-TAG_SUFFIX ?= 
-SPOTFIRE_SERVER_CONTAINER_ITERATION ?= 1
+space = $() $()
 
-SPOTFIRE_SERVER_IMAGE_TAG               = $(SPOTFIRE_SERVER_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_SERVER_CONTAINER_ITERATION)))
-SPOTFIRE_NODEMANAGER_IMAGE_TAG          = $(or $(IMAGE_BUILD_ID),nodemanager)
-SPOTFIRE_WORKERHOST_IMAGE_TAG           = $(or $(IMAGE_BUILD_ID),workerhost)
-SPOTFIRE_PYTHONSERVICE_IMAGE_TAG        = $(SPOTFIRE_PYTHONSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_PYTHONSERVICE_CONTAINER_ITERATION)))
-SPOTFIRE_TERRSERVICE_IMAGE_TAG          = $(SPOTFIRE_TERRSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_TERRSERVICE_CONTAINER_ITERATION)))
-SPOTFIRE_RSERVICE_IMAGE_TAG             = $(SPOTFIRE_RSERVICE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_RSERVICE_CONTAINER_ITERATION)))
-SPOTFIRE_WEBPLAYER_IMAGE_TAG            = $(SPOTFIRE_NETCORE_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_WEBPLAYER_CONTAINER_ITERATION)))
-SPOTFIRE_DEPLOYMENT_IMAGE_TAG           = $(SPOTFIRE_DEPLOYMENT_VERSION)$(addprefix -,$(or $(TAG_SUFFIX),$(SPOTFIRE_WEBPLAYER_CONTAINER_ITERATION)))
+SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG   = $(subst $(space),-,$(SPOTFIRE_NETCORE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_BASE_IMAGE_TAG                 = $(subst $(space),-,$(TAG_SUFFIX))
+SPOTFIRE_CONFIG_IMAGE_TAG               = $(subst $(space),-,$(SPOTFIRE_SERVER_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_SERVER_IMAGE_TAG               = $(subst $(space),-,$(SPOTFIRE_SERVER_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_NODEMANAGER_IMAGE_TAG          = $(subst $(space),-,$(SPOTFIRE_NODEMANAGER_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_WORKERHOST_IMAGE_TAG           = $(subst $(space),-,$(SPOTFIRE_NETCORE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_PYTHONSERVICE_IMAGE_TAG        = $(subst $(space),-,$(SPOTFIRE_PYTHONSERVICE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_TERRSERVICE_IMAGE_TAG          = $(subst $(space),-,$(SPOTFIRE_TERRSERVICE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_RSERVICE_IMAGE_TAG             = $(subst $(space),-,$(SPOTFIRE_RSERVICE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_WEBPLAYER_IMAGE_TAG            = $(subst $(space),-,$(SPOTFIRE_NETCORE_VERSION)-$(TAG_SUFFIX))
+SPOTFIRE_DEPLOYMENT_IMAGE_TAG           = $(subst $(space),-,$(SPOTFIRE_DEPLOYMENT_VERSION)-$(TAG_SUFFIX))
 
-%potfire-automationservices : IMAGE_TAG = $(SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG)
-%potfire-base :               IMAGE_TAG = $(SPOTFIRE_BASE_IMAGE_TAG)
-%potfire-config :             IMAGE_TAG = $(SPOTFIRE_CONFIG_IMAGE_TAG)
-%potfire-server :             IMAGE_TAG = $(SPOTFIRE_SERVER_IMAGE_TAG)
-%potfire-nodemanager :        IMAGE_TAG = $(SPOTFIRE_NODEMANAGER_IMAGE_TAG)
-%potfire-workerhost :         IMAGE_TAG = $(SPOTFIRE_WORKERHOST_IMAGE_TAG)
-%potfire-pythonservice :      IMAGE_TAG = $(SPOTFIRE_PYTHONSERVICE_IMAGE_TAG)
-%potfire-terrservice :        IMAGE_TAG = $(SPOTFIRE_TERRSERVICE_IMAGE_TAG)
-%potfire-rservice :           IMAGE_TAG = $(SPOTFIRE_RSERVICE_IMAGE_TAG)
-%potfire-webplayer :          IMAGE_TAG = $(SPOTFIRE_WEBPLAYER_IMAGE_TAG)
-%potfire-deployment :         IMAGE_TAG = $(SPOTFIRE_DEPLOYMENT_IMAGE_TAG)
+%potfire-server            : IMAGE_TAG = $(SPOTFIRE_SERVER_IMAGE_TAG)
+%potfire-config            : IMAGE_TAG = $(SPOTFIRE_CONFIG_IMAGE_TAG)
+%potfire-nodemanager       : IMAGE_TAG = $(SPOTFIRE_NODEMANAGER_IMAGE_TAG)
+%potfire-base              : IMAGE_TAG = $(SPOTFIRE_BASE_IMAGE_TAG)
+%potfire-workerhost        : IMAGE_TAG = $(SPOTFIRE_WORKERHOST_IMAGE_TAG)
+%potfire-webplayer         : IMAGE_TAG = $(SPOTFIRE_WEBPLAYER_IMAGE_TAG)
+%potfire-automationservices: IMAGE_TAG = $(SPOTFIRE_AUTOMATIONSERVICES_IMAGE_TAG)
+%potfire-terrservice       : IMAGE_TAG = $(SPOTFIRE_TERRSERVICE_IMAGE_TAG)
+%potfire-pythonservice     : IMAGE_TAG = $(SPOTFIRE_PYTHONSERVICE_IMAGE_TAG)
+%potfire-rservice          : IMAGE_TAG = $(SPOTFIRE_RSERVICE_IMAGE_TAG)
+%potfire-deployment        : IMAGE_TAG = $(SPOTFIRE_DEPLOYMENT_IMAGE_TAG)
 
 # --build-arg image tags
-spotfire-base:                                                             private IMAGE_BUILD_ARGS += $(addprefix DEBIAN_IMAGE_TAG=,$(DEBIAN_IMAGE_TAG))
-spotfire-server spotfire-config spotfire-nodemanager spotfire-deployment : private IMAGE_BUILD_ARGS += "SPOTFIRE_BASE_IMAGE_TAG=$(SPOTFIRE_BASE_IMAGE_TAG)"
-spotfire-pythonservice spotfire-terrservice spotfire-rservice :            private IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
-spotfire-workerhost :                                                      private IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
-spotfire-webplayer spotfire-automationservices :                           private IMAGE_BUILD_ARGS += "SPOTFIRE_WORKERHOST_IMAGE_TAG=$(SPOTFIRE_WORKERHOST_IMAGE_TAG)"
+spotfire-base:                                                             IMAGE_BUILD_ARGS += $(addprefix DEBIAN_IMAGE_TAG=,$(DEBIAN_IMAGE_TAG))
+spotfire-server spotfire-config spotfire-nodemanager spotfire-deployment : IMAGE_BUILD_ARGS += "SPOTFIRE_BASE_IMAGE_TAG=$(SPOTFIRE_BASE_IMAGE_TAG)"
+spotfire-pythonservice spotfire-terrservice spotfire-rservice :            IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
+spotfire-workerhost :                                                      IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_IMAGE_TAG=$(SPOTFIRE_NODEMANAGER_IMAGE_TAG)"
+spotfire-webplayer spotfire-automationservices :                           IMAGE_BUILD_ARGS += "SPOTFIRE_WORKERHOST_IMAGE_TAG=$(SPOTFIRE_WORKERHOST_IMAGE_TAG)"
 
 # --build-arg product versions
-spotfire-nodemanager :                                                     private IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
-spotfire-server spotfire-config :                                          private IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
-spotfire-webplayer spotfire-automationservices :                           private IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
-spotfire-webplayer spotfire-automationservices spotfire-deployment :       private IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
-spotfire-deployment :                                                      private IMAGE_BUILD_ARGS += "SPOTFIRE_DEPLOYMENT_VERSION=$(SPOTFIRE_DEPLOYMENT_VERSION)"
-spotfire-terrservice :                                                     private IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
-spotfire-rservice :                                                        private IMAGE_BUILD_ARGS += "SPOTFIRE_RSERVICE_VERSION=$(SPOTFIRE_RSERVICE_VERSION)"
-spotfire-pythonservice :                                                   private IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
+spotfire-nodemanager :                                                     IMAGE_BUILD_ARGS += "SPOTFIRE_NODEMANAGER_VERSION=$(SPOTFIRE_NODEMANAGER_VERSION)"
+spotfire-server spotfire-config :                                          IMAGE_BUILD_ARGS += "SPOTFIRE_SERVER_VERSION=$(SPOTFIRE_SERVER_VERSION)"
+spotfire-webplayer spotfire-automationservices :                           IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_VERSION=$(SPOTFIRE_NETCORE_VERSION)"
+spotfire-webplayer spotfire-automationservices spotfire-deployment :       IMAGE_BUILD_ARGS += "SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION=$(SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION)"
+spotfire-deployment :                                                      IMAGE_BUILD_ARGS += "SPOTFIRE_DEPLOYMENT_VERSION=$(SPOTFIRE_DEPLOYMENT_VERSION)"
+spotfire-terrservice :                                                     IMAGE_BUILD_ARGS += "SPOTFIRE_TERRSERVICE_VERSION=$(SPOTFIRE_TERRSERVICE_VERSION)"
+spotfire-rservice :                                                        IMAGE_BUILD_ARGS += "SPOTFIRE_RSERVICE_VERSION=$(SPOTFIRE_RSERVICE_VERSION)"
+spotfire-pythonservice :                                                   IMAGE_BUILD_ARGS += "SPOTFIRE_PYTHONSERVICE_VERSION=$(SPOTFIRE_PYTHONSERVICE_VERSION)"
 
-#
 # tag, push, list
 #
 # REMOTE_IMAGE_BUILD_ID: push this destination build id

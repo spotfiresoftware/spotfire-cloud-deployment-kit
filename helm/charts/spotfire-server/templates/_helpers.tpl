@@ -94,7 +94,7 @@ Common labels
 helm.sh/chart: {{ include "spotfire-server.chart" . }}
 {{ include "spotfire-server.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | replace " " "_" | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
@@ -106,7 +106,7 @@ labels for cli pod
 helm.sh/chart: {{ include "spotfire-server.chart" . }}
 {{ include "spotfire-server.cli.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | replace " " "_" | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
