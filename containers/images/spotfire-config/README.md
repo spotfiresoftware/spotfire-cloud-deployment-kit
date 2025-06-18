@@ -1,6 +1,6 @@
 # spotfire-config container
 
-## About this Image
+## About this image
 
 This directory contains the official container recipe for **Spotfire® configuration tool**.
 
@@ -16,15 +16,17 @@ file contains basic information that the server needs to connect to the Spotfire
 
 ## How to build this container image
 
-**Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
+The easiest and recommended way to build all the Spotfire container images is using the provided `containers/Makefile`. See [Spotfire Cloud Deployment Kit on GitHub](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
 You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
+
 - You have built the [spotfire-base](../spotfire-base/README.md) container image.
 
 Steps:
+
 1. Copy the `spotfireserver-<version>.x86_64.tar.gz` package into the `build/` directory within this directory.
 2. From the `<this-repo>/containers` folder, run `make spotfire-config` to build this image, or `make spotfire-config --dry-run` to just view the commands.
 

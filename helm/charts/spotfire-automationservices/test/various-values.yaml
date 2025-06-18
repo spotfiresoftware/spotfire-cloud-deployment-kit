@@ -96,6 +96,8 @@ kedaAutoscaling:
     prometheusServerAddress: http://address/
     spotfireServerHelmRelease: tsshelmrelease
 logging:
+  workerhost:
+    logConfiguration: Monitoring
   logForwarderAddress: mytss-log-forwarder-automationservices
   logLevel: info
 extraEnvVars:

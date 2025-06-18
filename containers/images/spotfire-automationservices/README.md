@@ -1,6 +1,6 @@
 # spotfire-automationservices
 
-## About This Image
+## About this image
 
 This directory contains the official container recipe for **Spotfire® Automation Services**.
 
@@ -8,25 +8,28 @@ This directory contains the official container recipe for **Spotfire® Automatio
 
 **Spotfire® Automation Services** is a service for automatically executing multi-step jobs within your Spotfire® environment.
 
-For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html).
+For a quick overview, see the [Introduction to the Spotfire environment](https://spotfi.re/docs/server).
 
 For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs).
 
 ## How to build this image
 
-**Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
+The easiest and recommended way to build all the Spotfire container images is using the provided `containers/Makefile`. See [Spotfire Cloud Deployment Kit on GitHub](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
 You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
+
 - You have built the [spotfire-workerhost](../spotfire-workerhost/README.md) container image.
 
 Steps:
+
 1. Copy the `Spotfire.Dxp.netcore-linux.sdn` package into the `build/` directory within this folder.
 2. From the `<this-repo>/containers` folder, run `make spotfire-automationservices` to build this image, or `make spotfire-automationservices --dry-run` to just view the commands.
 
 ### Adding custom Spotfire packages
+
 At build time, put custom spk files in the `build/` folder.
 
 ### Adding additional ODBC drivers
@@ -59,6 +62,7 @@ Replace `custom_image:tag` with the name and tag you want to give to your custom
 ## How to use this image
 
 Prerequisites:
+
 - A running [spotfire server](../spotfire-server/README.md) container instance to connect to.
 - Spotfire client packages deployed to a deployment area so that the required licenses exist for `spotfire-automationservices` to start.
 
@@ -91,5 +95,6 @@ and [Service logs configuration](https://docs.tibco.com/pub/spotfire_server/late
 
 - `LOGGING_SERVICELOG_MAX` - Maximum number of automation services log files to save. Default `2`
 - `LOGGING_SERVICELOG_SIZE` - Maximum size for automation services service log files. Default `10MB`
+- `LOGGING_WORKERHOST_LOGLEVEL` - Log configuration for the Web Player service. Currently available configs are: `standard`, `minimum`, `info`, `debug`, `monitoring`, `fullmonitoring`, `trace`
 
-See the common Spotfire Node manager [environment variables](../spotfire-nodemanager/README.md#environment-variables).
+See the common Spotfire node manager [environment variables](../spotfire-nodemanager/README.md#environment-variables).

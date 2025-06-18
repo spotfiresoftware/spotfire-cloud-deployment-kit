@@ -31,7 +31,7 @@ LABEL org.opencontainers.image.title="spotfire/nodemanager" \
     com.spotfire.image.type="commercial" \
     com.spotfire.image.distribution-scope="private"
 
-ENV SPOTFIRE_JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
+ENV SPOTFIRE_JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64/
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \

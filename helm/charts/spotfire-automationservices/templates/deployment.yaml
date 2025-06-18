@@ -54,7 +54,10 @@ spec:
           - name: SERVER_BACKEND_ADDRESS
             value: {{ required "The spotfire server service address must be set for spotfire nodemanager configuration" (tpl .Values.nodemanagerConfig.serverBackendAddress $) }}
           {{- include "spotfire-common.acceptEUAEnvVar" . | nindent 10 }}
-          {{- include "spotfire-common.spotfire-service.logging.serverEnvVars" . | nindent 10 }}
+          - name: NM_LOG_LEVEL
+            value: {{ .Values.logging.logLevel | required "logging.logLevel is required" }}
+          - name: LOGGING_WORKERHOST_LOGCONFIGURATION
+            value: {{ .Values.logging.workerhost.logConfiguration }}
           {{- include "spotfire-common.spotfire-service.logging.podAnnotationsEnvVars" . | nindent 10 }}
           {{- if .Values.extraEnvVars }}
           {{ tpl (toYaml .Values.extraEnvVars) $ | nindent 10 }}
@@ -106,7 +109,7 @@ spec:
         - name: fluent-bit
           securityContext:
             {{- toYaml .Values.fluentBitSidecar.securityContext | nindent 12 }}
-          image: "{{ .Values.fluentBitSidecar.image.repository }}:{{ .Values.fluentBitSidecar.image.tag }}"
+          image: "{{ include "spotfire-common.images.image" (dict "image" .Values.fluentBitSidecar.image) }}"
           imagePullPolicy: "{{ .Values.fluentBitSidecar.image.pullPolicy }}"
           ports:
             - name: http

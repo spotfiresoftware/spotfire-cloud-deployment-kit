@@ -8,6 +8,7 @@
     Tag                 tsnm.nmlog
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    tsnm.standardlog
 
@@ -23,6 +24,7 @@
     Tag                 tsnm.jettylog
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    tsnm.standardlog
 
@@ -93,6 +95,7 @@
     Tag                 tsnm.worker.debug
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    worker.debuglog
 
@@ -143,10 +146,24 @@
 
 [INPUT]
     Name                tail
+    Alias               tsnm.worker.memorystatistics
+    Tag                 tsnm.worker.memorystatistics
+
+    parser              worker.memorystatistics
+
+    Path                ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}MemoryStatisticsLog.*.txt
+    Db                  ${TSNM_HOME}${FILE_SEPARATOR}logs${FILE_SEPARATOR}tsnm.fluentbit.db
+
+    Read_from_Head      True
+    Buffer_Max_Size     64KB
+
+[INPUT]
+    Name                tail
     Alias               tsnm.datafunctionservices.terr
     Tag                 tsnm.datafunctionservices.terr
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    datafunctionservices.standardlog
 
@@ -162,6 +179,7 @@
     Tag                 tsnm.datafunctionservices.python
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    datafunctionservices.standardlog
 
@@ -177,6 +195,7 @@
     Tag                 tsnm.datafunctionservices.r
 
     Multiline           on
+    Skip_Empty_Lines    on
     Multiline_Flush     1
     Parser_Firstline    datafunctionservices.standardlog
 

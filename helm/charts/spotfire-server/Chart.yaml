@@ -4,9 +4,9 @@ description: A Helm chart for Spotfire Server.
 
 type: application
 
-version: 0.4.0
+version: 1.0.0
 
-appVersion: "14.4.2"
+appVersion: "14.5.0"
 
 kubeVersion: ">=1.24.0-0"
 
@@ -32,11 +32,11 @@ dependencies:
     condition: log-forwarder.enabled
   - name: haproxy
     repository: https://haproxytech.github.io/helm-charts
-    version: 1.23.*
+    version: 1.24.*
     condition: haproxy.enabled
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 0.4.0
+    version: 1.0.0
 
 annotations:
   license: Apache 2.0

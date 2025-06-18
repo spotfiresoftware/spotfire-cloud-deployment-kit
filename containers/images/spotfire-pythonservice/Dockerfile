@@ -1,7 +1,6 @@
 # check=skip=InvalidDefaultArgInFrom;error=true
 ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
-ARG PYTHON_VERSION=3.11
 
 #
 # extract Spotfire Python service from sdn distribution file
@@ -23,12 +22,6 @@ RUN bash /opt/spotfire/nodemanager/scripts/install-service.sh \
 #
 # spotfire-pythonservice specific
 #
-ARG PYTHON_VERSION
-# Remove everything except site-packages which might contain python packages from sdn/spk
-RUN mv /tmp/nodemanager-install/nm/services/PYTHON/python/lib/python${PYTHON_VERSION}/site-packages/ /tmp \
-    && rm -rf /tmp/nodemanager-install/nm/services/PYTHON/python \
-    && mkdir -p /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/ \
-    && mv /tmp/site-packages /tmp/nodemanager-install/nm/services/PYTHON/python/python${PYTHON_VERSION}/
 FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
 
 ARG SPOTFIRE_PYTHONSERVICE_VERSION
@@ -48,21 +41,7 @@ LABEL org.opencontainers.image.title="spotfire/spotfire-pythonservice" \
 
 ENV TSNM_CAPABILITY=PYTHON
 
-# Temporarilty change from spotfire to root in order to install python
-USER root
-ARG PYTHON_VERSION
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-  && apt-get install -y python${PYTHON_VERSION} python${PYTHON_VERSION}-venv \
-  && apt-get clean all
-
-# Set up a python venv for spotfire
-ENV SPOTFIRE_PYTHON_HOME=/opt/python-env
-RUN mkdir -p ${SPOTFIRE_PYTHON_HOME} \
-  && chown spotfire:spotfire ${SPOTFIRE_PYTHON_HOME}
 USER spotfire
-RUN python${PYTHON_VERSION} -m venv ${SPOTFIRE_PYTHON_HOME} --upgrade-deps \
-  && ${SPOTFIRE_PYTHON_HOME}/bin/python -m pip install spotfire
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/services /opt/spotfire/nodemanager/nm/services
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/config/default.conf /opt/spotfire/nodemanager/nm/config/default.conf

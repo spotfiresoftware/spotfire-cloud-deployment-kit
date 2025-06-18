@@ -1,0 +1,1 @@
+--8<-- "containers/images/spotfire-webplayer/README.md"

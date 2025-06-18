@@ -39,7 +39,7 @@ COPY --chown=spotfire:spotfire config/ config/
 
 # Environment
 ENV PATH=$PATH:/opt/spotfire/spotfireserver/tomcat/spotfire-bin/ \
-  SPOTFIRE_JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/ \
+  SPOTFIRE_JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64/ \
   STARTUPCHECK_TIMEOUT_SECONDS="60" \
   STARTUPCHECK_ADMIN_USER="N" \
   STARTUPCHECK_VALID_DEPLOYMENT="N" \

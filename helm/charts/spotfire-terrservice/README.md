@@ -1,6 +1,6 @@
 # spotfire-terrservice
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.21.2](https://img.shields.io/badge/AppVersion-1.21.2-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.22.0](https://img.shields.io/badge/AppVersion-1.22.0-informational?style=flat-square)
 
 A Helm chart for Spotfire® Enterprise Runtime for R - Server Edition
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.4.0 |
+| file://../spotfire-common | spotfire-common | 1.0.0 |
 
 ## Overview
 
@@ -28,7 +28,7 @@ The TERR service pod includes:
 - Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
 - Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
+This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/), and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
@@ -69,12 +69,12 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 To set [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your Helm values.
 
 Example:
-```configuration:
-  # The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
-  engine.session.max: 5
+```ini
+# The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
+engine.session.max: 5
 
-  # The number of TERR engines preallocated and available for new sessions in the TERR service queue.
-  engine.queue.size: 10
+# The number of TERR engines preallocated and available for new sessions in the TERR service queue.
+engine.queue.size: 10
 ```
 
 ### Uninstalling
@@ -95,10 +95,10 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 
 #### Autoscaling with KEDA
 
-To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
+To use [KEDA](https://keda.sh/docs) for autoscaling, first install KEDA in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
-Example: Helm values snippet configuration for enabling autoscaling with KEDA:
-```
+Example: A `values.yaml` snippet configuration for enabling autoscaling with KEDA:
+```yaml
 resources:
   limits:
     cpu: 5
@@ -120,7 +120,7 @@ By default, the TERR service has `number of cores - 1` available slots, which me
 Typically, you want to scale out before all the available capacity is taken. Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
 Note that clients requesting a slot typically wait until a slot is available.
 
-For more information, see [Monitoring the TERR service](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
+For more information, see [Monitoring the Spotfire Service for TERR using JMX](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
 
 **Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts (for example, `engine.execution.timeout` and `engine.session.maxtime`) so that long-running jobs are not aborted prematurely when an instance is stopped to scale in.
 See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/engine_timeout.html) for more details.
@@ -128,23 +128,20 @@ See [Engine Timeout](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terr
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
 Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
-```
+```yaml
 kedaAutoscaling:
-  triggers:
-  # {list of triggers to activate scaling of the target resource}
+  triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
 ### Upgrading
 
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
 
 #### Upgrading helm chart version
 
-When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
-
-Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for more information.
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
 
 ## Values
 
@@ -166,14 +163,14 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"3.2.4"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"3.2.8"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.21.2-v2.6.0"` | The container image tag to use. |
+| image.tag | string | `"1.22.0-v3.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

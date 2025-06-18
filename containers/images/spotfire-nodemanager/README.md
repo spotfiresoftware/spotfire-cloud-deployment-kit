@@ -1,6 +1,6 @@
 # spotfire-nodemanager
 
-## About This Image
+## About this image
 
 This directory contains the official container recipe for **Spotfire® node manager**.
 
@@ -9,30 +9,34 @@ This directory contains the official container recipe for **Spotfire® node mana
 **Spotfire® node manager** is the service used for controlling the Spotfire services.
 
 The Spotfire node manager can manage the following Spotfire services:
+
 - **Spotfire® Web Player** service: enables users to perform analyses from a web browser.
 - **Spotfire® Automation Services**: allows scheduling custom jobs.
-- **Spotfire® Enterprise Runtime for R - Server Edition (a/k/a TERR™ service)**: allows additional calculations and advanced analytics using Spotfire Enterprise Runtime for R (a/k/a TERR™).
+- **Spotfire® Enterprise Runtime for R - Server Edition (a/k/a the TERR™ service)**: allows additional calculations and advanced analytics using Spotfire Enterprise Runtime for R (a/k/a TERR™).
 - **Spotfire® Service for Python**: allows additional calculations and advanced analytics using Python.
 
-For more information, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_quick_start_help/server/topics/introduction_to_the_spotfire_environment.html).
+For more information, see the [Introduction to the Spotfire environment](https://spotfi.re/docs/server).
 
 ## How to build this image
 
-**Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
+The easiest and recommended way to build all the Spotfire container images is using the provided `containers/Makefile`. See [Spotfire Cloud Deployment Kit on GitHub](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
 You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
+
 - You have built the [spotfire-base](../spotfire-base/README.md) container image.
 
 Steps:
-1. Copy the `nodemanager-<version>.x86_64.tar.gz` package into the `build/` directory within this folder.
+
+1. Copy the `spotfirenodemanager-<version>.x86_64.tar.gz` package into the `build/` directory within this folder.
 2. From the `<this-repo>/containers` folder, run `make spotfire-nodemanager` to build this image, or `make spotfire-nodemanager --dry-run` to preview the required commands.
 
 ## How to use this image
 
 Prerequisites:
+
 - To start the **spotfire-nodemanager** container, first you need a configured **spotfire-server** to connect to.
 
 ### Start a node manager container
@@ -50,6 +54,7 @@ By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree tha
 ### Adding services to the node manager
 
 Prerequisites:
+
 - You have deployed the corresponding Spotfire distribution package (.sdn) to the Spotfire Server.
 For instructions, see [Deploying client packages to Spotfire Server](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deploying_client_packages_to_spotfire_server.html).
 

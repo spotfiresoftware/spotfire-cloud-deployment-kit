@@ -1,0 +1,29 @@
+/*
+.md-logo {
+    filter: brightness(0) invert(1);
+}
+*/
+
+/*
+:root {
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color: #333c66;
+  --md-primary-fg-color--dark:  #90030C;
+}
+*/
+
+.md-header {
+    color: #333c66;
+    background-color: #fbfcff;
+}
+
+.md-grid {
+    max-width: 80rem;
+}
+
+ul {
+  line-height: 1rem;
+}
+li {
+  line-height: 1rem;
+}

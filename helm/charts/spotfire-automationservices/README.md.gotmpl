@@ -130,7 +130,7 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
 Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
-```
+```yaml
 kedaAutoscaling:
   enabled: true
   spotfireConfig:
@@ -153,22 +153,19 @@ With these default settings, if the queue reaches the configured threshold, then
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
 Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
-```
+```yaml
 kedaAutoscaling:
-  triggers:
-  # {list of triggers to activate scaling of the target resource}
+  triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
 ### Upgrading
 
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
 
 #### Upgrading helm chart version
 
-When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
-
-Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for more information.
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
 
 {{ template "chart.valuesSection" . }}

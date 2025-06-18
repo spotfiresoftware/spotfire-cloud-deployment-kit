@@ -58,7 +58,7 @@ Example usage: include "spotfire-common.spotfire-service.labels" (merge . (dict 
 helm.sh/chart: {{ include "spotfire-common.spotfire-service.chart" . }}
 {{ include "spotfire-common.spotfire-service.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | replace " " "_" | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}

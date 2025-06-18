@@ -1,6 +1,6 @@
 # spotfire-server container
 
-## About this Image
+## About this image
 
 This directory contains the official container recipe for **Spotfire® Server**.
 
@@ -9,6 +9,7 @@ This directory contains the official container recipe for **Spotfire® Server**.
 **Spotfire® Server** is the administrative center of the Spotfire environment.
 
 The Spotfire Server:
+
 - Facilitates configuration and administration of the Spotfire environment.
 - Provides user authentication and role-based authorization.
 - Provides centralized storage of Spotfire analysis files and metadata. The library items reside in the Spotfire database.
@@ -17,32 +18,35 @@ The Spotfire Server:
 - Routes clients to the appropriate service instance, based on smart default routing or configured routing rules.
 - Distributes software updates to services and clients.
 
-For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html).
+For a quick overview, see the [Introduction to the Spotfire environment](https://spotfi.re/docs/server/).
 
 For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs).
 
 ## How to build this image
 
-**Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
+The easiest and recommended way to build all the Spotfire container images is using the provided `containers/Makefile`. See [Spotfire Cloud Deployment Kit on GitHub](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
 You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
+
 - You have built the [spotfire-base](../spotfire-base/README.md) container image.
 
 Steps:
+
 1. Copy the `spotfireserver-<version>.x86_64.tar.gz` package into the `build/` directory within this directory.
 2. From the `<this-repo>/containers` folder, run `make spotfire-server` to build this image, or `make spotfire-server --dry-run` to just view the commands.
 
 ## How to use this image
 
 Requirements:
-- In order to bootstrap (initial setup) the **spotfire-server** container you need connectivity access to a working database server configured with the Spotfire database schemas and valid credentials.
 
-**Note**: The Spotfire database needs to have configured valid schemas corresponding to the same Spotfire release.
+- To bootstrap (initial setup) the **spotfire-server** container you need connectivity access to a working database server configured with the Spotfire database schemas and valid credentials.
 
-**Note**: The Spotfire database schemas can be created with the [spotfire-config](../spotfire-config/README.md) container.
+**Note:** The Spotfire database must have configured valid schemas corresponding to the same Spotfire release.
+
+**Note:** The Spotfire database schemas can be created with the [spotfire-config](../spotfire-config/README.md) container.
 
 ### Start a Spotfire Server container
 
@@ -58,10 +62,10 @@ docker run -d --rm -p8080:8080 \
   spotfire/spotfire-server
 ```
 
-**Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+**Note:**  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
 By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
-For example, starting a Spotfire Server container instance connecting to a Spotfire database using Postgresql as underlying database server:
+For example, starting a Spotfire Server container instance connecting to a Spotfire database with PostgreSQL as the underlying database server:
 
 ```bash
 docker run -d --rm -p8080:8080 \
@@ -74,9 +78,9 @@ docker run -d --rm -p8080:8080 \
   spotfire/spotfire-server
 ```
 
-**Note**: For details on variables for connecting to other supported databases,
+**Note:** For details on variables for connecting to other supported databases,
 see [Database drivers and database connection
-](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/database_drivers_and_database_connection_urls.html)
+](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/database_drivers_and_database_connection_urls.html).
 
 ### Environment variables
 
@@ -84,7 +88,7 @@ see [Database drivers and database connection
 
 It is required to provide the Spotfire database connection details.
 
-- `SPOTFIREDB_CLASS` - See **--driver-class** for [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
+- `SPOTFIREDB_CLASS` - See **--driver-class** for the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _org.postgresql.Driver_
 - `SPOTFIREDB_URL` - See **--database-url** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _jdbc:postgresql://server:5432/spotfire_server_
@@ -96,11 +100,11 @@ It is required to provide the Spotfire database connection details.
    Example: **empty value**, meaning a random password will be generated.
 - `SERVER_BACKEND_ADDRESS` - See **-Avalue** in the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) help.
    Example: _spotfire-server_.
-- `BOOTSTRAP_OPTS` - Additional optional arguments to the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html)
+- `BOOTSTRAP_OPTS` - Additional optional arguments to the [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html).
 
-**Note**: All `SPOTFIREDB_*` environment variables are **required** unless an existing `bootstrap.xml` exists in `/opt/spotfire/spotfireserver/tomcat/webapps/spotfire/WEB-INF` during startup.
+**Note:** All `SPOTFIREDB_*` environment variables are **required** unless an existing `bootstrap.xml` exists in `/opt/spotfire/spotfireserver/tomcat/webapps/spotfire/WEB-INF` during startup.
 
-**Note**: Make sure to keep a backup before upgrading the database.
+**Note:** Make sure to keep a backup before upgrading the database.
 
 For more information, see the [database drivers and database connection URLs](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/database_drivers_and_database_connection_urls.html)
 and [bootstrap command](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html)
@@ -144,6 +148,7 @@ The following predefined startup checks are available:
 - `STARTUPCHECK_VALID_DEPLOYMENT` - Verify if a valid package deployment is in place. Values: Y/N. Default: `N`.
 
 The following variables define spotfire server site behavior:
+
 - `SITE_NAME` - Define which site the server should belong to. Default: `Default`.
 - `ENCRYPTION_PASSWORD` - The password for encrypting passwords that are stored in the database.  See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. Default: If you do not set this option, a static password is used.
 
@@ -179,33 +184,28 @@ docker run ... -v /local/path/to/library:/opt/spotfire/spotfireserver/tomcat/app
 Once an export and import location is set to an external volume, exported and imported library content can be transferred from and to this volume.
 
 For more information on importing and exporting, see:
+
 - [Importing to library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_importing_to_library.htm)
 - [Exporting from library](https://docs.tibco.com/pub/sfire-analyst/latest/doc/html/en-US/TIB_sfire-analyst_UsersGuide/index.htm#t=lib%2Flib_exporting_from_library.htm)
 - [Command-based library administration tasks](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/command-based_library_administration_tasks.html).
 
 ### Using custom jar files
 
-You can add additional jar files to the Spotfire server.
+You can extend the Spotfire server by adding additional jar files, such as JDBC drivers.
 
-For example
-- Additional JDBC drivers to be used by Spotfire Server can be added into the following folder.: `/opt/spotfire/spotfireserver/tomcat/custom-ext`.
+For example, to add JDBC drivers to the Spotfire Server, place them in the `/opt/spotfire/spotfireserver/tomcat/custom-ext` directory. You can achieve this by mounting a volume containing the drivers to this path:
 
-   You can do this by mounting a volume into that path.
-   For example:
-   ```bash
-   docker run ... -v /local/path/to/custom-ext:/opt/spotfire/spotfireserver/tomcat/custom-ext/
-   ```
+```bash
+docker run ... -v /local/path/to/custom-ext:/opt/spotfire/spotfireserver/tomcat/custom-ext/
+```
 
-- Additional JDBC drivers to be used by Information Services can be
-added into the following folder: `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices`.
+Similarly, to add JDBC drivers for Spotfire Information Services, place them in the `/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices` directory. You can mount a volume with the drivers to this path as well:
 
-   You can do this by mounting a volume into that path.
-   For example:
-   ```bash
-   docker run ... -v /local/path/to/custom-ext-informationservices:/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices/
-   ```
+```bash
+docker run ... -v /local/path/to/custom-ext-informationservices:/opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices/
+```
 
-For more information about using extra jar files, `custom-ext` and `custom-ext-informationservices` see:
+For more information about using extra jar files, and the `custom-ext` and `custom-ext-informationservices` folders, see:
 
 - [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html)
 - [Authentication towards a custom JAAS module](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/authentication_towards_a_custom_jaas_module.html)
@@ -215,10 +215,10 @@ Alternatively you can [extend this image](#how-to-extend-this-image).
 
 ## How to extend this image
 
-This example shows how to create a new container image, based from the **spotfire-server** image, to include custom drivers:
+This example shows how to create a new container image, based from the `spotfire-server` image, to include custom drivers:
 
 1. First follow the instructions for [how to build this image](#how-to-build-this-image).
-2. Create a new `Dockerfile` in a new directory (e.g. **spotfire-server-extended**):
+2. Create a new `Dockerfile` in a new directory (e.g., `spotfire-server-extended`):
     ```Containerfile
     FROM spotfire/spotfire-server
     COPY custom-ext/ /opt/spotfire/spotfireserver/tomcat/custom-ext
@@ -229,7 +229,7 @@ This example shows how to create a new container image, based from the **spotfir
     docker build -t spotfire-server-extended .
     ```
 
-You can now use the container image **spotfire-server-extended**.
+You can now use the container image `spotfire-server-extended`.
 
 ## Using the Spotfire Server configuration tool
 
@@ -239,7 +239,7 @@ Anyhow, we recommend using the dedicated [spotfire-config](../spotfire-config/RE
 The spotfire server configuration tool is available in a running Spotfire server container as the command `config.sh`.
 The `--tool-password` needed to run many commands is stored in the `TOOL_PASSWORD` environment variable.
 
-Example:
+Example: Get a shell into a spotfire server container and use the configuration tool
 
 ```bash
 # Start a shell in the container

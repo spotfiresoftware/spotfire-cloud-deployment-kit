@@ -12,6 +12,12 @@ if [ -f "/opt/spotfire/nodemanager/scripts/post-stop-service.sh" ]; then
     /opt/spotfire/nodemanager/scripts/post-stop-service.sh
 fi
 
+# Run any custom service specific post stop script
+if [ -f "/opt/spotfire/nodemanager/scripts/post-stop-service.custom.sh" ]; then
+    echo "Executing custom post stop service script..."
+    /opt/spotfire/nodemanager/scripts/post-stop-service.custom.sh
+fi
+
 # Make sure to fill the fluent-bit buffers for prestop hook
 for i in {1..20}
 do

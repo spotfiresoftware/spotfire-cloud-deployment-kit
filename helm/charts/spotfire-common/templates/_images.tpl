@@ -3,25 +3,28 @@ Return the proper image name
 {{ include "spotfire-common.images.image" ( dict "image" .Values.path.to.the.spotfire.image "globalPath" .Values.global) }}
 */}}
 {{- define "spotfire-common.images.image" -}}
-{{- $repositoryName := .image.repository -}}
-{{- $tagOrDigest := .image.tag | toString -}}
-{{- $separator := ":" -}}
-{{- if .image.digest -}}
-  {{- $tagOrDigest = .image.digest | toString -}}
-  {{- $separator = "@" -}}
+{{- $tagPart := "" -}}
+{{- if not (empty .image.tag) -}}
+  {{- $tagPart = printf ":%s" (.image.tag | toString) -}}
 {{- end -}}
-{{- $registryName := .image.registry -}}
-{{- if empty $registryName }}
+{{- $digestPart := "" -}}
+{{- if not (empty .image.digest) -}}
+  {{- $digestPart = printf "@%s" (.image.digest | toString) -}}
+{{- end -}}
+{{- $registryPart := "" -}}
+{{- if empty .image.registry }}
   {{- if .globalPath }}
     {{- if .globalPath.image.registry }}
-      {{- $registryName = .globalPath.image.registry -}}
+      {{- $registryPart = printf "%s/" .globalPath.image.registry -}}
     {{- end -}}
   {{- end -}}
+{{- else }}
+  {{- $registryPart = printf "%s/" .image.registry -}}
 {{- end -}}
-{{- if $registryName }}
-{{- printf "%s/%s%s%s" $registryName $repositoryName $separator $tagOrDigest -}}
+{{- if $digestPart -}}
+  {{- printf "%s%s%s" $registryPart .image.repository $digestPart -}}
 {{- else -}}
-{{- printf "%s%s%s" $repositoryName $separator $tagOrDigest -}}
+  {{- printf "%s%s%s" $registryPart .image.repository $tagPart -}}
 {{- end -}}
 {{- end -}}
 

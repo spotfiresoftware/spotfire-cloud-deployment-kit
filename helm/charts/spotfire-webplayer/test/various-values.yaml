@@ -131,6 +131,8 @@ extraContainers:
       - echo
       - hello world
 logging:
+  workerhost:
+    logConfiguration: Monitoring
   logLevel: info
   logForwarderAddress: mytss-log-forwarder
 volumes:

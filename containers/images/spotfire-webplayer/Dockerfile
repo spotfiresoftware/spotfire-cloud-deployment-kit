@@ -11,8 +11,8 @@ ENV TSNM_CAPABILITY=WEB_PLAYER
 RUN mkdir -p /tmp/nodemanager-packages
 
 # Language packs
-COPY --chown=spotfire:spotfire build/SPOT_sfire_server_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_languagepack-multi.zip /tmp
-RUN unzip -q -u -j /tmp/SPOT_sfire_server_*_languagepack-multi.zip '**/*-netcore.sdn' -d /tmp/nodemanager-packages/
+COPY --chown=spotfire:spotfire build/SPOT_sfire-app_${SPOTFIRE_NETCORE_LANGUAGEPACKS_VERSION}_enterprise-languagepacks.zip /tmp
+RUN unzip -q -u -j /tmp/SPOT_sfire-app_*_enterprise-languagepacks.zip '**/*-netcore.sdn' -d /tmp/nodemanager-packages/
 
 # Web Player and any additional packages
 ADD --chown=spotfire:spotfire build/*.sdn build/*.spk /tmp/nodemanager-packages/

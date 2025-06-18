@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-webplayer
   # -- The container image tag to use.
-  tag: "14.4.2-v2.6.0"
+  tag: "14.5.0-v3.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -42,7 +42,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "3.2.4"
+    tag: "3.2.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -128,8 +128,11 @@ readinessProbe:
 logging:
   # -- The spotfire-server log-forwarder name. Template.
   logForwarderAddress: ""
-  # -- Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies for both node manager and the service.
+  # -- Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies to node manager and not the service.
   logLevel: "debug"
+  workerhost:
+    # -- Log configuration for the service. Currently available configs are: `standard`, `minimum`, `info`, `debug`, `monitoring`, `fullmonitoring`, `trace`.
+    logConfiguration: standard
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

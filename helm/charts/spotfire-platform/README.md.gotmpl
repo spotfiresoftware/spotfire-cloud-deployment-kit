@@ -49,18 +49,14 @@ This will deploy the Spotfire platform with all components enabled using the emb
 
 To use an external database, you need to provide the database connection details to the database. We will use a PostgreSQL database for this example but you can use any other database supported by Spotfire.
 
-First, install the [PostgreSQL](https://artifacthub.io/packages/helm/bitnami/postgresql) chart using Helm: 
+First, install the PostgreSQL chart using Helm: 
 
 ```bash
 helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install spotfiredatabase bitnami/postgresql \
-  --version 15 \
-  --set primary.persistence.enabled=false \
-  --set primary.resourcesPreset=small \
-  --set global.postgresql.auth.postgresPassword=PostgresAdminPassword
+helm install spotfiredatabase bitnami/postgresql --set global.postgresql.auth.postgresPassword=PostgresAdminPassword
 ```
 
-It will create a new non-persistent PostgreSQL database with the password `PostgresAdminPassword` and the service name `spotfiredatabase-postgresql`.
+It will create a new PostgreSQL database with the password `PostgresAdminPassword` and the service name `spotfiredatabase-postgresql`.
 
 Create a file named `spotfire-database.yaml` with the following content:
 

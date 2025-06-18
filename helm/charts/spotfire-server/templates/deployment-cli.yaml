@@ -51,6 +51,11 @@ spec:
               mountPath: /opt/spotfire/spotfireconfigtool/custom-ext-informationservices
               subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
             {{- end }}
+            {{- if .Values.volumes.libraryImportExport.existingClaim }}
+            - name: {{ .Values.volumes.libraryImportExport.existingClaim }}-volume
+              mountPath: /opt/spotfire/spotfireconfigtool/library
+              subPath: {{ .Values.volumes.libraryImportExport.subPath | quote }}
+            {{- end }}
             {{- with .Values.cliPod.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -97,6 +102,15 @@ spec:
         {{- end }}
         {{ if .Values.volumes.customExtInformationservices.existingClaim -}}
           {{- $claimName := .Values.volumes.customExtInformationservices.existingClaim  }}
+            {{- if not (index $existingVolumes $claimName) }}
+        - name: {{ $claimName }}-volume
+          persistentVolumeClaim:
+            claimName: {{ $claimName }}
+            {{- $_ := set $existingVolumes $claimName true }}
+          {{- end }}
+        {{- end }}
+        {{ if .Values.volumes.libraryImportExport.existingClaim -}}
+          {{- $claimName := .Values.volumes.libraryImportExport.existingClaim  }}
             {{- if not (index $existingVolumes $claimName) }}
         - name: {{ $claimName }}-volume
           persistentVolumeClaim:

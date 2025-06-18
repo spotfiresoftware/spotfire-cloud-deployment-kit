@@ -16,7 +16,8 @@ metadata:
 spec:
   containers:
     - name: curl
-      image: curlimages/curl:7.77.0
+      image: "{{ template "spotfire-common.spotfire-service.image" . }}"
+      imagePullPolicy: "{{ template "spotfire-common.spotfire-service.image.pullPolicy" . }}"
       command: ['curl']
       args: ['-v', '--trace-time', '--retry-connrefused', '--fail', '--retry', '20', '--max-time', '300', '--retry-delay', '10', 'http://{{ include "spotfire-common.spotfire-service.fullname" . }}:9080/spotfire/liveness']
   restartPolicy: Never

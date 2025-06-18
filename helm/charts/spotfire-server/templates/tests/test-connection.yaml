@@ -10,7 +10,8 @@ metadata:
 spec:
   containers:
     - name: curl
-      image: curlimages/curl:7.77.0
+      image: "{{ template "spotfire-server.image" . }}"
+      imagePullPolicy: "{{ template "spotfire-server.image.pullPolicy" . }}"
       command: ['curl']
       args:  ['--max-time', '180', '{{ include "spotfire-server.fullname" . }}:8080']
   restartPolicy: Never

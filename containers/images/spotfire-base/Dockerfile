@@ -15,15 +15,25 @@ LABEL org.opencontainers.image.title="spotfire/spotfire-base" \
     org.opencontainers.image.source='https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit' \
     org.opencontainers.image.vendor='Cloud Software Group, Inc.'
 
+
 RUN apt-get update \
   && apt-get upgrade -y \
   && mkdir -p /usr/share/man/man1 \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
      ca-certificates-java \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-     openjdk-17-jre-headless \
      unzip \
      cabextract \
+     brotli \
+     libjemalloc2 \
+     libmimalloc2.0 \
+     curl \
+  && apt-get clean all
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget apt-transport-https gpg \
+  && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null \
+  && echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list \
+  && DEBIAN_FRONTEND=noninteractive apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y temurin-21-jdk --no-install-recommends \
   && apt-get clean all
 
 RUN groupadd -g 1000 spotfire \

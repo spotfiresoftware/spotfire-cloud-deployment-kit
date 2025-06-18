@@ -27,7 +27,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-terrservice
   # -- The container image tag to use.
-  tag: "1.21.2-v2.6.0"
+  tag: "1.22.0-v3.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -38,7 +38,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "3.2.4"
+    tag: "3.2.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 

@@ -1,0 +1,1 @@
+--8<-- "helm/charts/spotfire-pythonservice/README.md"

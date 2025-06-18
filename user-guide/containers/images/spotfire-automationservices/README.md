@@ -1,0 +1,1 @@
+--8<-- "containers/images/spotfire-automationservices/README.md"

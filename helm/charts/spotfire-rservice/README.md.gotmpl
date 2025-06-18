@@ -21,7 +21,7 @@ This chart deploys the [Spotfire® Service for R](https://docs.tibco.com/pub/sf-
 The R service pod includes:
 - A [Fluent Bit](https://fluentbit.io/) sidecar container for log forwarding.
 - Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
-- A predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
+- Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
 This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/), and [KEDA](https://keda.sh/).
 
@@ -52,7 +52,7 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
         -f my-values.yaml
     ```
 
-**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` (or the parameter `global.spotfire.acceptEUA`) to the value `true`.
+**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
 By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 **Note**: You must provide your private registry address where the Spotfire container images are stored.
@@ -64,12 +64,12 @@ See [helm install](https://helm.sh/docs/helm/helm_install/) for command document
 To set [Custom configuration properties](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-rsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your helm.values.
 
 Example:
-```configuration:
-  # The maximum number of R engine sessions that are allowed to run concurrently in the R service.
-  engine.session.max: 5
+```ini
+# The maximum number of R engine sessions that are allowed to run concurrently in the R service.
+engine.session.max: 5
 
-  # The number of R engines preallocated and available for new sessions in the R service queue.
-  engine.queue.size: 10
+# The number of R engines preallocated and available for new sessions in the R service queue.
+engine.queue.size: 10
 ```
 
 ### Uninstalling
@@ -93,7 +93,7 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install KEDA in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
 Example: A `values.yaml` snippet configuration for enabling autoscaling with KEDA:
-```
+```yaml
 resources:
   limits:
     cpu: 5
@@ -124,20 +124,19 @@ See [Engine Timeout](https://docs.tibco.com/pub/sf-rsrv/latest/doc/html/TIB_sf-r
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
 Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
-```
+```yaml
 kedaAutoscaling:
-  triggers:
-  # {list of triggers to activate scaling of the target resource}
+  triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
 ### Upgrading
 
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
 
 #### Upgrading helm chart version
 
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
 
 {{ template "chart.valuesSection" . }}

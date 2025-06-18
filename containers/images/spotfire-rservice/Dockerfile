@@ -46,7 +46,7 @@ USER root
 ENV TSNM_CAPABILITY=R
 
 ARG DEBIAN_FRONTEND=noninteractive  \
-    R_APT_VERSION=4.4.* \
+    R_APT_VERSION=4.5.* \
     R_APT_SUITE=bookworm-cran40/
 
 RUN apt update \

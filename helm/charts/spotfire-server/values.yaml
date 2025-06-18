@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.4.2-v2.6.0"
+  tag: "14.5.0-v3.0.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -37,7 +37,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "3.2.4"
+    tag: "3.2.8"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -65,8 +65,8 @@ serviceAccount:
   create: true
   # Annotations to add to the service account.
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, then a name is generated using the fullname template.
+  # Service account name. If not set and create is true, a name is generated.
+  # If set, it will be evaluated as a template.
   name: ""
 
 podAnnotations:
@@ -183,7 +183,7 @@ extraInitContainers: []
   # - name: dummy-init
   #   image: busybox
   #   command: ["sleep", "infinity"]
- 
+
 # -- Additional sidecar containers to add to the Spotfire server pod.
 # More info: `kubectl explain deployment.spec.template.spec.containers`
 extraContainers: []
@@ -242,7 +242,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.4.2-v2.6.0"
+    tag: "14.5.0-v3.0.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -291,7 +291,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.4.2-v2.6.0"
+    tag: "14.5.0-v3.0.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -546,6 +546,9 @@ configuration:
     lifecycle.changes-monitoring.configuration-change-action: GRACEFUL_SHUTDOWN
     lifecycle.changes-monitoring.draining.shutdown: true
 
+    # Various other settings
+    deployment.compressible-resources.brotli-executable: "brotli"
+
   deployment:
     # -- When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`.
     enabled: true
@@ -566,7 +569,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.4.2-v2.6.0"
+        tag: "14.5.0-v3.0.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -770,6 +773,17 @@ haproxy:
         bufSize: 24576
         # -- The maintenance page response string.
         responseString: "<html><title>Maintenance - </title><body>Maintenance in progress</body></html>"
+    # -- Additional settings for various settings in the default spotfire haproxy configuration.
+    # @default -- additional settings
+    haproxy:
+      # -- The haproxy global section. See [haproxy global](https://docs.haproxy.org/3.0/configuration.html#3).
+      global:
+      # -- The haproxy defaults section. See [haproxy proxies](https://docs.haproxy.org/3.0/configuration.html#4).
+      defaults:
+      # -- The haproxy metrics and status frontend section. See [haproxy proxies](https://docs.haproxy.org/3.0/configuration.html#4).
+      stats:
+      # -- The haproxy spotfire frontend section. See [haproxy proxies](https://docs.haproxy.org/3.0/configuration.html#4).
+      frontend:
 
   # -- The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl.
   # @default -- The chart creates a configuration automatically.

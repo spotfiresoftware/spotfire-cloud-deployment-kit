@@ -6,6 +6,15 @@ This directory contains the recipes to build and examples to use the [**Spotfire
 
 **Note**: You can build each image on its own as described in their respective READMEs, or you can use the provided `Makefile` within this directory to build all the images with just one single command (this `Makefile` also takes care of their internal dependencies).
 
+## Prerequisites
+
+- [Required **Spotfire** installation packages](build-files.mk). You can download them from the [Spotfire Download site](https://www.spotfire.com/downloads).
+- A **Linux host** with admin permissions to build and execute the containers.
+  You can use a bare metal installed server, a virtual machine, or WSL on Windows.
+- An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman` or alternative), for building the container images.
+
+**Note**: Spotfire® is a commercial product. You must have a valid license for each of the Spotfire components you choose to build and run as containers.
+
 ## Build the images
 
 1. Copy the required files into the `<this-repo>/containers/downloads` directory.
@@ -34,13 +43,19 @@ make CONTAINER_REGISTRY=127.0.0.1:32000 push
 
 ### Customizing and extending the images
 
-These recipes provide a standard, canonical, typical or vanilla deployment for the Spotfire® Platform.
-They are suitable for most of the use case scenarios.
+The provided recipes offer a standard deployment for the Spotfire® Platform, suitable for most scenarios. It is recommended to extend the images rather than modify them directly. To extend, create new recipes using the official container images as the base layer (using `FROM spotfire/<image-name>:<image-tag>`). This approach simplifies updates when new official recipes are released.
 
-You are welcome to use modify the recipes and adapt them to your specific use case, in compliance with the Apache License 2.0.
-However, we recommend that you proceed by extending these images, rather than modifying them.
-To extend the images, create your recipes that use these official container images as base layer (using `FROM spotfire/<image-name>:<image-tag>`).
-This will make it easier for you to update your images when new official recipes are released.
+Generally, it is recommended to use the default application versions provided in the Cloud Deployment Kit (CDK) for Spotfire®. However, in some cases, you may need to build container images with different application versions. To do this, update the application version in [versions.mk](../versions.mk) (e.g., `SPOTFIRE_SERVER_VERSION=12.0.1`), place the corresponding application files in the `containers/downloads` directory, and build the new containers using the `make` command from the `containers/` directory.
+
+```bash
+make IMAGE_BUILD_ID=my-custom-image-0.1
+```
+
+This command appends `-my-custom-image-0.1` to the default tags, formatted as `<application_version>-v<cloud_deployment_kit_version>-my-custom-image-0.1`.
+
+**Note**: Building with non-default application versions can be problematic because the CDK has not been developed with these versions in mind, and it might not work as expected. Thorough testing is recommended to ensure compatibility.
+
+When using customized or extended container images with Helm charts, ensure to override the `image.tag` during the Helm chart installation to match your custom image tag.
 
 ### Licenses
 

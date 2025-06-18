@@ -116,23 +116,26 @@ spotfire-pythonservice :                                                   IMAGE
 
 # tag, push, list
 #
-# REMOTE_IMAGE_BUILD_ID: push this destination build id
-# LOCAL_IMAGE_BUILD_ID: push this source build id
+# DEST_IMAGE_BUILD_ID: push this destination build id
+# SOURCE_IMAGE_BUILD_ID: push this source build id
+# SOURCE_CONTAINER_REGISTRY
+# DEST_CONTAINER_REGISTRY
+DEST_CONTAINER_REGISTRY ?= $(CONTAINER_REGISTRY)
 
-REMOTE_IMAGE_REFERENCE    = $(addsuffix /,$(CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(REMOTE_IMAGE_BUILD_ID))
-LOCAL_IMAGE_REFERENCE     = $(addsuffix /,$(LOCAL_CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(LOCAL_IMAGE_BUILD_ID))
+DEST_IMAGE_REFERENCE    = $(addsuffix /,$(DEST_CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(DEST_IMAGE_BUILD_ID))
+SOURCE_IMAGE_REFERENCE  = $(addsuffix /,$(SOURCE_CONTAINER_REGISTRY))$(IMAGE_REPOSITORY_PREFIX)/$(*):$(call IMAGE_TAG,$(SOURCE_IMAGE_BUILD_ID))
 
 push : $(addprefix push-,$(NONLOCAL_TARGETS))
-push-% : CONTAINER_REGISTRY ?= $(error CONTAINER_REGISTRY is unset)
+# push-% : CONTAINER_REGISTRY ?= $(error CONTAINER_REGISTRY is unset)
 push-% :
-	$(DOCKER_CLI) tag $(LOCAL_IMAGE_REFERENCE) $(REMOTE_IMAGE_REFERENCE)
-	$(DOCKER_CLI) push $(REMOTE_IMAGE_REFERENCE)
-	$(DOCKER_CLI) rmi $(REMOTE_IMAGE_REFERENCE)
+	$(DOCKER_CLI) tag $(SOURCE_IMAGE_REFERENCE) $(DEST_IMAGE_REFERENCE)
+	$(DOCKER_CLI) push $(DEST_IMAGE_REFERENCE)
+	$(DOCKER_CLI) rmi $(DEST_IMAGE_REFERENCE)
 
 # make CONTAINER_REGISTRY=registry.com list
 list-images : $(addprefix list-image-,$(NONLOCAL_TARGETS))
 list-image-% :
-	@echo $(REMOTE_IMAGE_REFERENCE)
+	@echo $(DEST_IMAGE_REFERENCE)
 
 # source <(make --silent list-tags)
 list-tags : create_var_assignment = $(if $(filter $(EXPORT),1),export ,)$(shell echo '$(*)' | tr '[:lower:]-' '[:upper:]_')_$(1)=$(2)
@@ -142,12 +145,16 @@ list-tag-% :
 
 # pull + push can be used to copy images from one place to the other
 # 1. make pull --dry-run IMAGE_BUILD_ID=<source-tag> CONTAINER_REGISTRY=<source-registry>
-# 2. LOCAL_IMAGE_BUILD_ID=<source-tag> IMAGE_BUILD_ID= make push --dry-run CONTAINER_REGISTRY=<destination-registry>
+# 2. SOURCE_IMAGE_BUILD_ID=<source-tag> IMAGE_BUILD_ID= make push --dry-run CONTAINER_REGISTRY=<destination-registry>
 pull : $(addprefix pull-,$(NONLOCAL_TARGETS))
 pull-% :
-	$(DOCKER_CLI) pull $(REMOTE_IMAGE_REFERENCE)
+	$(DOCKER_CLI) pull $(DEST_IMAGE_REFERENCE)
 
-.PHONY : push push-% list list-%
+tag : $(addprefix tag-,$(NONLOCAL_TARGETS))
+tag-% :
+	$(DOCKER_CLI) tag $(SOURCE_IMAGE_REFERENCE) $(DEST_IMAGE_REFERENCE)
+
+.PHONY : push push-% list list-% tag tag-%
 	
 #
 # additional targets
@@ -173,6 +180,6 @@ clean : $(addprefix clean-,$(NONLOCAL_TARGETS))
 	rm -rf licenses/
 
 clean-% :
-	$(DOCKER_CLI) rmi $(REMOTE_IMAGE_REFERENCE) 2>/dev/null || :
+	$(DOCKER_CLI) rmi $(DEST_IMAGE_REFERENCE) 2>/dev/null || :
 
 .PHONY : clean clean-% licenses licenses-% variable

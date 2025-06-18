@@ -7,6 +7,10 @@ global
     tune.bufsize {{ .Values.spotfireConfig.maintenancePage.bufSize }}
     {{- end }}
 
+    {{- if .Values.spotfireConfig.haproxy.global }}
+    {{ .Values.spotfireConfig.haproxy.global }}
+    {{- end }}
+
 defaults
     log global
     mode http
@@ -25,6 +29,11 @@ defaults
     timeout server {{ .Values.spotfireConfig.timeouts.server }}
     timeout tunnel {{ .Values.spotfireConfig.timeouts.tunnel }}
     timeout http-request {{ .Values.spotfireConfig.timeouts.httpRequest }}
+
+    {{- if .Values.spotfireConfig.haproxy.defaults }}
+    {{ .Values.spotfireConfig.haproxy.defaults }}
+    {{- end }}
+
 frontend stats
     bind :1024
     {{- if not .Values.spotfireConfig.debug }}
@@ -46,8 +55,17 @@ frontend stats
     stats uri /stats
     stats refresh 10s
 
+    {{- if .Values.spotfireConfig.haproxy.stats }}
+    {{ .Values.spotfireConfig.haproxy.stats }}
+    {{- end }}
+
+
 frontend spotfire
     bind :80
+
+    {{- if .Values.spotfireConfig.haproxy.frontend }}
+    {{ .Values.spotfireConfig.haproxy.frontend }}
+    {{- end }}
 
     option httplog
 

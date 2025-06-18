@@ -18,7 +18,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   # From prerequisites-debian12.sh
-    libglib2.0-0 \
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
@@ -40,10 +39,6 @@ RUN apt-get update \
     libcairo2 \
     libasound2 \
     libatspi2.0-0 \
-    libtiff6 \
-    libpng16-16 \
-    libgif7 \
-    libjpeg62-turbo \
     xvfb \
     xauth \
     fonts-liberation \
@@ -68,8 +63,11 @@ RUN apt-get install -y --no-install-recommends wget ca-certificates \
      apt-transport-https \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
-     aspnetcore-runtime-6.0 \
+     aspnetcore-runtime-8.0 \
   && apt-get clean all
+
+# Enable libjemalloc2
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 # Example Connector odbc drivers
 ARG INSTALL_ODBC_DRIVERS=Y

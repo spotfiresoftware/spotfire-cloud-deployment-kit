@@ -79,6 +79,16 @@
     Time_Format     %Y-%m-%dT%H:%M:%S,%L%z
 
 [PARSER]
+    Name            worker.memorystatistics
+    Format          regex
+
+    Regex           /^(?<Level>[^;]+);(?<HostName>[^;]*);(?<Timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}[^;]+);(?<UtcTimestampString>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3});(?<SessionId>[^;]*);(?<UserName>[^;]*);(?<AnalysisId>[^;]*);(?<TableId>[^;]*);(?<AnalysisPath>[^;]*);(?<Title>[^;]*);(?<Type>[^;]*);(?<Value>[^;]*);(?<InstanceId>[^;]*);(?<ServiceId>[^;]*)$/
+
+    Time_Key        Timestamp
+    Time_Format     %Y-%m-%dT%H:%M:%S,%L%z
+    Types           Value:integer
+
+[PARSER]
     Name           datafunctionservices.standardlog
     Format         regex
 

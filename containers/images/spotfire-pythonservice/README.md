@@ -1,33 +1,36 @@
 # spotfire-pythonservice
 
-## About This Image
+## About this image
 
-This directory contains the official container recipe for **[Spotfire® Service for Python](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall/topics/the_tibco_spotfire_service_for_python.html)**.
+This directory contains the official container recipe for **[Spotfire® Service for Python](https://spotfi.re/docs/pysrv/)**.
 
 ## What is Spotfire® Service for Python?
 
-**Spotfire® Service for Python** (Python service) provides remote execution of Python data functions for users from web client and mobile devices (Spotfire® Business Author and Consumer).
+**Spotfire® Service for Python** (the Python service) provides remote execution of Python data functions for users from web client and mobile devices.
 
-**Note**: _Spotfire Service for Python_ is a _Spotfire Services_ component, provided and licensed under _TIBCO Spotfire Statistics Services_  as a _Spotfire Server_ component in [TIBCO eDelivery](https://edelivery.tibco.com/storefront/index.ep).
+**Note:** The _Spotfire Service for Python_ is a _Spotfire Server_ component, provided and licensed under _Spotfire Statistics Services_ in [Spotfire Product downloads](https://spotfi.re/download).
 
 References:
-- For a quick overview, see the [Introduction to the Spotfire environment](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html).
+
+- For a quick overview, see the [Introduction to the Spotfire environment](https://spotfi.re/docs/server).
 - For more information on the Spotfire product family, see the [Spotfire® Documentation](https://spotfi.re/docs).
-- For latest specific component documentation, see [Spotfire® Service for Python Installation and Administration](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/pyinstall-homepage.html).
+- For latest specific component documentation, see [Spotfire® Service for Python Installation and Administration](https://spotfi.re/docs/pysrv).
 You can access to documentation for other component versions and other formats in [Spotfire® Service for Python product documentation](https://docs.tibco.com/products/spotfire-service-for-python)
 
 ## How to build this image
 
-**Note**: The easiest and recommended way to build all the Spotfire container images is using the provided containers `Makefile` as described in [Build the images](../../README.md#build-the-images).
+The easiest and recommended way to build all the Spotfire container images is using the provided `containers/Makefile`. See [Spotfire Cloud Deployment Kit on GitHub](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
 You can also build this image individually.
 Follow the instructions below or adjust them according to your needs.
 
 Prerequisites:
+
 - You have built the [spotfire-nodemanager](../spotfire-nodemanager/README.md) container image.
 
 Steps:
-1. Copy the `PythonServiceLinux.sdn` package into the `build/` directory within this folder.
+
+1. Copy the `Spotfire.Dxp.PythonServiceLinux.sdn` package into the `build/` directory within this folder.
 2. From the `<this-repo>/containers` folder, run `make spotfire-pythonservice` to build this image, or `make spotfire-pythonservice --dry-run` to preview the required commands.
 
 ### Adding custom Spotfire packages
@@ -37,6 +40,7 @@ Before building the image, put any custom SPK files in the `build/` folder.
 ## How to use this image
 
 Prerequisites:
+
 - A running [spotfire server](../spotfire-server/README.md) container instance to connect to.
 
 ### Start a Python service container
@@ -46,7 +50,7 @@ You can start an instance of the **Spotfire Service for Python** container with:
 docker run -d --rm -e ACCEPT_EUA=Y -e SERVER_BACKEND_ADDRESS=spotfire-server spotfire/spotfire-pythonservice
 ```
 
-**Note**:  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
+**Note:**  This Spotfire container image requires setting the environment variable `ACCEPT_EUA`.
 By passing the value `Y` to the environment variable `ACCEPT_EUA`, you agree that your use of the Spotfire software running in this container will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
 
 The `spotfire-pythonservice` will start with the default configuration from `/opt/spotfire/nodemanager/nm/services/PYTHON/conf/custom.properties` in the container image.
@@ -65,7 +69,7 @@ docker run -d --rm -e ACCEPT_EUA=Y \
 ```
 
 Example of an `additional-custom.properties` file:
-```
+```ini
 # The maximum number of Python engine sessions that are allowed to run concurrently in the Python service.
 engine.session.max: 5
 
@@ -73,7 +77,7 @@ engine.session.max: 5
 engine.queue.size: 10
 ```
 
-- For more information, see [Configuring the service](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/configuring_the_service.html).
+For more information, see [Configuring the service](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/configuring_the_service.html).
 
 ### How to add additional Python packages
 
@@ -93,7 +97,7 @@ docker run -d --rm -e ACCEPT_EUA=Y \
   spotfire/spotfire-pythonservice
 ```
 
-**Note**: The [shared package library location](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/package_library_location.html) configuration property `packagePath` is set to `/opt/packages` in this container image.
+**Note:** The [shared package library location](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/package_library_location.html) configuration property `packagePath` is set to `/opt/packages` in this container image.
 
 ### Environment variables
 
@@ -108,6 +112,6 @@ docker run -d --rm -e ACCEPT_EUA=Y \
 - `LOGGING_SERVICELOG_MAX` - Maximum number of Python service log files to save. Defaults to `2`
 - `LOGGING_SERVICELOG_SIZE` - Maximum size for Python service log files. Defaults to `10MB`
 
-**Note**: These environment variables can only be used if the default configuration is used.
+**Note:** These environment variables can only be used if the default configuration is used.
 
-**Note**: See also the Spotfire Node manager [environment variables](../spotfire-nodemanager/README.md#environment-variables).
+**Note:** See also the Spotfire node manager [environment variables](../spotfire-nodemanager/README.md#environment-variables).

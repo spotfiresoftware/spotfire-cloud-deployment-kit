@@ -1,0 +1,1 @@
+--8<-- "helm/charts/spotfire-terrservice/README.md"

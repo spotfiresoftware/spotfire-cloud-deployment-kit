@@ -1,0 +1,1 @@
+--8<-- "containers/images/spotfire-workerhost/README.md"

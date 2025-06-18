@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.4.2](https://img.shields.io/badge/AppVersion-14.4.2-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.5.0](https://img.shields.io/badge/AppVersion-14.5.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 0.4.0 |
+| file://../spotfire-common | spotfire-common | 1.0.0 |
 
 ## Overview
 
@@ -105,7 +105,7 @@ A credentials profile is a method for storing data source credentials to log in 
 1. Get a copy of the service configuration `Spotfire.Dxp.Worker.Host.dll.config`. (See how in the previous example.
 2. Update the connector's authentication mode to `WebConfig`.
 3. Create a credentials profile in the following format, renaming the file with credentials_profile_name without extension.
-    ```
+    ```xml
     <entry profile="credentials_profile_name">
       <allowed-usages>
           <entry server-regex="database\.example\.com" />
@@ -151,7 +151,7 @@ helm upgrade --install my-release . --reuse-values --set replicaCount=3
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
 Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
-```
+```yaml
 kedaAutoscaling:
   enabled: true
   spotfireConfig:
@@ -180,7 +180,7 @@ For more information, see [Web Player service performance counters](https://docs
 
 To mitigate toggling scenarios, you can control the KEDA scale down policy.
 For example, to scale down only one pod per hour:
-```
+```yaml
 kedaAutoscaling:
   advanced:
     horizontalPodAutoscalerConfig:
@@ -195,23 +195,20 @@ kedaAutoscaling:
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
 Additionally, you can define your own [custom scaling triggers](https://keda.sh/docs/latest/concepts/scaling-deployments/#triggers). Helm template functionality is available:
-```
+```yaml
 kedaAutoscaling:
-  triggers:
-  # {list of triggers to activate scaling of the target resource}
+  triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, see the [keda-autoscaling.yaml template](./templates/keda-autoscaling.yaml).
+**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
 ### Upgrading
 
-See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
-
-**Note**: When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
 
 #### Upgrading helm chart version
 
-Some parameters might have been changed, moved or renamed and must be taken into consideration when upgrading the release. See [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for more information.
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
 
 ## Values
 
@@ -235,14 +232,14 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"3.2.4"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"3.2.8"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"14.4.2-v2.6.0"` | The container image tag to use. |
+| image.tag | string | `"14.5.0-v3.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -257,7 +254,8 @@ Some parameters might have been changed, moved or renamed and must be taken into
 | livenessProbe.initialDelaySeconds | int | `60` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
 | logging.logForwarderAddress | string | `""` | The spotfire-server log-forwarder name. Template. |
-| logging.logLevel | string | `"debug"` | Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies for both node manager and the service. |
+| logging.logLevel | string | `"debug"` | Set to `debug`, `trace`, `minimal`, or leave empty for info. This applies to node manager and not the service. |
+| logging.workerhost.logConfiguration | string | `"standard"` | Log configuration for the service. Currently available configs are: `standard`, `minimum`, `info`, `debug`, `monitoring`, `fullmonitoring`, `trace`. |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | nodemanagerConfig.preStopDrainingTimeoutSeconds | int | `610` | The draining timeout after which the service is forcefully shut down. |

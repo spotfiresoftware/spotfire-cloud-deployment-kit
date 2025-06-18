@@ -94,7 +94,7 @@ Common labels
 helm.sh/chart: {{ include "spotfire-server.chart" . }}
 {{ include "spotfire-server.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | replace " " "_" | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
@@ -106,7 +106,7 @@ labels for cli pod
 helm.sh/chart: {{ include "spotfire-server.chart" . }}
 {{ include "spotfire-server.cli.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | replace " " "_" | quote }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
@@ -135,10 +135,11 @@ app.kubernetes.io/component: server
 Create the name of the service account to use
 */}}
 {{- define "spotfire-server.serviceAccountName" -}}
+{{- $serviceAccountName := (tpl .Values.serviceAccount.name $) -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "spotfire-server.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "spotfire-server.fullname" .) $serviceAccountName }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" $serviceAccountName }}
 {{- end }}
 {{- end }}
 
