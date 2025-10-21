@@ -123,11 +123,10 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        -f google-cloud-sql-postgres.yaml \
-        ...
+        -f google-cloud-sql-postgres.yaml
     ```
    For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 

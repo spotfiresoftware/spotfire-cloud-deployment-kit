@@ -35,7 +35,7 @@ ENV SPOTFIRE_JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64/
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends iproute2 zip unzip jq \
+  && apt-get install -y --no-install-recommends iproute2 zip unzip jq openssl \
   && apt-get clean all
 
 # Default values for configuring node manager
@@ -54,6 +54,11 @@ ENV LOGGING_NMLOG_SIZE=10MB \
     LOGGING_NMPERFORMANCELOG_SIZE=10MB \
     LOGGING_NMPERFORMANCELOG_MAX=2
 
+
+# Create directory for custom ssl cert dir
+RUN mkdir -p /opt/spotfire/certs \
+    && chown -R spotfire:spotfire /opt/spotfire/certs
+ENV SSL_CERT_DIR="/etc/ssl/certs:/opt/spotfire/certs"
 
 EXPOSE 9080 9443 9501
 

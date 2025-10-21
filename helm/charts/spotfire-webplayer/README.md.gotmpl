@@ -202,6 +202,10 @@ kedaAutoscaling:
 
 **Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
+#### Improved performance and concurrency for temporary folder
+
+To optimize data reuse, the Spotfire Web Player uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Temp`) to store temporary files and data used in analyses opened via the Web Player. In certain scenarios, like when opening large analysis files concurrently, it is recommended to use a more performant and larger kubernetes volume. For more details, see  [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+
 ### Upgrading
 
 When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.

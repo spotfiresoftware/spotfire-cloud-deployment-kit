@@ -1,6 +1,6 @@
 # spotfire-automationservices
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.5.0](https://img.shields.io/badge/AppVersion-14.5.0-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.0](https://img.shields.io/badge/AppVersion-14.6.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Automation Services.
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 1.0.0 |
+| file://../spotfire-common | spotfire-common | 2.0.0 |
 
 ## Overview
 
@@ -164,6 +164,10 @@ kedaAutoscaling:
 
 **Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
+#### Improved performance and concurrency for temporary folder
+
+To optimize data reuse, the Spotfire Automation Services uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Temp`) to store temporary files and data. In certain scenarios, like when opening large analysis files concurrently, or when exporting large analysis files using Automation Services, it is recommended to use a more performant and larger Kubernetes volume. For more details, see [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+
 ### Upgrading
 
 When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
@@ -195,14 +199,15 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"3.2.8"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.0.7"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| image.tag | string | `"14.5.0-v3.0.0"` | The container image tag to use. |
+| image.tag | string | `"14.6.0-v4.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -249,6 +254,8 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `3` |  |
 | tolerations | list | `[]` |  |
+| volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
+| volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | volumes.customModules.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
 | volumes.customModules.persistentVolumeClaim.create | bool | `false` | If 'true', then a 'PersistentVolumeClaim' is created. |
 | volumes.customModules.persistentVolumeClaim.resources | object | `{"requests":{"storage":"2Gi"}}` | Specifies the standard Kubernetes resource requests and/or limits for the volumes.customModules claims. |

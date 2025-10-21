@@ -65,6 +65,11 @@ spec:
           - name: logs-volume
             mountPath: /opt/spotfire/nodemanager/nm/logs
           {{- include "spotfire-common.volumes.troubleshooting.volumeMount" . | indent 10 }}
+          {{- if .Values.volumes.certificates.existingClaim }}
+          - name: ca-certificates-volume
+            mountPath: /usr/local/share/ca-certificates
+            subPath: {{ .Values.volumes.certificates.subPath | quote }}
+          {{- end }}
           {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
           - name: packages-volume
             mountPath: /opt/packages
@@ -129,6 +134,8 @@ spec:
           lifecycle:
             preStop:
             {{- include "spotfire-common.fluenbit-configuration.tsnm.prestop.exec" . | indent 14 }}
+          resources:
+            {{- toYaml .Values.fluentBitSidecar.resources | nindent 12 }}
       {{- if .Values.extraContainers }}
         {{- tpl (toYaml .Values.extraContainers) $ | nindent 8 }}
       {{- end }}
@@ -139,6 +146,11 @@ spec:
         {{- include "spotfire-common.volumes.troubleshooting.volume" . | indent 8 }}
         - name: logs-volume
           emptyDir: {}
+        {{- if .Values.volumes.certificates.existingClaim }}
+        - name: ca-certificates-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.volumes.certificates.existingClaim }}
+        {{- end }}
         {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
         - name: packages-volume
           persistentVolumeClaim:

@@ -62,7 +62,7 @@ and the [Prometheus documentation](https://prometheus.io/).
     kubectl --namespace monitor port-forward $POD_NAME 3000 --address 0.0.0.0 > /dev/null &
     ```
 
-5. Log in to the Grafana web interface [http://localhost:3000]() with the user `admin` and the password from the previous step.
+5. Log in to the Grafana web interface [http://localhost:3000](http://localhost:3000) with the user `admin` and the password from the previous step.
 
 For more information, see the [Grafana Helm chart documentation](https://github.com/grafana/helm-charts/blob/main/charts/grafana/README.md)
 and the [Grafana documentation](https://grafana.com/oss/grafana/).

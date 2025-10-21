@@ -72,8 +72,7 @@ When you create a service of type `LoadBalancer` in GKE, Google Cloud automatica
         --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        --set spotfire-server.haproxy.service.type="LoadBalancer" \
-    ...
+        --set spotfire-server.haproxy.service.type="LoadBalancer"
     ```
     It will take 5-10 minutes to create the associated Google Network Load Balancer.
 
@@ -183,10 +182,9 @@ After that, associate your domain with the external IP address of the created Go
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
-        -f google-gce-ingress.yaml \
-        ...
+        -f google-gce-ingress.yaml
     ```
     It takes 5-10 minutes to create the associated Google Application Load Balancer.
 

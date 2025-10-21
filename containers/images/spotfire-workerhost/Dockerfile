@@ -43,6 +43,7 @@ RUN apt-get update \
     xauth \
     fonts-liberation \
     unixodbc \
+    libicu76 \
   # Extra fonts
     fonts-arphic-ukai \
     fonts-arphic-uming \

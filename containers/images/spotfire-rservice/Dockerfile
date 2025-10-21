@@ -45,22 +45,13 @@ USER root
 
 ENV TSNM_CAPABILITY=R
 
-ARG DEBIAN_FRONTEND=noninteractive  \
-    R_APT_VERSION=4.5.* \
-    R_APT_SUITE=bookworm-cran40/
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt update \
-    && apt install -y  \
-       ca-certificates \
-       gnupg \
-    && gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-key '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7' \
-    && gpg --armor --export '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7' | tee /etc/apt/trusted.gpg.d/cran_debian_key.asc \
-    && echo deb https://cloud.r-project.org/bin/linux/debian "${R_APT_SUITE}" > /etc/apt/sources.list.d/r-project.list \
-    && apt update -y \
+RUN apt update -y \
     && apt install -y --no-install-recommends \
-        "r-base-core=${R_APT_VERSION}" \
-        "r-base-dev=${R_APT_VERSION}" \
-        "r-recommended=${R_APT_VERSION}" \
+        r-base-core \
+        r-base-dev \
+        r-recommended \
     && apt clean all \
     && R --quiet -e 'R.version'
 

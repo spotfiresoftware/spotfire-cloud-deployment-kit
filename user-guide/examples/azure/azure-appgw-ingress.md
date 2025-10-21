@@ -70,11 +70,10 @@ When you create a service of type `LoadBalancer` in AKS, Azure automatically pro
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        --set spotfire-server.haproxy.service.type="LoadBalancer" \
-    ...
+        --set spotfire-server.haproxy.service.type="LoadBalancer"
     ```
     **Note:** The associated Azure Load Balancer creation takes 5-10 minutes.
 
@@ -233,10 +232,9 @@ You can do it directly from the `spotfire-platform` Helm chart.
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
-        -f azure-appgw-ingress.yaml \
-        ...
+        -f azure-appgw-ingress.yaml
     ```
     For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 

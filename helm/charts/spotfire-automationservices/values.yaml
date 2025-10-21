@@ -27,7 +27,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-automationservices
   # -- The container image tag to use.
-  tag: "14.5.0-v3.0.0"
+  tag: "14.6.0-v4.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -38,7 +38,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "3.2.8"
+    tag: "4.0.7"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -52,6 +52,19 @@ fluentBitSidecar:
     # runAsUser: 1000
     # # -- Group ID for the Container.
     # runAsGroup: 0
+
+  # -- The resources setting for fluent-bit sidecar container.
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This increases chances that charts can run on environments with few
+    # resources, such as Minikube. If you do want to specify resources, then uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
 nameOverride: ""
 fullnameOverride: ""
@@ -251,3 +264,10 @@ volumes:
       volumeName:
     # -- When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim.
     existingClaim: ""
+
+  # The volume with mountPath: `/usr/local/share/ca-certificates`
+  certificates:
+    # -- Defines an already-existing persistent volume claim.
+    existingClaim: ""
+    # -- The subPath of the volume to be used for the volume mount
+    subPath: ""

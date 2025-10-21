@@ -85,11 +85,10 @@ The [AWS Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        --set spotfire-server.haproxy.service.type="LoadBalancer" \
-    ...
+        --set spotfire-server.haproxy.service.type="LoadBalancer"
     ```
    It will take 5-10 minutes to create the associated AWS Network Load Balancer.
 
@@ -215,10 +214,9 @@ After that, associate your domain with the external IP address of the created AW
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
-        -f aws-alb-ingress.yaml \
-        ...
+        -f aws-alb-ingress.yaml
     ```
    It takes 5-10 minutes to create the associated AWS Application Load Balancer.
 

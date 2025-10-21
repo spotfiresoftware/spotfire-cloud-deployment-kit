@@ -35,14 +35,12 @@ fi
 echo "Using hostname: $hostname"
 
 # Additional configuration
+scripts/configure-custom-ca.sh || exit $?
 scripts/configure-nodemanager.sh || exit $?
 scripts/configure-service.sh || exit $?
 
 # Configure ports and addresses
 ./configure -m "${NODEMANAGER_REGISTRATION_PORT}" -c "${NODEMANAGER_COMMUNICATION_PORT}" -s "${SERVER_BACKEND_ADDRESS}" -r "${SERVER_BACKEND_REGISTRATION_PORT}" -b "${SERVER_BACKEND_COMMUNICATION_PORT}" -n "${hostname}" || exit $?
-
-# Establish trust
-nm/init.sh
 
 # Restart the node once it is trusted, use exec to forward SIGTERM et al
 exec nm/init.sh

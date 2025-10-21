@@ -32,14 +32,24 @@ $(PACKAGE_DIR)/index.yaml : $(CHART_PACKAGES)
 	helm repo index $(addprefix --url ,$(REPO_URL)) $(PACKAGE_DIR)/
 
 # Define dependencies for each chart to ensure subcharts are packaged first and to rebuild only when needed
-spotfire-common $(SPOTFIRE_COMMON_TGZ)                         : $(wildcard charts/spotfire-common/*)
-spotfire-server $(SPOTFIRE_SERVER_TGZ)                         : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-server/*)
-spotifre-webplayer $(SPOTFIRE_WEBPLAYER_TGZ)                   : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-webplayer/*)
-spotfire-automationservices $(SPOTFIRE_AUTOMATIONSERVICES_TGZ) : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-automationservices/*)
-spotfire-terrservice $(SPOTFIRE_TERRSERVICE_TGZ)               : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-terrservice/*)
-spotfire-pythonservice $(SPOTFIRE_PYTHONSERVICE_TGZ)           : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-pythonservice/*)
-spotfire-rservice $(SPOTFIRE_RSERVICE_TGZ)                     : $(SPOTFIRE_COMMON_TGZ) $(wildcard charts/spotfire-rservice/*)
-spotfire-platform $(SPOTFIRE_PLATFORM_TGZ)                     : $(SPOTFIRE_COMMON_TGZ) $(SPOTFIRE_SERVER_TGZ) $(SPOTFIRE_WEBPLAYER_TGZ) $(SPOTFIRE_AUTOMATIONSERVICES_TGZ) $(SPOTFIRE_TERRSERVICE_TGZ) $(SPOTFIRE_PYTHONSERVICE_TGZ) $(SPOTFIRE_RSERVICE_TGZ) $(wildcard charts/spotfire-platform/*)
+$(SPOTFIRE_COMMON_TGZ)             : $(shell find charts/spotfire-common/)
+$(SPOTFIRE_SERVER_TGZ)             : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-server)
+$(SPOTFIRE_WEBPLAYER_TGZ)          : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-webplayer/)
+$(SPOTFIRE_AUTOMATIONSERVICES_TGZ) : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-automationservices/)
+$(SPOTFIRE_TERRSERVICE_TGZ)        : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-terrservice/)
+$(SPOTFIRE_PYTHONSERVICE_TGZ)      : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-pythonservice/)
+$(SPOTFIRE_RSERVICE_TGZ)           : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-rservice/)
+$(SPOTFIRE_PLATFORM_TGZ)           : $(SPOTFIRE_COMMON_TGZ) $(SPOTFIRE_SERVER_TGZ) $(SPOTFIRE_WEBPLAYER_TGZ) $(SPOTFIRE_AUTOMATIONSERVICES_TGZ) $(SPOTFIRE_TERRSERVICE_TGZ) $(SPOTFIRE_PYTHONSERVICE_TGZ) $(SPOTFIRE_RSERVICE_TGZ) $(shell find charts/spotfire-platform/)
+
+# Alias for tgz
+spotfire-common : $(SPOTFIRE_COMMON_TGZ)
+spotfire-server : $(SPOTFIRE_SERVER_TGZ)
+spotfire-webplayer : $(SPOTFIRE_WEBPLAYER_TGZ)
+spotfire-automationservices : $(SPOTFIRE_AUTOMATIONSERVICES_TGZ)
+spotfire-terrservice : $(SPOTFIRE_TERRSERVICE_TGZ)
+spotfire-pythonservice : $(SPOTFIRE_PYTHONSERVICE_TGZ)
+spotfire-rservice : $(SPOTFIRE_RSERVICE_TGZ)
+spotfire-platform : $(SPOTFIRE_PLATFORM_TGZ)
 
 # Package each chart, the chart-name is inferred from packaged chart tgz name
 # e.g. chart-name for '$(PACKAGE_DIR)/spotfire-server-1.0.0.tgz' becomes 'spotfire-server'

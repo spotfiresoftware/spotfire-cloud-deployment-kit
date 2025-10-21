@@ -99,3 +99,25 @@ For more information, see [Automatically installing services](https://docs.tibco
 - `LOGGING_NMLOG_MAX` - See **nm.log.max** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `2`
 - `LOGGING_NMPERFORMANCELOG_SIZE` - See **nm.performance.log.size** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `10MB`
 - `LOGGING_NMPERFORMANCELOG_MAX` - See **nm.performance.log.max** in the [Node Log4j2 configuration properties](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/node_log4j2_configuration_properties.html). Default `2`
+
+### Adding custom CA certificates
+
+The node manager container supports adding custom Certificate Authority (CA) certificates for secure connections to external services that use self-signed or enterprise CA certificates.
+
+Mount your custom CA certificates into the `/usr/local/share/ca-certificates` directory:
+
+```bash
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "/path/to/your/certificates:/usr/local/share/ca-certificates:ro" \
+  spotfire/spotfire-nodemanager
+```
+
+You can also mount individual certificate files:
+
+```bash
+docker run -d --rm -e ACCEPT_EUA=Y \
+  -e SERVER_BACKEND_ADDRESS=spotfire-server \
+  -v "/path/to/your-ca.crt:/usr/local/share/ca-certificates/your-ca.crt:ro" \
+  spotfire/spotfire-nodemanager
+```

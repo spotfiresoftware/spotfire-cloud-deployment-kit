@@ -13,7 +13,7 @@ This directory contains the recipes to build and examples to use the [**Spotfire
 - [spotfire-pythonservice](charts/spotfire-pythonservice/README.md): Spotfire Service for Python helm chart.
 - [spotfire-terrservice](charts/spotfire-terrservice/README.md): Spotfire Enterprise Runtime for R - Server Edition helm chart.
 
-See the respective README files for details and usage examples. For more examples see the [user guide](../user-guide/).
+See the respective README files for details and usage examples. For more examples see the [user guide](../user-guide/index.md).
 
 **Note**: There are other recipes in the `charts` directory not listed here. They are used internally for better template reusability, and they include common software requirements and functions.
 

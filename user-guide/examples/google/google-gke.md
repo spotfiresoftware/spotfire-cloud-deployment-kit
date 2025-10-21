@@ -132,8 +132,7 @@ For more information, see [GKE documentation](https://cloud.google.com/kubernete
         --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        --set spotfire-server.postgresql.enabled=true \
-        ...
+        --set spotfire-server.postgresql.enabled=true
     ```
     For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 

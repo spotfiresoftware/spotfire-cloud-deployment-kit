@@ -474,6 +474,40 @@ to control which PersistentVolume or PersistentVolumeClaim to use.
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
+#### Improved performance and concurrency for temporary folder
+
+In certain scenarios, like when caching information link results or large library files concurrently, the Spotfire server writes this to its temp folder (default `/opt/spotfire/spotfireserver/tomcat/temp`). In the Kubernetes setup or underlying host, these writes or reads to disk might become a bottleneck, negatively impacting performance and throughput. It can also happen that the default allowed ephemeral storage for the pod is too small.
+In those cases, it is recommended to use a more performant and/or bigger Kubernetes volume. The storage size must accommodate:
+- The attachment manager cache, see [Attachment manager cache](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/attachment_manager_cache.html).
+- Deployment area packages.
+
+For Azure AKS, see also: [Use Azure Container Storage with local NVMe](https://learn.microsoft.com/en-us/azure/storage/container-storage/use-container-storage-with-local-disk).
+
+Example: A `values.yml` snippet configuration for optimizing the Spotfire server temp disk performance on Azure.
+```yaml
+extraVolumeMounts:
+- mountPath: /opt/spotfire/spotfireserver/tomcat/temp
+  name: spotfire-temp-dir-volume
+extraVolumes:
+- name: spotfire-temp-dir-volume
+  ephemeral: # See kubernetes documentation for more information on ephemeral volumes, https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          type: spotfire-ephemeral-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: acstor-ephemeraldisk-nvme # replace with the name of your storage class if different
+        resources:
+          requests:
+            storage: 10Gi # Specify the desired storage size
+
+```
+
+If the correct permissions are not set on the volume see, [Troubleshooting the generic volumes folder permissions](#troubleshooting-the-generic-volumes-folder-permissions).
+
+*Note:* A similar configuration can be applied to optimize the temporary disk performance of other Spotfire services on Azure. See each service README for their default temp folder.
+
 ### Spotfire generic volumes
 
 A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables.
@@ -487,8 +521,29 @@ Example:
 ```yaml
 extraVolumeMounts:
   - name: example
-    mountPath: /opt/spotfire/example.txt
-    subPath: example.txt
+    mountPath: /opt/spotfire/example
+    subPath: example
+extraVolumes:
+  - name: example
+    persistentVolumeClaim:
+      claimName: exampleClaim
+```
+
+### Troubleshooting the generic volumes folder permissions
+If there are any permission issues on the volume mount folders, use an extra init container to set the appropriate permissions.
+
+Example: A `values.yml` snippet configuration for setting the desired permissions on a generic volume folder using an extra init container.
+```yaml
+extraInitContainers:
+  - name: example-permission-provider
+    image: busybox
+    command:
+    - "chmod"
+    - "o+rwx" # Specify desired permissions on the mount folder.
+    - "/opt/spotfire/example-folder"
+    volumeMounts:
+    - mountPath: "/opt/spotfire/example-folder"
+      name: example
 extraVolumes:
   - name: example
     persistentVolumeClaim:

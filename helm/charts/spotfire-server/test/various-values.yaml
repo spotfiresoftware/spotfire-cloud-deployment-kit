@@ -98,6 +98,13 @@ cliPod:
   podAnnotations:
     firstpodannotation: "1"
     secondpodannotation: "2"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi
 configJob:
   logLevel: DEBUG
   extraEnvVars:
@@ -154,6 +161,13 @@ configJob:
     firstpodannotation: "1"
     secondpodannotation: "2"
   ttlSecondsAfterFinished: "3600"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi
 database:
   bootstrap:
     databaseUrl: jdbc://server/dbname
@@ -174,6 +188,13 @@ database:
       key: DBSERVER_ADMIN_PASSWORD
     databaseUrl: jdbc://server/
 fluentBitSidecar:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi
   image:
     pullPolicy: Never
     repository: fluent/fluent-bit
@@ -316,7 +337,13 @@ podAnnotations:
 readinessProbe:
   enabled: true
 replicaCount: 2
-resources: {}
+resources: 
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 200m
+    memory: 1Gi
 service:
   type: ClusterIP
 startupProbe:

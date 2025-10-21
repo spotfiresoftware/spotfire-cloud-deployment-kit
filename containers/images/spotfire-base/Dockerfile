@@ -1,7 +1,7 @@
 #
 # spotfire-base container for latest released stable Debian
 #
-ARG DEBIAN_IMAGE_TAG=12-slim
+ARG DEBIAN_IMAGE_TAG=13-slim
 
 #
 # common java-base
@@ -25,7 +25,7 @@ RUN apt-get update \
      cabextract \
      brotli \
      libjemalloc2 \
-     libmimalloc2.0 \
+     libmimalloc3 \
      curl \
   && apt-get clean all
 

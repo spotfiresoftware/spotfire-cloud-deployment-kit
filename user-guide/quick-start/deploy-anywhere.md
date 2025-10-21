@@ -41,9 +41,9 @@ To deploy Spotfire in a Kubernetes cluster, follow these steps in a terminal:
     ```bash
     kubectl create secret docker-registry spotfire-registry-secret \
         --namespace spotfire \
-        --docker-server=oci.spotfire.com
+        --docker-server=oci.spotfire.com \
         --docker-username=$REGISTRY_USERNAME \
-        --docker-password=$REGISTRY_PASSWORD \
+        --docker-password=$REGISTRY_PASSWORD
     ```
 
     The secret allows the Kubernetes cluster to pull Spotfire container images from the Spotfire OCI registry.
@@ -60,7 +60,7 @@ To deploy Spotfire in a Kubernetes cluster, follow these steps in a terminal:
     ```bash
     helm upgrade --install spotfire-platform \
         oci://oci.spotfire.com/charts/spotfire-platform \
-        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}"
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace spotfire \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=oci.spotfire.com \
@@ -71,7 +71,7 @@ To deploy Spotfire in a Kubernetes cluster, follow these steps in a terminal:
         --set spotfire-pythonservice.enabled=false \
         --set spotfire-rservice.enabled=false \
         --set spotfire-terrservice.enabled=false \
-        --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
+        --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com
     ```
 
     **Note**: Setting `postgresql.enabled=true` will enable the embedded PostgreSQL database, which is intended for testing and demo purposes only. For production, use a dedicated database.

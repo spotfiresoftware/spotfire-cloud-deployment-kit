@@ -17,6 +17,13 @@ fluentBitSidecar:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 0
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi
 fullnameOverride: ""
 acceptEUA: true
 global:
@@ -143,6 +150,9 @@ volumes:
           storage: 11Gi
       storageClassName: storageclassname
       volumeName: volumename
+  certificates:
+    existingClaim: certs-pvc
+    subPath: subpath
   troubleshooting:
     persistentVolumeClaim:
       create: true

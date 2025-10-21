@@ -87,7 +87,8 @@ spec:
               value: {{ printf "Helm configuration update - release=%s revision=%d" .Release.Name .Release.Revision }}
             - name: JOB_CREATE_ADMIN
               value: {{ .Values.configuration.spotfireAdmin.create | quote }}
-          resources: {}
+          resources:
+            {{- toYaml .Values.configJob.resources | nindent 12 }}
           volumeMounts:
             - name: config-job-scripts-volume
               mountPath: /opt/spotfire/scripts/

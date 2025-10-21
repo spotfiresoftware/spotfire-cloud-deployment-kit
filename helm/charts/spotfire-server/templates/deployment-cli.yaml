@@ -82,6 +82,8 @@ spec:
             {{- include "spotfire-server.database.envVars" . | nindent 12 }}
             - name: LOG_LEVEL
               value: {{ .Values.cliPod.logLevel | quote }}
+          resources:
+            {{- toYaml .Values.cliPod.resources | nindent 12 }}
       volumes:
         {{- $existingVolumes := dict }}
         {{- if .Values.volumes.certificates.existingClaim }}

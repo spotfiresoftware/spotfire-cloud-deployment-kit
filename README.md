@@ -14,7 +14,6 @@ This repository contains quick guides, templates, configuration examples, and sc
 
 The recipes have been validated with the Spotfire® releases identified in [Spotfire components versions](versions.mk).
 They might work for other Spotfire versions with some modifications.
-For more information, see [how versions are related](docs/how-versions-are-related.md).
 
 **Note:** Spotfire products are commercially licensed products and are subject to the payment of license fees.
 You must have a valid license for each of the Spotfire applications you choose to build and run in a container.
@@ -106,7 +105,7 @@ A partial summary of the third party software and licenses used in this project 
 
 ---
 
-Copyright 2022-2024 Cloud Software Group, Inc.
+Copyright 2022-2025 Cloud Software Group, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -1,8 +1,9 @@
 {{- define "spotfire-server.haproxy.config" -}}
 global
-    log stdout format raw local0
+    log {{ .Values.spotfireConfig.globals.log }}
     daemon
-    maxconn 1024
+    maxconn {{ .Values.spotfireConfig.globals.maxconn }}
+
     {{- if .Values.spotfireConfig.maintenancePage.useFile }}
     tune.bufsize {{ .Values.spotfireConfig.maintenancePage.bufSize }}
     {{- end }}
@@ -41,7 +42,7 @@ frontend stats
     {{- end }}
 
     # external health check (/health) and readiness (/up)
-    acl acl_backend_down nbsrv(spotfire) lt 1
+    acl acl_backend_down nbsrv(spotfire-servers) lt 1
     http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health && acl_backend_down }
     http-request return status 200 content-type "text/plain" string "OK" if { path /health }
 
@@ -69,7 +70,7 @@ frontend spotfire
 
     option httplog
 
-    acl acl_backend_down nbsrv(spotfire) lt 1
+    acl acl_backend_down nbsrv(spotfire-servers) lt 1
 
     {{- if .Values.spotfireConfig.compression.enabled }}
 
@@ -79,7 +80,7 @@ frontend spotfire
     {{- end }}
 
     # Deny all non-spotfire requests
-    http-request deny status 403 content-type text/html string "403 Forbidden" unless { path -m beg /spotfire/ } || { path / } || { path /spotfire }
+    http-request deny status 403 content-type text/html string "403 Forbidden" unless { path -m beg /spotfire/ } || { path / } || { path /spotfire } || { path /SpotfireWeb/ViewAnalysis.aspx }
 
     # Deny external access to Spotfire Server health check url
     http-request deny deny_status 404 if { path /spotfire/rest/status/getStatus }
@@ -88,7 +89,7 @@ frontend spotfire
 
 
     # For debug purposes (shows the number of running spotfire servers)
-    http-response set-header X-Server-Status "%[nbsrv(spotfire)]"
+    http-response set-header X-Server-Status "%[nbsrv(spotfire-servers)]"
 
     # For logging purposes (these are by default displayed in the haproxy logs)
     capture request header X-Forwarded-Proto len 5
@@ -141,7 +142,7 @@ frontend spotfire
 
     {{- end }}
 
-    default_backend spotfire
+    default_backend spotfire-servers
 
     {{- if .Values.spotfireConfig.cache.enabled }}
 
@@ -175,7 +176,7 @@ cache tss
     process-vary on
 {{- end }}
 
-backend spotfire
+backend spotfire-servers
     dynamic-cookie-key {{ .Values.spotfireConfig.loadBalancingCookie.dynamicCookieKey }}
     cookie {{ .Values.spotfireConfig.loadBalancingCookie.name }} {{ .Values.spotfireConfig.loadBalancingCookie.attributes }}
     option httpchk GET /spotfire/rest/status/getStatus HTTP/1.0

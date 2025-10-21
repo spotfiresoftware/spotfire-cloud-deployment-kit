@@ -45,11 +45,6 @@ USER root
 
 ENV TSNM_CAPABILITY=TERR
 
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-  && apt-get install -y libtinfo5 \
-  && apt-get clean all
-
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/services /opt/spotfire/nodemanager/nm/services
 COPY --from=extract --chown=spotfire:spotfire /tmp/nodemanager-install/nm/config/default.conf /opt/spotfire/nodemanager/nm/config/default.conf
 COPY --chown=spotfire:spotfire entrypoint-terr.sh ./

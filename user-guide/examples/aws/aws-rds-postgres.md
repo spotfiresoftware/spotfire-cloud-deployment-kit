@@ -146,11 +146,10 @@ For more information, see [Creating an Amazon RDS DB instance](https://docs.aws.
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        -f aws-rds-postgres.yaml \
-        ...
+        -f aws-rds-postgres.yaml
     ```
 
     For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
@@ -166,6 +165,5 @@ To avoid unneeded resource usage, once you have completed this tutorial, delete 
 ```bash
 eksctl delete cluster --name $CLUSTER_NAME
 aws rds delete-db-instance --db-instance-identifier $DB_INSTANCE_NAME --skip-final-snapshot
-...
 ```
 For more information, see [Deleting a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html).

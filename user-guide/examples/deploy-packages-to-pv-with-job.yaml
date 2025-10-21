@@ -44,7 +44,7 @@ spec:
     spec:
       containers:
         - name: populate-packages
-          image: spotfire/spotfire-pythonservice:1.22.0
+          image: spotfire/spotfire-pythonservice:1.23.0
           command: ['sh', '-c', 'python -m pip install -t /packages -r /requirements.txt']
           imagePullPolicy: Always
           volumeMounts:

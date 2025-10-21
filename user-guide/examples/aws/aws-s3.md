@@ -128,12 +128,11 @@ Execute this step only if the Spotfire environment is already deployed on the EK
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
         -f aws-rds-postgres.yaml \
-        -f aws-s3-bucket.yaml \
-        ...
+        -f aws-s3-bucket.yaml
     ```
    For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 

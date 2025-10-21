@@ -145,6 +145,10 @@ kedaAutoscaling:
 
 **Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
 
+#### Improved performance and concurrency for temporary folder
+
+To store intermediate results during analysis and optimize data reuse, the Spotfire Service for Python uses its temporary folder (default: `/tmp`). In scenarios where large data sets or concurrent computations are involved, the default temporary folder might become a bottleneck, impacting performance and throughput. To address this, it is recommended to use a more performant and larger Kubernetes volume for the temporary folder. For more details, see [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+
 ### Upgrading
 
 When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.

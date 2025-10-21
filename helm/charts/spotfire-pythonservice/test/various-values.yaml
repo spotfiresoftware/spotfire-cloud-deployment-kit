@@ -66,6 +66,9 @@ volumes:
           storage: 11Gi
       storageClassName: storageclassname
       volumeName: volumename
+  certificates:
+    existingClaim: certs-pvc
+    subPath: subpath
   packages:
     subPath: subpath
     existingClaim: existingclaim2
@@ -118,6 +121,13 @@ fluentBitSidecar:
     pullPolicy: Always
     repository: fluent/fluent-bit
     tag: 1.9.9
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi
 extraInitContainers:
   - name: dummy-init
     image: busybox

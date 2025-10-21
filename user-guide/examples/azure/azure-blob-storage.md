@@ -153,12 +153,11 @@ For more information, see the [az storage](https://learn.microsoft.com/en-us/cli
         --version 2.0.0 \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
-        --set global.spotfire.image.registry=$REGISTRY_SERVER\
+        --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
         -f azure-database-postgres.yaml \
-        -f azure-blob-storage.yaml \
-        ...
+        -f azure-blob-storage.yaml
     ```
     For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 

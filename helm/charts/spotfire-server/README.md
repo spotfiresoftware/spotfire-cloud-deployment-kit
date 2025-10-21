@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.5.0](https://img.shields.io/badge/AppVersion-14.5.0-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.0](https://img.shields.io/badge/AppVersion-14.6.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Server.
 
@@ -16,8 +16,8 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 1.0.0 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.48.* |
+| file://../spotfire-common | spotfire-common | 2.0.0 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.52.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.24.* |
 
 ## Overview
@@ -480,6 +480,40 @@ to control which PersistentVolume or PersistentVolumeClaim to use.
 
 **Note**: The `spotfire` user needs write permissions for the volume.
 
+#### Improved performance and concurrency for temporary folder
+
+In certain scenarios, like when caching information link results or large library files concurrently, the Spotfire server writes this to its temp folder (default `/opt/spotfire/spotfireserver/tomcat/temp`). In the Kubernetes setup or underlying host, these writes or reads to disk might become a bottleneck, negatively impacting performance and throughput. It can also happen that the default allowed ephemeral storage for the pod is too small.
+In those cases, it is recommended to use a more performant and/or bigger Kubernetes volume. The storage size must accommodate:
+- The attachment manager cache, see [Attachment manager cache](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/attachment_manager_cache.html).
+- Deployment area packages.
+
+For Azure AKS, see also: [Use Azure Container Storage with local NVMe](https://learn.microsoft.com/en-us/azure/storage/container-storage/use-container-storage-with-local-disk).
+
+Example: A `values.yml` snippet configuration for optimizing the Spotfire server temp disk performance on Azure.
+```yaml
+extraVolumeMounts:
+- mountPath: /opt/spotfire/spotfireserver/tomcat/temp
+  name: spotfire-temp-dir-volume
+extraVolumes:
+- name: spotfire-temp-dir-volume
+  ephemeral: # See kubernetes documentation for more information on ephemeral volumes, https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/
+    volumeClaimTemplate:
+      metadata:
+        labels:
+          type: spotfire-ephemeral-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: acstor-ephemeraldisk-nvme # replace with the name of your storage class if different
+        resources:
+          requests:
+            storage: 10Gi # Specify the desired storage size
+
+```
+
+If the correct permissions are not set on the volume see, [Troubleshooting the generic volumes folder permissions](#troubleshooting-the-generic-volumes-folder-permissions).
+
+*Note:* A similar configuration can be applied to optimize the temporary disk performance of other Spotfire services on Azure. See each service README for their default temp folder.
+
 ### Spotfire generic volumes
 
 A generic way to use volumes with the `spotfire-server` chart is with the `extraVolumeMounts` and `extraVolumes` chart variables.
@@ -493,8 +527,29 @@ Example:
 ```yaml
 extraVolumeMounts:
   - name: example
-    mountPath: /opt/spotfire/example.txt
-    subPath: example.txt
+    mountPath: /opt/spotfire/example
+    subPath: example
+extraVolumes:
+  - name: example
+    persistentVolumeClaim:
+      claimName: exampleClaim
+```
+
+### Troubleshooting the generic volumes folder permissions
+If there are any permission issues on the volume mount folders, use an extra init container to set the appropriate permissions.
+
+Example: A `values.yml` snippet configuration for setting the desired permissions on a generic volume folder using an extra init container.
+```yaml
+extraInitContainers:
+  - name: example-permission-provider
+    image: busybox
+    command:
+    - "chmod"
+    - "o+rwx" # Specify desired permissions on the mount folder.
+    - "/opt/spotfire/example-folder"
+    volumeMounts:
+    - mountPath: "/opt/spotfire/example-folder"
+      name: example
 extraVolumes:
   - name: example
     persistentVolumeClaim:
@@ -559,11 +614,12 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"14.5.0-v3.0.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"14.6.0-v4.0.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
 | cliPod.podSecurityContext | object | `{}` | The podSecurityContext setting for cliPod More info: `kubectl explain deployment.spec.template.spec.securityContext` |
+| cliPod.resources | object | `{}` | The resources setting for cliPod. |
 | cliPod.securityContext | object | `{}` | The securityContext setting for cliPod. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
 | cliPod.tolerations | list | `[]` |  |
 | configJob.affinity | object | `{}` |  |
@@ -577,11 +633,12 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"14.5.0-v3.0.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"14.6.0-v4.0.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
+| configJob.resources | object | `{}` | The resources setting for configJob. |
 | configJob.securityContext | object | `{}` | The securityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.containers.securityContext` |
 | configJob.tolerations | list | `[]` |  |
 | configJob.ttlSecondsAfterFinished | int | `7200` | Set the length of time in seconds to keep job and its logs until the job is removed. |
@@ -612,7 +669,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"14.5.0-v3.0.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.0-v4.0.0"` | The container image tag to use. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
 | configuration.draining.enabled | bool | `true` | Enables or disables the container lifecycle PreStop hook. |
@@ -656,7 +713,8 @@ For more details, see for example:
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"3.2.8"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.0.7"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | haproxy.enabled | bool | `true` |  |
@@ -675,6 +733,9 @@ For more details, see for example:
 | haproxy.spotfireConfig.cleanup.sameSiteCookieAttributeForHttp | bool | `true` | If the SameSite cookie attribute should be removed for HTTP connections in Set-Cookie response headers, then it might be needed in cases where both HTTP and HTTPS are enabled, and upstream servers set this unconditionally. |
 | haproxy.spotfireConfig.cleanup.secureCookieAttributeForHttp | bool | `true` | If incorrect, then the secure cookie attribute should be removed for HTTP connections in the Set-Cookie response headers. |
 | haproxy.spotfireConfig.debug | bool | `false` | Specifies if debug response headers should be enabled. |
+| haproxy.spotfireConfig.globals | object | haproxy globals in the Spotfire provided configuration. | Global configuration parameters in the Spotfire provided configuration. |
+| haproxy.spotfireConfig.globals.log | string | `"stdout format raw local0"` | The haproxy log configuration. See [haproxy log formats](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#8.2) for more information. |
+| haproxy.spotfireConfig.globals.maxconn | int | `1024` | Sets the maximum per-process number of concurrent connections. See [haproxy maxconn](https://cbonte.github.io/haproxy-dconv/2.6/configuration.html#maxconn) for more information. |
 | haproxy.spotfireConfig.haproxy | object | additional settings | Additional settings for various settings in the default spotfire haproxy configuration. |
 | haproxy.spotfireConfig.haproxy.defaults | string | `nil` | The haproxy defaults section. See [haproxy proxies](https://docs.haproxy.org/3.0/configuration.html#4). |
 | haproxy.spotfireConfig.haproxy.frontend | string | `nil` | The haproxy spotfire frontend section. See [haproxy proxies](https://docs.haproxy.org/3.0/configuration.html#4). |
@@ -704,7 +765,7 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"14.5.0-v3.0.0"` | The container image tag to use. |
+| image.tag | string | `"14.6.0-v4.0.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |

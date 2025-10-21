@@ -129,8 +129,7 @@ See also the [Amazon EKS Best Practices Guide](https://docs.aws.amazon.com/eks/l
         --set global.spotfire.image.registry=$REGISTRY_SERVER \
         --set global.spotfire.image.pullSecrets[0]=$REGISTRY_SECRET \
         --set spotfire-server.configuration.site.publicAddress=http://spotfire.example.com \
-        --set spotfire-server.postgresql.enabled=true \
-        ...
+        --set spotfire-server.postgresql.enabled=true
     ```
     For more information, see the [spotfire-platform Helm chart](../../helm/charts/spotfire-platform/README.md).
 
