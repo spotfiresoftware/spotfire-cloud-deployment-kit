@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.6.0-v4.0.0"
+  tag: "14.6.0-v4.0.1"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -44,7 +44,7 @@ fluentBitSidecar:
   # -- The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
   # More info: `kubectl explain pod.spec.securityContext`
   securityContext: {}
-  
+
   # -- The resources setting for fluent-bit sidecar container.
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -255,7 +255,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.0-v4.0.0"
+    tag: "14.6.0-v4.0.1"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -272,7 +272,7 @@ cliPod:
     #   memory: 128Mi
     # requests:
     #   cpu: 100m
-    #   memory: 128Mi    
+    #   memory: 128Mi
 
 # ===============================
 # configJob pods settings
@@ -317,7 +317,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.0-v4.0.0"
+    tag: "14.6.0-v4.0.1"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -606,12 +606,24 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.6.0-v4.0.0"
+        tag: "14.6.0-HF-001-v4.0.1"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
         # image.pullSecrets -- spotfire-deployment image pull secrets.
         pullSecrets: []
+      # -- The resources setting for defaultDeployment.
+      resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This increases chances that charts can run on environments with few
+        # resources, such as Minikube. If you do want to specify resources, then uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
 
   # -- Action log settings. See [config-action-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-logger.html) for more information.
   # @default -- File logging enabled, database logging disabled.

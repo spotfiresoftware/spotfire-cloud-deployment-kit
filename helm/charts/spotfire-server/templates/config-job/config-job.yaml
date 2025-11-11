@@ -30,6 +30,8 @@ spec:
             - mountPath: /opt/spotfire/deployments-volume
               name: {{ default "deployments" .Values.volumes.deployments.existingClaim }}-volume
               subPath: {{ .Values.volumes.deployments.subPath | quote }}
+          resources:
+            {{- toYaml .Values.configuration.deployment.defaultDeployment.resources | nindent 12 }}
       {{- end }}
       {{- if .Values.configJob.extraInitContainers }}
         {{- tpl (toYaml .Values.configJob.extraInitContainers) $ | nindent 8 }}

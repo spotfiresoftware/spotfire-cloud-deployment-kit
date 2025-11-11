@@ -38,7 +38,7 @@ Remember to change the provided example values to adapt them to your own environ
 2. Create a Google Storage bucket:
     ```bash
     export BUCKET_NAME=<my-bucket>
-    gcloud storage buckets create gs:/$BUCKET_NAME \
+    gcloud storage buckets create gs://$BUCKET_NAME \
         --location=$LOCATION
     ```
     For more information, see [Create buckets](https://cloud.google.com/storage/docs/creating-buckets).
