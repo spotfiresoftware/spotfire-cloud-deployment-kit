@@ -41,10 +41,17 @@ spotfire-server:
 # data loss. Please make sure you are familiar with the documentation of your
 # chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate
 # measures to ensure data persistence.
+# See [Installation](README.md#installation) for more details.
 # @default -- -
 postgresql:
   # -- Enable or disable the PostgreSQL database component
   enabled: false
+  # -- Required: Image repository for PostgreSQL (must use bitnamilegacy for compatibility)
+  image:
+    repository: bitnamilegacy/postgresql
+  # -- Required: Resource preset must be set to at least "small" to avoid OOM issues
+  primary:
+    resourcesPreset: small
 
 # -- See [spotfire-webplayer README.md](../spotfire-webplayer/README.md) for configuration options
 # @default -- -

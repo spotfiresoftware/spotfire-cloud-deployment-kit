@@ -4,7 +4,7 @@ description: A Helm chart for Spotfire® Enterprise Runtime for R - Server Editi
 
 type: application
 
-version: 2.0.1
+version: 2.0.2
 
 appVersion: "1.23.0"
 
@@ -24,7 +24,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 2.0.1
+    version: 2.0.2
 
 annotations:
   license: Apache 2.0
