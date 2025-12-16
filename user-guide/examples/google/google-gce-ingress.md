@@ -66,7 +66,7 @@ When you create a service of type `LoadBalancer` in GKE, Google Cloud automatica
 
     helm upgrade --install $MY_SPOTFIRE_RELEASE \
         oci://$REGISTRY_SERVER/charts/spotfire-platform \
-        --version 2.0.0 \
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=$REGISTRY_SERVER \
@@ -179,7 +179,7 @@ After that, associate your domain with the external IP address of the created Go
 
     helm upgrade --install $MY_SPOTFIRE_RELEASE \
         oci://$REGISTRY_SERVER/charts/spotfire-platform \
-        --version 2.0.0 \
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=$REGISTRY_SERVER \

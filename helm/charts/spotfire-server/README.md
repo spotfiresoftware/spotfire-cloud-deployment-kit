@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 2.0.2](https://img.shields.io/badge/Version-2.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.0](https://img.shields.io/badge/AppVersion-14.6.0-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.1](https://img.shields.io/badge/AppVersion-14.6.1-informational?style=flat-square)
 
 A Helm chart for Spotfire Server.
 
@@ -16,9 +16,9 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 2.0.2 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.52.* |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.24.* |
+| file://../spotfire-common | spotfire-common | 2.1.0 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.54.* |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.26.* |
 
 ## Overview
 
@@ -618,7 +618,7 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"14.6.0-v4.0.2"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"14.6.1-v4.1.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -637,7 +637,7 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"14.6.0-v4.0.2"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"14.6.1-v4.1.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -673,7 +673,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.0-HF-002-v4.0.2"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.1-v4.1.0"` | The container image tag to use. |
 | configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -709,6 +709,7 @@ For more details, see for example:
 | database.create-db.spotfiredbDbname | string | `"spotfire"` | Database name to be created to hold the Spotfire Server database schemas. |
 | database.create-db.variant | string | `""` | For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option. |
 | database.upgrade | bool | `false` | Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed. |
+| database.upgradeOptions | string | `""` | Additional arguments to pass to the Spotfire Server upgrade tool. See [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) and [Running the Spotfire Server upgrade tool silently](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/running_the_spotfire_server_upgrade_tool_silently.html) for more information. |
 | extraContainers | list | `[]` | Additional sidecar containers to add to the Spotfire server pod. More info: `kubectl explain deployment.spec.template.spec.containers` |
 | extraEnvVars | list | `[]` | Additional environment variables that all spotfire-server pods use. |
 | extraEnvVarsCM | string | `""` |  |
@@ -718,7 +719,7 @@ For more details, see for example:
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.0.7"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.1.0"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
@@ -770,13 +771,14 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"14.6.0-v4.0.2"` | The container image tag to use. |
+| image.tag | string | `"14.6.1-v4.1.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
 | ingress.hosts[0].paths[0].path | string | `"/"` |  |
 | ingress.hosts[0].paths[0].pathType | string | `"Prefix"` |  |
 | ingress.ingressClassName | string | `""` | IngressClass that will be be used for the Ingress (Kubernetes 1.18+) ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/ |
+| ingress.servicePort | int | `80` | The haproxy service port that the ingress will route traffic to. |
 | ingress.tls | list | `[]` |  |
 | kedaAutoscaling | object | Disabled | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |

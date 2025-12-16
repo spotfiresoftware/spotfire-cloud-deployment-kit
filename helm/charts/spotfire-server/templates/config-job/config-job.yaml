@@ -73,6 +73,10 @@ spec:
               value: {{ index .Values "database" "create-db" "enabled" | quote }}
             - name: JOB_UPGRADE_DATABASE
               value: {{ .Values.database.upgrade | quote }}
+            {{- if .Values.database.upgradeOptions }}
+            - name: JOB_UPGRADE_DATABASE_OPTS
+              value: {{ .Values.database.upgradeOptions | quote }}
+            {{- end }}
             {{- if or (eq .Values.configuration.apply "always") (eq .Values.configuration.apply "initialsetup") (eq .Values.configuration.apply "never") }}
             - name: JOB_WHEN_TO_APPLY_CONFIG
               value: {{ .Values.configuration.apply | quote }}

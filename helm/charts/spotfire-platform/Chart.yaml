@@ -2,32 +2,32 @@ apiVersion: v2
 name: spotfire-platform
 description: This is an umbrella chart for Spotfire, a chart that groups several Spotfire services together. It allows you to deploy, upgrade, and manage a Spotfire environment with optional Spotfire services.
 type: application
-version: 2.0.2
-appVersion: 14.6-v4.0.2
+version: 2.1.0
+appVersion: 14.6-v4.1.0
 kubeVersion: ">=1.24.0-0"
 dependencies:
   - name: spotfire-server
     repository: file://../spotfire-server/
-    version: 2.0.2
+    version: 2.1.0
   - name: spotfire-webplayer
     repository: file://../spotfire-webplayer/
-    version: 2.0.2
+    version: 2.1.0
     condition: spotfire-webplayer.enabled
   - name: spotfire-automationservices
     repository: file://../spotfire-automationservices/
-    version: 2.0.2
+    version: 2.1.0
     condition: spotfire-automationservices.enabled
   - name: spotfire-terrservice
     repository: file://../spotfire-terrservice/
-    version: 2.0.2
+    version: 2.1.0
     condition: spotfire-terrservice.enabled
   - name: spotfire-rservice
     repository: file://../spotfire-rservice/
-    version: 2.0.2
+    version: 2.1.0
     condition: spotfire-rservice.enabled
   - name: spotfire-pythonservice
     repository: file://../spotfire-pythonservice/
-    version: 2.0.2
+    version: 2.1.0
     condition: spotfire-pythonservice.enabled
   - name: postgresql
     condition: postgresql.enabled

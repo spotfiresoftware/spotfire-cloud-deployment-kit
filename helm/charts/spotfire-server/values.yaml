@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.6.0-v4.0.2"
+  tag: "14.6.1-v4.1.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -37,7 +37,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "4.0.7"
+    tag: "4.1.0"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -118,6 +118,8 @@ readinessProbe:
 ingress:
   # -- Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster.
   enabled: false
+  # -- The haproxy service port that the ingress will route traffic to.
+  servicePort: 80
   hosts:
       - host: "spotfire.local"
         paths:
@@ -255,7 +257,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.0-v4.0.2"
+    tag: "14.6.1-v4.1.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -317,7 +319,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.0-v4.0.2"
+    tag: "14.6.1-v4.1.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -466,6 +468,8 @@ database:
     oracleRootfolder: ""
   # -- Often new Spotfire server version requires an upgraded database. If true, the database will be upgrade to match the server version being deployed.
   upgrade: false
+  # -- Additional arguments to pass to the Spotfire Server upgrade tool. See [Upgrading Spotfire](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/upgrading_spotfire.html) and [Running the Spotfire Server upgrade tool silently](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/running_the_spotfire_server_upgrade_tool_silently.html) for more information.
+  upgradeOptions: ""
 
 configuration:
   # -- When to apply configurationScripts, commandScripts, admin user creation and action log settings.
@@ -606,7 +610,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.6.0-HF-002-v4.0.2"
+        tag: "14.6.1-v4.1.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
