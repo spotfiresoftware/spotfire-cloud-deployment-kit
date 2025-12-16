@@ -69,7 +69,7 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
     ```bash
     export DB_INSTANCE_NAME=<db-instance-name>
     export DB_ADMIN_PASSWORD=<changeAdminPassword>
-    export MACHINE_TYPE=db-custom-2-7680 # 2 vCPUs, 8 GB RAM
+    export MACHINE_TYPE=db-perf-optimized-N-2 # 2 vCPUs, 16 GB RAM
 
     gcloud services enable sqladmin.googleapis.com
     gcloud sql instances create $DB_INSTANCE_NAME \
@@ -83,6 +83,9 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
     It will take ~5 minutes to create the database instance.
 
     For more information, see [Google SQL - Create instances](https://cloud.google.com/sql/docs/postgres/create-instance#gcloud).
+
+    For information on the available machine types, see [Machine series overview
+](https://cloud.google.com/sql/docs/postgres/machine-series-overview).
 
     See [Introduction to Cloud SQL for PostgreSQL editions](https://cloud.google.com/sql/docs/postgres/editions-intro) to understand which edition you need for your database.
 
@@ -120,7 +123,7 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
 
     helm upgrade --install $MY_SPOTFIRE_RELEASE \
         oci://$REGISTRY_SERVER/charts/spotfire-platform \
-        --version 2.0.0 \
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=$REGISTRY_SERVER \

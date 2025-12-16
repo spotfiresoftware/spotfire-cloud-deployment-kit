@@ -29,7 +29,7 @@ spec:
       serverAddress: {{ required "The prometheus server address must be set for KEDA autoscaling configuration" .Values.kedaAutoscaling.spotfireConfig.prometheusServerAddress }}
       metricName: spotfire_Spotfire_Webplayer_Web_Player_health_status
       threshold: {{ required "The target threshold when to scale out must be specified" .Values.kedaAutoscaling.threshold | quote }}
-      query: {{ printf "sum(spotfire_Spotfire_Webplayer_Web_Player_health_status{capability=\"WEB_PLAYER\", app_kubernetes_io_instance=\"%s\", app_kubernetes_io_name=\"%s\"})" .Release.Name (include "spotfire-common.spotfire-service.name" .) | quote }}
+      query: {{ printf "sum(spotfire_Spotfire_Webplayer_Web_Player_health_status{namespace=\"%s\", capability=\"WEB_PLAYER\", app_kubernetes_io_instance=\"%s\", app_kubernetes_io_name=\"%s\"})" .Release.Namespace .Release.Name (include "spotfire-common.spotfire-service.name" .) | quote }}
       namespace: {{ .Release.Namespace }}
   {{- else }}
   {{- with .Values.kedaAutoscaling.triggers }}

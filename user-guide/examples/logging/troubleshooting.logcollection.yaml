@@ -1,0 +1,70 @@
+kind: Deployment
+replicaCount: 1
+rbac:
+  create: false
+metrics:
+  dashboards:
+    enabled: false
+podAnnotations:
+  prometheus.io/path: /metrics
+  prometheus.io/port: "24231"
+  prometheus.io/scrape: "true"
+
+mountVarLogDirectory: false
+mountDockerContainersDirectory: false
+
+volumes:
+  - name: spotfire-logs
+    # emptyDir for test purposes, use persistent storage in production
+    emptyDir: {}
+volumeMounts: 
+  - name: spotfire-logs
+    mountPath: /spotfire/logs
+
+fileConfigs:
+  01_sources.conf: |-
+
+    <source>
+      @type forward
+      port 24224
+      bind 0.0.0.0
+    </source>
+
+    # expose metrics in prometheus format
+    <source>
+      @type prometheus
+      bind 0.0.0.0
+      port 24231
+      metrics_path /metrics
+    </source>
+
+  02_filters.conf: null
+  03_dispatch.conf: null
+  04_outputs.conf: |-
+    <match **>
+      @type file
+      compress gzip
+      path /spotfire/logs/%Y%m%d%H%M.log
+      <buffer>
+        @type file
+        timekey 10m
+        timekey_use_utc true
+        timekey_wait 1m
+        path /var/log/fluent/buf/spotfire.*
+      </buffer>
+      <format>
+        @type json
+      </format>
+      <inject>
+        time_key timestamp
+        time_type string
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+        tag_key log.type
+      </inject>
+    </match>
+
+service:
+  ports:
+    - name: forward
+      containerPort : 24224
+      protocol: TCP

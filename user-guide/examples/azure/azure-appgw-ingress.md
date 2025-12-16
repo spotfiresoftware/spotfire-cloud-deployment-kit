@@ -67,7 +67,7 @@ When you create a service of type `LoadBalancer` in AKS, Azure automatically pro
 
     helm upgrade --install $MY_SPOTFIRE_RELEASE \
         oci://$REGISTRY_SERVER/charts/spotfire-platform \
-        --version 2.0.0 \
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=$REGISTRY_SERVER \
@@ -229,7 +229,7 @@ You can do it directly from the `spotfire-platform` Helm chart.
 
     helm upgrade --install $MY_SPOTFIRE_RELEASE \
         oci://$REGISTRY_SERVER/charts/spotfire-platform \
-        --version 2.0.0 \
+        --version "{{ SPOTFIRE_PLATFORM_CHART_VERSION }}" \
         --namespace=$NAMESPACE \
         --set global.spotfire.acceptEUA=true \
         --set global.spotfire.image.registry=$REGISTRY_SERVER \

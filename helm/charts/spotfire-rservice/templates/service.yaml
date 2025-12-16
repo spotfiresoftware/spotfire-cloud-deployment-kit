@@ -9,9 +9,9 @@ spec:
   clusterIP: None
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: http
+      targetPort: service
       protocol: TCP
-      name: http
+      name: service
     - port: 9443
       name: backend
       protocol: TCP

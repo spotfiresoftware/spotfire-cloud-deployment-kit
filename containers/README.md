@@ -8,7 +8,7 @@ This directory contains the recipes to build and examples to use the [**Spotfire
 
 ## Prerequisites
 
-- [Required **Spotfire** installation packages](build-files.mk). You can download them from the [Spotfire Download site](https://www.spotfire.com/downloads).
+- [Required **Spotfire** installation packages](build-files.mk). You can download them from the [Spotfire Download site](https://www.spotfire.com/downloads), and hotfixes from the [Spotfire Community site](https://community.spotfire.com/articles/spotfire/list-of-hotfixes-for-spotfire-clients-analyst-web-player-consumer-business-author-and-automation-services/).
 - A **Linux host** with admin permissions to build and execute the containers.
   You can use a bare metal installed server, a virtual machine, or WSL on Windows.
 - An [OCI-compliant](https://opencontainers.org/) container image building tool (for example, `docker`, `podman` or alternative), for building the container images.

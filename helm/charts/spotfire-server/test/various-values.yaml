@@ -291,7 +291,7 @@ livenessProbe:
   failureThreshold: 3
   httpGet:
     path: /spotfire/rest/status/getStatus
-    port: http
+    port: service
   periodSeconds: 30
 log-forwarder:
   enabled: true
@@ -351,7 +351,7 @@ startupProbe:
   failureThreshold: 30
   httpGet:
     path: /spotfire/rest/status/getStatus
-    port: http
+    port: service
   initialDelaySeconds: 60
   periodSeconds: 10
 toolPassword: mytoolpassword

@@ -25,6 +25,48 @@ You can configure the `log-forwarder` service to forward the logs to other desti
 FluentBit supports output to many services.
 For more information, see [FluentBit output plugins](https://docs.fluentbit.io/manual/pipeline/outputs).
 
+
+### Collect logs temporarily, for example, when troubleshooting, with an additional forwarding target
+
+By default, Spotfire pods keep a small amount of logs on disk, and if there are temporary situations where more information should be kept, for example, for troubleshooting purposes, it is possible to add an additional target for log events if log forwarding is enabled.
+
+In this case, [fluentd](https://docs.fluentd.org/) is added as a log event receiver and all log events are written to disk; one file every 10 minutes. If there is a large amount of log events, a persistent volume or similar is needed to avoid that the fluentd container runs out of disk space. Use [troubleshooting.logcollection.yaml](logging/troubleshooting.logcollection.yaml) as a starting point for a working example.
+
+```bash
+helm install logcollection fluent/fluentd --namespace <namespace> --values troubleshooting.logcollection.yaml
+```
+
+Then, re-configure the `log-forwarder` service to also forward the Spotfire logs to this temporary fluentd log receiver.
+
+```yaml
+spotfire-server:
+  log-forwarder:
+    config:
+      outputs: |
+        ... existing outputs
+        # temporary output to capture information
+        [OUTPUT]
+            Name            forward
+            Match_Regex     (tss|tsnm)\..*
+            Host            logcollection-fluentd
+            Port            24224
+```
+
+When enough information have been collected, copy the files.
+
+```bash
+logcollection_pod=$(kubectl get pods --namespace "<namespace>" -l "app.kubernetes.io/name=fluentd,app.kubernetes.io/instance=logcollection" -o jsonpath="{.items[0].metadata.name}")
+kubectl cp --namespace "<namespace>" --container="fluentd" "${logcollection_pod}:/spotfire/logs" "./"
+```
+
+#### Cleanup
+
+1. Re-configure the `log-forwarder` service again, and remove the additional forwarding output.
+
+2. Delete the helm `logcollection` installation.
+```bash
+helm uninstall logcollection --namespace <namespace>
+```
 ### Forward Spotfire logs to Elasticsearch
 
 To forward the logs to Elasticsearch, use the [FluentBit output for Elasticsearch](https://docs.fluentbit.io/manual/pipeline/outputs/elasticsearch).
@@ -34,7 +76,6 @@ Example:
 ```bash
 helm install --set acceptEUA=true my-spotfire-release . -f log.forwarder.elasticsearch.yaml
 ```
-
 ### Elasticsearch
 
 #### Installing

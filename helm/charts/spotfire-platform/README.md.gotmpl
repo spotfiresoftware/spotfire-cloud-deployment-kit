@@ -35,6 +35,9 @@ Note: For more advanced configurations, where you need multiple instances of a s
 ```bash
 helm install my-release . --render-subchart-notes --set global.spotfire.acceptEUA=true \
     --set postgresql.enabled=true \
+    --set postgresql.image.repository=bitnamilegacy/postgresql \
+    --set postgresql.primary.resourcesPreset=small \
+    --set global.postgresql.auth.postgresPassword=DBAdminPassword \
     --set spotfire-webplayer.enabled=true \
     --set spotfire-automationservices.enabled=true \
     --set spotfire-terrservice.enabled=true \
@@ -44,6 +47,10 @@ helm install my-release . --render-subchart-notes --set global.spotfire.acceptEU
 ```
 
 This will deploy the Spotfire platform with all components enabled using the embedded PostgreSQL database.
+
+**Note**: The embedded PostgreSQL Helm chart requires `postgresql.image.repository=bitnamilegacy/postgresql` and `postgresql.primary.resourcesPreset=small` to be set. The password for the database user `postgres` is set to `DBAdminPassword`.
+
+**Warning**: Due to a limitation in the PostgreSQL Helm chart, if you uninstall the Spotfire platform chart using `helm uninstall my-release` and then reinstall it with a different value for `global.postgresql.auth.postgresPassword` (the PostgreSQL admin password), the new password will be ignored because the PostgreSQL PVC still contains the old password. This will cause the Spotfire deployments to fail. To use a different PostgreSQL admin password, you must first delete the PVC (`kubectl delete pvc data-my-release-postgresql-0`), which will also delete all data stored in the PostgreSQL database. For more information, see the [Bitnami PostgreSQL bug #2061](https://github.com/bitnami/charts/issues/2061).
 
 ### Using an external Spotfire database
 

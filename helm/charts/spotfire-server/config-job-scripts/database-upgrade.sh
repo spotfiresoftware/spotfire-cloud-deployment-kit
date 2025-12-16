@@ -48,7 +48,8 @@ java -Xms256m -Xmx4096m -classpath "spotfireconfigtool/lib/*:spotfireconfigtool/
     -Dlog4j.configurationFile=/opt/spotfire/spotfireconfigtool/log4j2-tools.xml \
     -Dtool.remote=true \
     com.spotfire.server.tools.upgrade.UpgradeLauncher ${ENCRYPTION_PASSWORD:+--encryptionpassword="${ENCRYPTION_PASSWORD}"} \
-    -silent=upgrade.properties
+    -silent=upgrade.properties \
+    ${JOB_UPGRADE_DATABASE_OPTS:-}
 
 
 

@@ -187,7 +187,7 @@ backend spotfire-servers
     http-response set-header X-Server "%s"
     {{- end }}
 
-    server-template spotfire-server 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns resolve-opts ignore-weight check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
+    server-template spotfire-server 10 _service._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns resolve-opts ignore-weight check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
 resolvers pcdns
     parse-resolv-conf
     resolve_retries       3

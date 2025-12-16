@@ -31,6 +31,8 @@ When reporting issues or seeking help, make sure to collect as much relevant inf
 
 The script [generate-troubleshooting-bundle.sh](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/utilities/generate-troubleshooting-bundle.sh) can be used as a starting point when collecting information from a Spotfire Helm deployment.
 
+In some scenarios, there might be a need to [collect logs during an extended period of time](examples/logging-with-efk.md#collect-logs-temporarily-eg-for-troubleshooting-with-an-additional-forwarding-target).
+
 For issues related to the cloud native environment and third party products, see the respective documentation.
 
 ## Ideas and improvements

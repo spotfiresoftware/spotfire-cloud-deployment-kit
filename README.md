@@ -22,7 +22,7 @@ Carefully review the [Cloud Computing Environment Licensing Policy (“CCEL Poli
 
 ## Prerequisites
 
-- **Spotfire Installation Packages:** Required packages are listed in [containers/build-files.mk](containers/build-files.mk). You can download them from the [Spotfire Download site](https://www.spotfire.com/downloads).
+- **Spotfire Installation Packages:** Required packages are listed in [containers/build-files.mk](containers/build-files.mk). You can download them from the [Spotfire Download site](https://www.spotfire.com/downloads), and hotfixes from the [Spotfire Community site](https://community.spotfire.com/articles/spotfire/list-of-hotfixes-for-spotfire-clients-analyst-web-player-consumer-business-author-and-automation-services/).
 - **Linux Host:** A Linux host with permissions to build and execute the containers. This can be a bare metal server, a virtual machine, or WSL on Windows.
 - **OCI-Compliant Container Image Building Tool:** An OCI-compliant tool like `docker` or `podman` for building the container images.
 - **GNU Make 3.82+:** Ensure `make` is installed on your system to use the provided Makefiles for building the images and charts.
