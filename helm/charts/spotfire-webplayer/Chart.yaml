@@ -4,9 +4,9 @@ description: A Helm chart for Spotfire Web Player.
 
 type: application
 
-version: 2.1.0
+version: 2.1.1
 
-appVersion: "14.6.1"
+appVersion: "14.6.1-HF-004"
 
 kubeVersion: ">=1.24.0-0"
 
@@ -22,7 +22,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 2.1.0
+    version: 2.1.1
 
 annotations:
   license: Apache 2.0
