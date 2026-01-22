@@ -105,7 +105,7 @@ A partial summary of the third party software and licenses used in this project 
 
 ---
 
-Copyright 2022-2025 Cloud Software Group, Inc.
+Copyright 2022-2026 Cloud Software Group, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

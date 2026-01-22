@@ -4,7 +4,7 @@ description: A Helm chart for Spotfire Server.
 
 type: application
 
-version: 3.0.0
+version: 3.0.1
 
 appVersion: "14.7.0"
 
@@ -36,7 +36,7 @@ dependencies:
     condition: haproxy.enabled
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 3.0.0
+    version: 3.0.1
 
 annotations:
   license: Apache 2.0
