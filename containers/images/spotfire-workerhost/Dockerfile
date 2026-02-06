@@ -17,7 +17,7 @@ USER root
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-  # From prerequisites-debian12.sh
+  # From prerequisites-debian13.sh
     libnss3 \
     libnspr4 \
     libatk1.0-0 \
@@ -56,7 +56,7 @@ RUN apt-get update \
 # .NET Core runtime
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
 RUN apt-get install -y --no-install-recommends wget ca-certificates \
-  && wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+  && wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
   && dpkg -i packages-microsoft-prod.deb \
   && rm packages-microsoft-prod.deb \
   && apt-get update \

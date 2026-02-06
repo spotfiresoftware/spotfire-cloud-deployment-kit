@@ -27,7 +27,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-automationservices
   # -- The container image tag to use.
-  tag: "14.6.1-HF-005-v4.1.2"
+  tag: "14.6.1-HF-006-v4.1.3"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.

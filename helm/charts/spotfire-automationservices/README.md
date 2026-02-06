@@ -1,6 +1,6 @@
 # spotfire-automationservices
 
-![Version: 2.1.2](https://img.shields.io/badge/Version-2.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.1-HF-005](https://img.shields.io/badge/AppVersion-14.6.1--HF--005-informational?style=flat-square)
+![Version: 2.1.3](https://img.shields.io/badge/Version-2.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.1-HF-006](https://img.shields.io/badge/AppVersion-14.6.1--HF--006-informational?style=flat-square)
 
 A Helm chart for Spotfire Automation Services.
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 2.1.2 |
+| file://../spotfire-common | spotfire-common | 2.1.3 |
 
 ## Overview
 
@@ -207,7 +207,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| image.tag | string | `"14.6.1-HF-005-v4.1.2"` | The container image tag to use. |
+| image.tag | string | `"14.6.1-HF-006-v4.1.3"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

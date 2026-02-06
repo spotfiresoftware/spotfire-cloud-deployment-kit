@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.6.1-v4.1.2"
+  tag: "14.6.1-v4.1.3"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -257,7 +257,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.1-v4.1.2"
+    tag: "14.6.1-v4.1.3"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -319,7 +319,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.1-v4.1.2"
+    tag: "14.6.1-v4.1.3"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -610,7 +610,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.6.1-HF-005-v4.1.2"
+        tag: "14.6.1-HF-006-v4.1.3"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
