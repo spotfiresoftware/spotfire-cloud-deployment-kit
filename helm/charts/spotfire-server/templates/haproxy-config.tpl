@@ -43,7 +43,7 @@ frontend stats
 
     # external health check (/health) and readiness (/up)
     acl acl_backend_down nbsrv(spotfire-servers) lt 1
-    http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health && acl_backend_down }
+    http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health } acl_backend_down
     http-request return status 200 content-type "text/plain" string "OK" if { path /health }
 
     http-request return status 200 content-type "text/plain" string "OK" if { path /up }

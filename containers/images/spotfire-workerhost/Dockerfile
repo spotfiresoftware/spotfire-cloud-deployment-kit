@@ -64,7 +64,7 @@ RUN apt-get install -y --no-install-recommends wget ca-certificates \
      apt-transport-https \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
-     aspnetcore-runtime-8.0 \
+     aspnetcore-runtime-10.0 \
   && apt-get clean all
 
 # Enable libjemalloc2

@@ -236,7 +236,12 @@ done
 # Job pods container stdout
 allJobs=$(kubectl --namespace "${NAMESPACE}" get jobs --output=jsonpath='{.items[*].metadata.name}' --selector="${spotfire_selector}")
 for job in ${allJobs}; do
-    collect_info "kubectl --namespace '${NAMESPACE}' logs job/${job}" "${OUTPUT_DIR}/job-${job}-log.txt"
+    # Loop to copy config job logs
+    job_selector="job-name=${job}"
+    jobPods=$(kubectl --namespace "${NAMESPACE}" get pods --output=jsonpath='{.items[*].metadata.name}' --selector=${job_selector})
+    for jobPod in ${jobPods}; do
+        collect_info "kubectl --namespace '${NAMESPACE}' logs pods/${jobPod}" "${OUTPUT_DIR}/job-${jobPod}-log.txt"
+    done
 done
 
 # Loop to copy server logs
