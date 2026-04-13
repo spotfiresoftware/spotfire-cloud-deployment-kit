@@ -43,7 +43,7 @@ frontend stats
 
     # external health check (/health) and readiness (/up)
     acl acl_backend_down nbsrv(spotfire-servers) lt 1
-    http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health && acl_backend_down }
+    http-request return status 503 content-type "text/plain" string "Service unavailable" if { path /health } acl_backend_down
     http-request return status 200 content-type "text/plain" string "OK" if { path /health }
 
     http-request return status 200 content-type "text/plain" string "OK" if { path /up }
@@ -187,7 +187,7 @@ backend spotfire-servers
     http-response set-header X-Server "%s"
     {{- end }}
 
-    server-template spotfire-server 10 _http._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns resolve-opts ignore-weight check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
+    server-template spotfire-server 10 _service._tcp.{{ include "haproxy.spotfire-server.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local resolvers pcdns resolve-opts ignore-weight check weight 100 agent-check agent-port {{ .Values.spotfireConfig.agent.port }} {{ .Values.spotfireConfig.serverTemplate.additionalParams }}
 resolvers pcdns
     parse-resolv-conf
     resolve_retries       3

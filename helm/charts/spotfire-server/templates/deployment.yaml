@@ -36,7 +36,7 @@ spec:
           image: "{{ template "spotfire-server.image" . }}"
           imagePullPolicy: "{{ template "spotfire-server.image.pullPolicy" . }}"
           ports:
-            - name: http
+            - name: service
               containerPort: 8080
               protocol: TCP
             - name: backend

@@ -4,9 +4,9 @@ description: A Helm chart for Spotfire Automation Services.
 
 type: application
 
-version: 2.1.4
+version: 2.2.0
 
-appVersion: "14.6.1-HF-007"
+appVersion: "14.6.2"
 
 kubeVersion: ">=1.24.0-0"
 
@@ -24,7 +24,7 @@ keywords:
 dependencies:
   - name: spotfire-common
     repository: file://../spotfire-common
-    version: 2.1.4
+    version: 2.2.0
 
 annotations:
   license: Apache 2.0

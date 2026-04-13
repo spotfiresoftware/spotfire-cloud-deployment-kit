@@ -22,7 +22,7 @@ spec:
     - port: 8080
       targetPort: 8080
       protocol: TCP
-      name: http
+      name: service
     - port: 9443
       name: backend
       protocol: TCP

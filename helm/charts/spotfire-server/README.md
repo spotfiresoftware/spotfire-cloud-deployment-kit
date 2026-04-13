@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 2.1.4](https://img.shields.io/badge/Version-2.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.1](https://img.shields.io/badge/AppVersion-14.6.1-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.2](https://img.shields.io/badge/AppVersion-14.6.2-informational?style=flat-square)
 
 A Helm chart for Spotfire Server.
 
@@ -16,9 +16,9 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 2.1.4 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.54.* |
-| https://haproxytech.github.io/helm-charts | haproxy | 1.26.* |
+| file://../spotfire-common | spotfire-common | 2.2.0 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.55.* |
+| https://haproxytech.github.io/helm-charts | haproxy | 1.27.* |
 
 ## Overview
 
@@ -618,7 +618,7 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"14.6.1-v4.1.4"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"14.6.2-v4.2.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -637,7 +637,7 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"14.6.1-v4.1.4"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"14.6.2-v4.2.0"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -673,7 +673,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.1-HF-007-v4.1.4"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.2-v4.2.0"` | The container image tag to use. |
 | configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -719,7 +719,7 @@ For more details, see for example:
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.1.0"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
@@ -771,7 +771,7 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"14.6.1-v4.1.4"` | The container image tag to use. |
+| image.tag | string | `"14.6.2-v4.2.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -790,7 +790,7 @@ For more details, see for example:
 | livenessProbe.enabled | bool | `true` |  |
 | livenessProbe.failureThreshold | int | `3` |  |
 | livenessProbe.httpGet.path | string | `"/spotfire/rest/status/getStatus"` |  |
-| livenessProbe.httpGet.port | string | `"http"` |  |
+| livenessProbe.httpGet.port | string | `"service"` |  |
 | livenessProbe.periodSeconds | int | `3` |  |
 | log-forwarder.config.filters | string | Example that drops specific events using [grep](https://docs.fluentbit.io/manual/pipeline/filters/grep) | Add custom fluent-bit [filters configuration](https://docs.fluentbit.io/manual/pipeline/filters). |
 | log-forwarder.config.inputs | string | [tcp input](https://docs.fluentbit.io/manual/pipeline/inputs/tcp) on port 5170 and [forward input](https://docs.fluentbit.io/manual/pipeline/inputs/forward) on port 24224 | fluent-bit [input configuration](https://docs.fluentbit.io/manual/pipeline/inputs). |
@@ -836,7 +836,7 @@ For more details, see for example:
 | startupProbe.enabled | bool | `true` |  |
 | startupProbe.failureThreshold | int | `30` |  |
 | startupProbe.httpGet.path | string | `"/spotfire/rest/status/getStatus"` |  |
-| startupProbe.httpGet.port | string | `"http"` |  |
+| startupProbe.httpGet.port | string | `"service"` |  |
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | tolerations | list | `[]` |  |
