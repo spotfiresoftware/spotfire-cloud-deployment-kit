@@ -1,6 +1,6 @@
 # Configuring a Google Network Load Balancer or a Google Application Load Balancer with the GKE Ingress controller
 
-This page provides an overview of the main steps needed to use a [Google Application Load Balancer](https://cloud.google.com/load-balancing/docs/application-load-balancer) with the [GKE Ingress](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) controller, 
+This page provides an overview of the main steps needed to use a [Google Application Load Balancer](https://docs.cloud.google.com/load-balancing/docs/application-load-balancer) with the [GKE Ingress](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/ingress) controller, 
 to deploy the [Spotfire Platform](https://www.spotfire.com/) on [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine),
 using the [Spotfire CDK](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
@@ -14,7 +14,7 @@ Remember to change the provided example values to adapt them to your own environ
 
 - An account in Google Cloud Platform with permissions for the required services
 - A Linux host with the following clients installed:
-    - [gcloud cli](https://cloud.google.com/sdk/docs/install-sdk)
+    - [gcloud cli](https://docs.cloud.google.com/sdk/docs/install-sdk)
     - [Kubectl](https://kubernetes.io/docs/tasks/tools/)
     - [Helm 3+](https://helm.sh/docs/intro/install/)
 - You have completed the previous quickstart:
@@ -25,11 +25,11 @@ Remember to change the provided example values to adapt them to your own environ
 ## Steps
 
 For load balancing in Google Cloud with GKE, you can use:
-- [Google Cloud Network Load Balancer](https://cloud.google.com/load-balancing/docs/passthrough-network-load-balancer): Layer 4 load balancing (TCP/SSL/Other)
-- [Google Cloud Application Load Balancer](https://cloud.google.com/load-balancing/docs/application-load-balancer): Layer 7 load balancing (HTTP/HTTPS)
+- [Google Cloud Network Load Balancer](https://docs.cloud.google.com/load-balancing/docs/passthrough-network-load-balancer): Layer 4 load balancing (TCP/SSL/Other)
+- [Google Cloud Application Load Balancer](https://docs.cloud.google.com/load-balancing/docs/application-load-balancer): Layer 7 load balancing (HTTP/HTTPS)
 
-For more information, see [Cloud Load Balancing overview](https://cloud.google.com/load-balancing/docs/load-balancing-overview) and
-[LoadBalancer Services in the GKE documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/service-load-balancer).
+For more information, see [Cloud Load Balancing overview](https://docs.cloud.google.com/load-balancing/docs/load-balancing-overview) and
+[LoadBalancer Services in the GKE documentation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/service-load-balancer).
 
 ### When to use layer 4 or layer 7 load balancing
 
@@ -47,7 +47,7 @@ You can use layer 7 load balancing for an enterprise deployment with advanced ro
 
 For simpler scenarios, you might prefer to set up a network Load Balancer together with a K8s service of type `LoadBalancer`.
 
-The [Google Cloud Passthrough Network Load Balancer](https://cloud.google.com/load-balancing/docs/passthrough-network-load-balancer) operates at Layer 4 (TCP/UDP) and can be used to direct traffic from the internet to your GKE cluster.
+The [Google Cloud Passthrough Network Load Balancer](https://docs.cloud.google.com/load-balancing/docs/passthrough-network-load-balancer) operates at Layer 4 (TCP/UDP) and can be used to direct traffic from the internet to your GKE cluster.
 When you create a service of type `LoadBalancer` in GKE, Google Cloud automatically provisions a Google Cloud Network Load Balancer for that service with a public IP.
 
 #### 1. Deploy Spotfire
@@ -95,7 +95,7 @@ with a Google Cloud Network Load Balancer, using the default reverse proxy servi
 
 For more advanced routing, you might use an Ingress Controller, which adds flexibility for Layer 7 routing (such as path- or host-based routing) and SSL termination.
 
-You can use Google Cloud Application Gateway together with a [GKE Ingress](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) in your GKE cluster.
+You can use Google Cloud Application Gateway together with a [GKE Ingress](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/ingress) in your GKE cluster.
 
 #### 1. Create a custom Backend health check
 
@@ -120,7 +120,7 @@ The GKE Ingress creates a default health check for each backend service and the 
         requestPath: /stats
     ```
    
-    For more information, see [Health checks](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress#health_checks).
+    For more information, see [Health checks](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/ingress#health_checks).
 
 2. Apply the custom backend health check configuration:
     ```bash
@@ -156,7 +156,7 @@ After that, associate your domain with the external IP address of the created Go
           - path: /
             pathType: Prefix
         # -- Annotations for the ingress object. For valid annotations, see the documentation for your ingress controller.
-        # -- Ingress configuration on Google Cloud: https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration
+        # -- Ingress configuration on Google Cloud: https://docs.cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration
         # -- Ingress GCE FAQ: https://github.com/kubernetes/ingress-gce
         annotations:
           # This tells Google Cloud to create an External Load Balancer to realize his Ingress
@@ -166,8 +166,8 @@ After that, associate your domain with the external IP address of the created Go
     ```
     **Note:** Here we use the GCE (Google Container Engine) annotation `cloud.google.com/backend-config` to point to our custom backend health check.
 
-    For more information, see [GKE Ingress for Application Load Balancers](https://cloud.google.com/kubernetes-engine/docs/concepts/ingress) and
-      [Ingress configuration on Google Cloud](https://cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration).
+    For more information, see [GKE Ingress for Application Load Balancers](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/ingress) and
+      [Ingress configuration on Google Cloud](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/ingress-configuration).
 
 2. Deploy the `spotfire-platform` Helm chart using the `google-gce-ingress.yaml` additional values.
     For example:
@@ -206,10 +206,10 @@ using a Google Application Load Balancer with the GKE Ingress controller.
 
 You might continue with some additional steps:
 - Check out the [Ingress user guide](https://kubernetes.io/docs/concepts/services-networking/ingress/) for details about Ingress features.
-  - Configure [static IP and a domain name](https://cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip) for your Ingress application using Ingress.
-  - Use [Google-managed SSL certificates](https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs).
+  - Configure [static IP and a domain name](https://docs.cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip) for your Ingress application using Ingress.
+  - Use [Google-managed SSL certificates](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/managed-certs).
 
-You can also learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://cloud.google.com/architecture).
+You can also learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://docs.cloud.google.com/architecture).
 
 ### 3. Cleanup
 
@@ -219,4 +219,4 @@ gcloud container clusters delete $CLUSTER_NAME --location $LOCATION
 gcloud sql instances delete $DB_INSTANCE_NAME
 ...
 ```
-For more information, see [Delete instances](https://cloud.google.com/sql/docs/postgres/delete-instance#gcloud).
+For more information, see [Delete instances](https://docs.cloud.google.com/sql/docs/postgres/delete-instance#gcloud).

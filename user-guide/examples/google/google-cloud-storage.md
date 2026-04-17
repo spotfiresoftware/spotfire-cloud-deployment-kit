@@ -1,6 +1,6 @@
 # Configuring a Google Cloud Storage bucket as the Spotfire external library storage
 
-This page provides an overview of the main steps needed to use a [Google Storage bucket](https://cloud.google.com/storage/docs/buckets) 
+This page provides an overview of the main steps needed to use a [Google Storage bucket](https://docs.cloud.google.com/storage/docs/buckets) 
 to deploy the [Spotfire Platform](https://www.spotfire.com/) on [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine),
 using the [Spotfire CDK](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
@@ -14,7 +14,7 @@ Remember to change the provided example values to adapt them to your own environ
 
 - An account in Google Cloud Platform with permissions for the required services
 - A Linux host with the following clients installed:
-    - [gcloud cli](https://cloud.google.com/sdk/docs/install-sdk)
+    - [gcloud cli](https://docs.cloud.google.com/sdk/docs/install-sdk)
     - [Kubectl](https://kubernetes.io/docs/tasks/tools/)
     - [Helm 3+](https://helm.sh/docs/intro/install/)
 - You have completed the previous quickstarts:
@@ -41,7 +41,7 @@ Remember to change the provided example values to adapt them to your own environ
     gcloud storage buckets create gs://$BUCKET_NAME \
         --location=$LOCATION
     ```
-    For more information, see [Create buckets](https://cloud.google.com/storage/docs/creating-buckets).
+    For more information, see [Create buckets](https://docs.cloud.google.com/storage/docs/creating-buckets).
 
 3. Verify your bucket:
     ```bash
@@ -99,7 +99,7 @@ Remember to change the provided example values to adapt them to your own environ
 You have now deployed the Spotfire Platform on Google Cloud,
 using a Google Cloud Storage bucket as the Spotfire external library storage.
 
-You can learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://cloud.google.com/architecture)
+You can learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://docs.cloud.google.com/architecture)
 
 ### 3. Cleanup
 
@@ -110,4 +110,4 @@ gcloud sql instances delete $DB_INSTANCE_NAME
 gcloud storage rm --recursive gs://$BUCKET_NAME
 ...
 ```
-For more information, see [Delete Google Storage buckets](https://cloud.google.com/storage/docs/deleting-buckets#delete-bucket-cli).
+For more information, see [Delete Google Storage buckets](https://docs.cloud.google.com/storage/docs/deleting-buckets#delete-bucket-cli).

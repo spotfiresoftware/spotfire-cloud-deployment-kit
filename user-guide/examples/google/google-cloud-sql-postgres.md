@@ -1,6 +1,6 @@
 # Configuring a Google Cloud SQL for PostgreSQL database as the Spotfire database
 
-This page provides an overview of the main steps needed to use a [Google Cloud SQL for PostgreSQL](https://cloud.google.com/sql/docs/postgres/) instance as the Spotfire database
+This page provides an overview of the main steps needed to use a [Google Cloud SQL for PostgreSQL](https://docs.cloud.google.com/sql/docs/postgres/) instance as the Spotfire database
 to deploy the [Spotfire Platform](https://www.spotfire.com/) on [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine),
 using the [Spotfire CDK](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit).
 
@@ -14,7 +14,7 @@ Remember to change the provided example values to adapt them to your own environ
 
 - An account in Google Cloud Platform with permissions for the required services
 - A Linux host with the following clients installed:
-    - [gcloud cli](https://cloud.google.com/sdk/docs/install-sdk)
+    - [gcloud cli](https://docs.cloud.google.com/sdk/docs/install-sdk)
     - [Kubectl](https://kubernetes.io/docs/tasks/tools/)
     - [Helm 3+](https://helm.sh/docs/intro/install/)
 - You have completed the previous quickstarts:
@@ -29,10 +29,10 @@ Remember to change the provided example values to adapt them to your own environ
 
 First, create a relational database instance in the Google account, choosing a network with connectivity to your K8s cluster.
 
-For more information, see [Cloud SQL PostgreSQL - Create instances](https://cloud.google.com/sql/docs/postgres/create-instance) and [Connect to Cloud SQL for PostgreSQL from Google Kubernetes Engine](https://cloud.google.com/sql/docs/postgres/connect-instance-kubernetes#expandable-2).
+For more information, see [Cloud SQL PostgreSQL - Create instances](https://docs.cloud.google.com/sql/docs/postgres/create-instance) and [Connect to Cloud SQL for PostgreSQL from Google Kubernetes Engine](https://docs.cloud.google.com/sql/docs/postgres/connect-instance-kubernetes#expandable-2).
 
 **Note:** To migrate an existing PostgreSQL database to Google SQL, see [Database Migration Service](https://cloud.google.com/database-migration?hl=en) and
-[Migrate a database to Cloud SQL for PostgreSQL by using Database Migration Service](https://cloud.google.com/database-migration/docs/postgres/quickstart).
+[Migrate a database to Cloud SQL for PostgreSQL by using Database Migration Service](https://docs.cloud.google.com/database-migration/docs/postgres/quickstart).
 
 **Note:** Here, we create a Google SQL database instance with only a private IP address. This requires configuring private services access to enable connections from other Google Cloud services, such as GKE.
 
@@ -55,7 +55,7 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
       --description="peering range for Google" \
       --network=default
     ```
-    For more information, see [Configure private services access](https://cloud.google.com/vpc/docs/configure-private-services-access#gcloud).
+    For more information, see [Configure private services access](https://docs.cloud.google.com/vpc/docs/configure-private-services-access#gcloud).
 
 3. Run the gcloud services `vpc-peerings connect` command to create the private services access connection:
     ```bash
@@ -82,12 +82,12 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
     ```
     It will take ~5 minutes to create the database instance.
 
-    For more information, see [Google SQL - Create instances](https://cloud.google.com/sql/docs/postgres/create-instance#gcloud).
+    For more information, see [Google SQL - Create instances](https://docs.cloud.google.com/sql/docs/postgres/create-instance#gcloud).
 
     For information on the available machine types, see [Machine series overview
-](https://cloud.google.com/sql/docs/postgres/machine-series-overview).
+](https://docs.cloud.google.com/sql/docs/postgres/machine-series-overview).
 
-    See [Introduction to Cloud SQL for PostgreSQL editions](https://cloud.google.com/sql/docs/postgres/editions-intro) to understand which edition you need for your database.
+    See [Introduction to Cloud SQL for PostgreSQL editions](https://docs.cloud.google.com/sql/docs/postgres/editions-intro) to understand which edition you need for your database.
 
 5. List your created instance and take note of its private IP address:
     ```bash
@@ -136,7 +136,7 @@ For more information, see [Cloud SQL PostgreSQL - Create instances](https://clou
 You have now deployed the Spotfire Platform on Google Cloud,
 using a Google Cloud SQL for PostgreSQL instance as the Spotfire database.
 
-You can learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://cloud.google.com/architecture).
+You can learn about reference architectures, diagrams, and best practices in Google Cloud in [Cloud Architecture Center](https://docs.cloud.google.com/architecture).
 
 ## Cleanup
 
@@ -146,4 +146,4 @@ gcloud container clusters delete $CLUSTER_NAME --location $LOCATION
 gcloud sql instances delete $DB_INSTANCE_NAME
 ...
 ```
-For more information, see [Google SQL - Delete instances](https://cloud.google.com/sql/docs/postgres/delete-instance#gcloud).
+For more information, see [Google SQL - Delete instances](https://docs.cloud.google.com/sql/docs/postgres/delete-instance#gcloud).

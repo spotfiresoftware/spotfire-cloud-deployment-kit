@@ -27,7 +27,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-terrservice
   # -- The container image tag to use.
-  tag: "1.25.0-v6.0.0"
+  tag: "1.25.0-v6.0.1"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.

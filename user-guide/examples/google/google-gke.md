@@ -6,7 +6,7 @@ using the [Spotfire CDK](https://github.com/spotfiresoftware/spotfire-cloud-depl
 
 You will deploy the Spotfire Platform on Google Cloud Platform (GCP) using the following services: 
 - Kubernetes cluster: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine)
-- Database server: [Google SQL PostgreSQL](https://cloud.google.com/sql/docs/postgres/introduction)
+- Database server: [Google SQL PostgreSQL](https://docs.cloud.google.com/sql/docs/postgres/introduction)
 - Blob storage: [Google Cloud Storage](https://cloud.google.com/storage)
 - Load balancer: [Google Cloud Load Balancing](https://cloud.google.com/load-balancing)
 
@@ -20,7 +20,7 @@ Remember to change the provided example values to adapt them to your own environ
 
 - An account in Google Cloud Platform with permissions for the required services
 - A Linux host with the following clients installed:
-    - [gcloud cli](https://cloud.google.com/sdk/docs/install-sdk).
+    - [gcloud cli](https://docs.cloud.google.com/sdk/docs/install-sdk).
     - [Kubectl](https://kubernetes.io/docs/tasks/tools/).
     - [Helm 3+](https://helm.sh/docs/intro/install/).
 
@@ -48,7 +48,7 @@ Remember to change the provided example values to adapt them to your own environ
     ```
 
     **Note:** In this example we create a 3-nodes cluster using the `n2-standard-8` virtual machine type (8 vCPUs, 32 GB).
-    See the [Machine families resource and comparison guide](https://cloud.google.com/compute/docs/machine-resource) to understand which SKU you need for your K8s nodes.
+    See the [Machine families resource and comparison guide](https://docs.cloud.google.com/compute/docs/machine-resource) to understand which SKU you need for your K8s nodes.
     The Google Cloud N-Family of machines are general purpose VMs for Enterprise-grade containerized applications.
 
     **Note:** See the [Spotfire system requirements](https://spotfi.re/sr) for the minimum and recommended sizing.
@@ -67,13 +67,13 @@ Remember to change the provided example values to adapt them to your own environ
     By default, GKE uses 3 zones, so with `--num-nodes=1` it will create 3 nodes in total.
 
     In this example we create a regional cluster, in which the control plane is replicated across multiple zones in a region.
-    Make sure you understand the difference between a [regional cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-regional-cluster) and a [zonal cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-zonal-cluster).
+    Make sure you understand the difference between a [regional cluster](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/creating-a-regional-cluster) and a [zonal cluster](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/creating-a-zonal-cluster).
 
     **Note:** To minimize your cloud bill, this command is using preemptible nodes, which are cheaper than a normal virtual machine. This is useful for testing purposes.
 
     It will take ~5-10 minutes to create the K8s cluster.
 
-    For more information, see [gcloud container clusters create](https://cloud.google.com/sdk/gcloud/reference/container/clusters/create).
+    For more information, see [gcloud container clusters create](https://docs.cloud.google.com/sdk/gcloud/reference/container/clusters/create).
 
 3. Set up the Google Kubernetes Engine auth plugin and configure `kubectl` to use the new GKE cluster:
     ```bash
@@ -87,7 +87,7 @@ Remember to change the provided example values to adapt them to your own environ
     kubectl get nodes -o wide
     ```
 
-For more information, see [GKE documentation](https://cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview), [Learn GKE fundamentals](https://cloud.google.com/kubernetes-engine/docs/learn), or learn about best practices in [Best practices for GKE networking](https://cloud.google.com/kubernetes-engine/docs/best-practices/networking).
+For more information, see [GKE documentation](https://docs.cloud.google.com/kubernetes-engine/docs/concepts/kubernetes-engine-overview), [Learn GKE fundamentals](https://docs.cloud.google.com/kubernetes-engine/docs/learn), or learn about best practices in [Best practices for GKE networking](https://docs.cloud.google.com/kubernetes-engine/docs/best-practices/networking).
 
 
 ### 3. Deploy Spotfire
@@ -153,4 +153,4 @@ To avoid unneeded resource usage, once you have completed these tutorials, delet
 gcloud container clusters delete $CLUSTER_NAME --location $LOCATION
 ...
 ```
-For more information, see [Delete a GKE cluster](https://cloud.google.com/sdk/gcloud/reference/container/clusters/delete).
+For more information, see [Delete a GKE cluster](https://docs.cloud.google.com/sdk/gcloud/reference/container/clusters/delete).
