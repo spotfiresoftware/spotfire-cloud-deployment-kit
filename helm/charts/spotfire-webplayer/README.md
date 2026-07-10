@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
+![Version: 5.0.1](https://img.shields.io/badge/Version-5.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0-HF-001](https://img.shields.io/badge/AppVersion-15.0.0--HF--001-informational?style=flat-square)
 
 A Helm chart for Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 5.0.0 |
+| file://../spotfire-common | spotfire-common | 5.0.1 |
 
 ## Overview
 
@@ -331,7 +331,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
+| image.tag | string | `"15.0.0-HF-001-v7.0.1"` | The container image tag to use. |
 | kedaAutoscaling | object | Default values for KEDA autoscaling, see values.yaml. | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -362,7 +362,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
 | podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
 | podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |

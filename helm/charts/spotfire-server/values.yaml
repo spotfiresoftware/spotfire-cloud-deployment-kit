@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "15.0.0-v7.0.0"
+  tag: "15.0.0-v7.0.1"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -189,7 +189,7 @@ podDeletionCost:
     # -- Image repository for the podDeletionCost.
     repository: spotfire/spotfire-config
     # -- Image tag for the podDeletionCost.
-    tag: "15.0.0-v7.0.0"
+    tag: "15.0.0-v7.0.1"
     # -- Image pull policy for the podDeletionCost.
     pullPolicy: IfNotPresent
     # -- Image pull secrets for the podDeletionCost.
@@ -298,7 +298,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "15.0.0-v7.0.0"
+    tag: "15.0.0-v7.0.1"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -363,7 +363,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "15.0.0-v7.0.0"
+    tag: "15.0.0-v7.0.1"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -654,7 +654,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "15.0.0-v7.0.0"
+        tag: "15.0.0-HF-001-v7.0.1"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
