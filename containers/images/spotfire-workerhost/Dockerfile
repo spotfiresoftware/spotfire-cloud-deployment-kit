@@ -74,8 +74,19 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 ARG INSTALL_ODBC_DRIVERS=Y
 ARG INSTALL_POSTGRES_DRIVER=Y
 ARG INSTALL_MARIADB_DRIVER=Y
+ARG INSTALL_DOTNET_DUMP=Y
 
 COPY --chown=spotfire:spotfire scripts/ ./scripts/
 RUN scripts/install-odbc-drivers.sh
+
+# Install dotnet-dump CLI tool (enabled by default)
+RUN if [ "${INSTALL_DOTNET_DUMP}" = "Y" ]; then \
+      mkdir -p /opt/spotfire/.dotnet/tools \
+      && wget -O /opt/spotfire/.dotnet/tools/dotnet-dump https://aka.ms/dotnet-dump/linux-x64 \
+      && chmod +x /opt/spotfire/.dotnet/tools/dotnet-dump \
+      && chown -R spotfire:spotfire /opt/spotfire/.dotnet; \
+    else \
+      echo "Skipping dotnet-dump installation (INSTALL_DOTNET_DUMP=${INSTALL_DOTNET_DUMP})"; \
+    fi
 
 USER spotfire

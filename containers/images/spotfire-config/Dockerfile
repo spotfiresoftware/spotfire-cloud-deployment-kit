@@ -35,6 +35,9 @@ WORKDIR /opt/spotfire/
 COPY --from=extract --chown=spotfire:spotfire /tmp/spotfireserver-*.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool spotfireconfigtool/
 COPY --chown=spotfire:spotfire bootstrap.sh ./
 
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
+    && chmod +x kubectl && mv kubectl /usr/local/bin/
+
 ENV BOOTSTRAP_FILE=bootstrap.xml
 
 # "toolLog" means log to file and "console" menas log to console

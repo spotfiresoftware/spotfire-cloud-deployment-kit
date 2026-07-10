@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-webplayer
   # -- The container image tag to use.
-  tag: "14.8.0-HF-004-v6.0.4"
+  tag: "15.0.0-v7.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -42,7 +42,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "4.2.2"
+    tag: "4.2.3"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -147,6 +147,7 @@ logging:
     # -- Log configuration for the service. Currently available configs are: `standard`, `minimum`, `info`, `debug`, `monitoring`, `fullmonitoring`, `trace`.
     logConfiguration: standard
 
+# -- Specifies the standard Kubernetes resource requests and/or limits
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This increases chances that charts can run on environments with few
@@ -160,6 +161,7 @@ resources: {}
   #   memory: 128Mi
 
 # -- KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details.
+# @default -- Default values for KEDA autoscaling, see values.yaml.
 kedaAutoscaling:
   enabled: false
   # -- The interval to check each trigger on.
@@ -179,11 +181,51 @@ kedaAutoscaling:
     # -- REQUIRED. The URL for the Prometheus server from where metrics are fetched.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
 
+# -- Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details.
+# @default -- Default values for Pod Deletion Cost, see values.yaml.
+podDeletionCost:
+  # -- Enable updating of pod deletion cost annotation.
+  enabled: false
+  # -- Number of replicas.
+  replicaCount: 1
+
+  image:
+    # -- Image registry for the podDeletionCost.
+    registry:
+    # -- Image repository for the podDeletionCost.
+    repository: spotfire/spotfire-config
+    # -- Image tag for the podDeletionCost.
+    tag: "15.0.0-v7.0.0"
+    # -- Image pull policy for the podDeletionCost.
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets for the podDeletionCost.
+    pullSecrets: []
+
+  # -- Specifies the standard Kubernetes resource requests and/or limits
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # --  An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0.
+  costFormula: "-100000*spotfire_Spotfire_WorkerHost_MayBeRecycled + spotfire_Spotfire_Webplayer_open_documents + 2*spotfire_Spotfire_Webplayer_cached_documents + 5*spotfire_Spotfire_Webplayer_analyses_under_scheduled_updates_control"
+  # -- How long to wait between checks (seconds).
+  sleepIntervalSeconds: "120"
+  # -- Minimum % change to trigger a patch.
+  thresholdPercent: "10"
+  # -- Minimum numeric change to trigger a patch.
+  minAbsDelta: "5"
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+topologySpreadConstraints: []
 
 config:
   # -- A custom [Spotfire.Dxp.Worker.Core.config](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/spotfire.dxp.worker.core.config_file.html).

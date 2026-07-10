@@ -5,6 +5,7 @@ set -o errexit
 
 startupcheck_timeout_seconds="60"
 startupcheck_delay_interval_seconds="5"
+log_level="${LOG_LEVEL:-}"
 
 ##
 ## Get filenames in a dir
@@ -73,8 +74,8 @@ function deployPackages () {
 
     for dir in /opt/spotfire/spotfireconfigtool/deployments/*/; do
         if [ -d "${dir}" ]; then
-            if [[ "${LOG_LEVEL^^}" =~ ^(DEBUG|TRACE) ]] ; then
-                echo "Listing content of ${dir}"
+            echo "Working on folder ${dir}"
+            if [[ "${log_level^^}" =~ ^(DEBUG|TRACE)$ ]] ; then
                 ls -lah "${dir}"
             fi
 

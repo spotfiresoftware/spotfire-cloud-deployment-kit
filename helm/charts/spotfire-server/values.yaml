@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.8.0-v6.0.4"
+  tag: "15.0.0-v7.0.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -37,7 +37,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "4.2.2"
+    tag: "4.2.3"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -175,11 +175,51 @@ kedaAutoscaling:
     # -- REQUIRED. The URL to the Prometheus server where metrics should be fetched from.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
 
+# -- Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details.
+# @default -- Default values for Pod Deletion Cost, see values.yaml.
+podDeletionCost:
+  # -- Enable updating of pod deletion cost annotation.
+  enabled: false
+  # -- Number of replicas.
+  replicaCount: 1
+
+  image:
+    # -- Image registry for the podDeletionCost.
+    registry:
+    # -- Image repository for the podDeletionCost.
+    repository: spotfire/spotfire-config
+    # -- Image tag for the podDeletionCost.
+    tag: "15.0.0-v7.0.0"
+    # -- Image pull policy for the podDeletionCost.
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets for the podDeletionCost.
+    pullSecrets: []
+
+  # -- Specifies the standard Kubernetes resource requests and/or limits
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # --  An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0.
+  costFormula: "-1000*spotfire_SpotfireServer_IsIdle + spotfire_InformationServices_InformationServicesMetrics_InformationServicesJobs + spotfire_SpotfireServer_ServerMetrics_UploadingAttachments"
+  # -- How long to wait between checks (seconds).
+  sleepIntervalSeconds: "120"
+  # -- Minimum % change to trigger a patch.
+  thresholdPercent: "10"
+  # -- Minimum numeric change to trigger a patch.
+  minAbsDelta: "5"
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+topologySpreadConstraints: []
 
 # -- Additional environment variables that all spotfire-server pods use.
 extraEnvVars: []
@@ -251,13 +291,14 @@ cliPod:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  topologySpreadConstraints: []
   image:
     # -- The image registry for spotfireConfig. Overrides global.spotfire.image.registry value.
     registry:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.8.0-v6.0.4"
+    tag: "15.0.0-v7.0.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -281,7 +322,10 @@ cliPod:
 # ===============================
 
 configJob:
-  # -- Set to `TRACE` to increase log level. Defaults to `DEBUG` if unset.
+  # -- Set verbosity for debugging config-job execution.
+  # Empty (default): Standard output with DEBUG logging from the configuration tool.
+  # `DEBUG`: Shows raw bash script lines + DEBUG-level configuration tool logging.
+  # `TRACE`: Shows expanded bash commands with values + TRACE-level configuration tool logging.
   logLevel: ""
   # -- Set the length of time in seconds to keep job and its logs until the job is removed.
   ttlSecondsAfterFinished: 7200
@@ -319,7 +363,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.8.0-v6.0.4"
+    tag: "15.0.0-v7.0.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -610,7 +654,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.8.0-HF-004-v6.0.4"
+        tag: "15.0.0-v7.0.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -742,6 +786,11 @@ haproxy:
     #app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/part-of: spotfire
     app.kubernetes.io/component: haproxy
+
+  # -- overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy)
+  image:
+    # -- overrides the image tag whose default is the haproxy chart appVersion. Use empty string to use the chart default or pick [a specific version](https://hub.docker.com/r/haproxytech/haproxy-alpine/tags?name=3.2).
+    tag: "3.2.19"
 
   # -- Spotfire specific configuration related to haproxy.
   # @default -- Caching of static resource and debug response headers enabled.

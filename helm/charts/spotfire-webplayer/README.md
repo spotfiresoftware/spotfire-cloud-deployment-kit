@@ -1,6 +1,6 @@
 # spotfire-webplayer
 
-![Version: 4.0.4](https://img.shields.io/badge/Version-4.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.8.0-HF-004](https://img.shields.io/badge/AppVersion-14.8.0--HF--004-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
 
 A Helm chart for Spotfire Web Player.
 
@@ -12,7 +12,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 4.0.4 |
+| file://../spotfire-common | spotfire-common | 5.0.0 |
 
 ## Overview
 
@@ -27,40 +27,74 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 
 ## Prerequisites
 
-- A deployed Spotfire Server release using the [Spotfire Server](../spotfire-server/README.md) chart.
-- A Spotfire distribution file (`Spotfire.Dxp.sdn`) with client packages deployed to a deployment area (so that the required licenses are in place for the service to start).
+- A deployed Spotfire Server release using the [Spotfire Server](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-server/README.md) chart.
+- A Spotfire distribution file (`Spotfire.Dxp.sdn`) with client packages deployed to a deployment area (so that the required licenses are in place for the Spotfire Web Player to start).
 
 ## Usage
 
-### Installing
+Replace all placeholders (shown in angle brackets like `<NAMESPACE>`) with your actual values before running the commands.
 
-1. Export the `SPOTFIRE_SERVER` value to connect to the `spotfire-server` service:
-    ```bash
-    export SPOTFIRE_SERVER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=spotfire-server --output=jsonpath={.items..metadata.name})
-    ```
-2.  Forward the logs to the `log-forwarder` service:
-    ```bash
-    export LOG_FORWARDER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=log-forwarder --output=jsonpath={.items..metadata.name})
-    ```
-3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
-    ```bash
-    helm install my-release . \
-        --set acceptEUA=true \
-        --set global.spotfire.image.registry="127.0.0.1:32000" \
-        --set global.spotfire.image.pullPolicy="Always" \
-        --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-        --set logging.logForwarderAddress="$LOG_FORWARDER" \
-        -f my-values.yaml
-    ```
+### Step 1: Create namespace
 
-**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+```bash
+kubectl create namespace "<NAMESPACE>"
+```
 
-**Note**: You must provide your private registry address where the Spotfire container images are stored.
+### Step 2: Prepare Spotfire Server service addresses
 
-See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+The Web Player service needs the Spotfire Server backend service name, and optionally the log-forwarder service name if you want application logs sent to the Spotfire log-forwarder.
 
-#### Configuring
+If the Spotfire Server chart was installed in the same namespace with the release name `<SPOTFIRE_SERVER_RELEASE>`, typical values are:
+
+- `nodemanagerConfig.serverBackendAddress="<SPOTFIRE_SERVER_RELEASE>-spotfire-server"`
+- `logging.logForwarderAddress="<SPOTFIRE_SERVER_RELEASE>-log-forwarder"` when the Spotfire Server chart log-forwarder is enabled
+
+### Step 3: Deploy the Spotfire Service for Web Player chart
+
+Create a `values.yaml` file (for example, `spotfire-webplayer-values.yaml`). See the [Values table](#values) for details of the values.
+
+```yaml
+# spotfire-webplayer-values.yaml
+acceptEUA: true
+
+global:
+  spotfire:
+    image:
+      registry: "<REGISTRY>"
+      pullPolicy: Always
+
+nodemanagerConfig:
+  serverBackendAddress: "<SPOTFIRE_SERVER_SERVICE>"
+
+logging:
+  logForwarderAddress: "<LOG_FORWARDER_SERVICE>"
+```
+
+Install the chart:
+
+```bash
+helm install "<SPOTFIRE_WEBPLAYER_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --create-namespace \
+  --values spotfire-webplayer-values.yaml
+```
+
+**Note**:
+- Setting `acceptEUA: true` means you agree that your use of the Spotfire software is governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+- Replace `<REGISTRY>` with your private registry address where the Spotfire container images are stored.
+- Replace `<SPOTFIRE_SERVER_SERVICE>` with the Spotfire Server service name that the Web Player service should connect to.
+- Replace `<LOG_FORWARDER_SERVICE>` with the log-forwarder service name if you want to forward logs to the Spotfire log-forwarder. If you do not want to use a log-forwarder service, omit `logging.logForwarderAddress`.
+
+Check pod status:
+
+```bash
+kubectl get pods --namespace "<NAMESPACE>" \
+  -l "app.kubernetes.io/name=spotfire-webplayer,app.kubernetes.io/instance=<SPOTFIRE_WEBPLAYER_RELEASE>"
+```
+
+## Configuration
+
+### Configuring
 
 You can override the default configuration settings by providing a custom configuration file.
 
@@ -77,20 +111,20 @@ See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/lat
 
 Example: Use `my-Spotfire.Dxp.Worker.Web.config` instead of the default `Spotfire.Dxp.Worker.Web.config`:
 ```bash
-helm install my-release . \
+helm install "<SPOTFIRE_WEBPLAYER_RELEASE>" . \
     --set acceptEUA=true \
-    --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-    --set logging.logForwarderAddress="$LOG_FORWARDER" \
+  --set nodemanagerConfig.serverBackendAddress="<SPOTFIRE_SERVER_SERVICE>" \
+  --set logging.logForwarderAddress="<LOG_FORWARDER_SERVICE>" \
     --set-file config.'Spotfire\.Dxp\.Worker\.Web\.config'=my-Spotfire.Dxp.Worker.Web.config
 ```
 
 **Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a backslash as shown in the example.
 
-#### Getting the container default configuration files
+### Getting the container default configuration files
 
 You can copy the default configuration files from the container image to use them as templates for your custom configuration.
 
-**Note**: The configuration files content can be version dependent.
+**Note**: The configuration file content can vary by version.
 
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Web.config`.
 You can replace the filename to get a copy any of the other container configuration files.
@@ -98,7 +132,7 @@ You can replace the filename to get a copy any of the other container configurat
 docker run --rm spotfire/spotfire-webplayer:<imagetag> cat /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Spotfire.Dxp.Worker.Web.config > Spotfire.Dxp.Worker.Web.config
 ```
 
-#### Adding a credentials profile for connectors to services as a file
+### Adding a credentials profile for connectors to services as a file
 
 A credentials profile is a method for storing data source credentials to log in automatically when you use data connections in web clients, Automation Services, and scheduled updates.
 
@@ -118,11 +152,11 @@ A credentials profile is a method for storing data source credentials to log in 
 4. Using _extraVolumeMounts_, mount the file to the location `/secrets/credentials` (overriding using the service configuration).
 5. See the [configuration section](#configuring) to upgrade the deployment.
 
-For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html)
+For more information, see [Credentials profiles for connectors](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/credentials_profiles.html).
 
-#### Custom modules
+### Custom modules
 
-The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
+The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See user-guide/examples/webplayer-custom-modules/README.md  in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
 ### Adding additional ODBC drivers for Spotfire Connectors
 
@@ -130,27 +164,27 @@ If you want to use certain Spotfire connectors that are not available in the def
 
 Once you have extended the image and included the necessary ODBC drivers, you must push the modified image to a registry that can be accessed by the Kubernetes cluster. Finally, update the `spotfire.image.*` values in your configuration to point to the new image.
 
-### Uninstalling
+## Scaling
 
-To uninstall/delete the `my-release` deployment:
-```bash
-helm uninstall my-release
+To change the number of replicas managed by Helm, update `replicaCount` in your values file and run `helm upgrade`.
+
+Example:
+
+```yaml
+replicaCount: 3
 ```
 
-See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
-
-### Scaling
-
-For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
 ```bash
-helm upgrade --install my-release . --reuse-values --set replicaCount=3
+helm upgrade "<SPOTFIRE_WEBPLAYER_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --values spotfire-webplayer-values.yaml
 ```
 
-#### Autoscaling with KEDA
+### Autoscaling with KEDA
 
-To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
+To use [KEDA](https://keda.sh/docs) for autoscaling, first install KEDA in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
-Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
+Example: A `values.yaml` snippet configuration for enabling autoscaling with KEDA:
 ```yaml
 kedaAutoscaling:
   enabled: true
@@ -200,19 +234,72 @@ kedaAutoscaling:
   triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
+**Note**: For more details on the autoscaling defaults, see `templates/keda-autoscaling.yaml` in the chart.
 
-#### Improved performance and concurrency for temporary folder
+#### Update the Pod Deletion Cost annotation automatically
 
-To optimize data reuse, the Spotfire Web Player uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Temp`) to store temporary files and data used in analyses opened via the Web Player. In certain scenarios, like when opening large analysis files concurrently, it is recommended to use a more performant and larger kubernetes volume. For more details, see  [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+The [controller.kubernetes.io/pod-deletion-cost](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost) pod annotation influences in which order Kubernetes selects the pod to delete, for example, during scale-in.
 
-### Upgrading
+Note that pod annotations should not be updated 'too' often (minutes rather than seconds), depending on the size of the cluster. The reason for this is that the Kubernetes API server is highly optimized for reads. `sleepIntervalSeconds` controls how often the updater should run, `thresholdPercent` and `minAbsDelta` controls how large the change must be for the annotation to be updated, that is, it specifies the size of a meaningful change.
 
-When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
+```yaml
+podDeletionCost:
+  enabled: true
+```
 
-#### Upgrading helm chart version
+The `spotfire-webplayer` has the following defaults:
+- cost formula: `-100000*spotfire_Spotfire_WorkerHost_MayBeRecycled + spotfire_Spotfire_Webplayer_open_documents + 2*spotfire_Spotfire_Webplayer_cached_documents + 5*spotfire_Spotfire_Webplayer_analyses_under_scheduled_updates_control`.
+- sleepIntervalSeconds: `120`.
+- `thresholdPercent`: `10`
+- `minAbsDelta`: `5`
 
-Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
+## Performance and Storage
+
+### Improved performance and concurrency for temporary folder
+
+To optimize data reuse, the Spotfire Web Player uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Temp`) to store temporary files and intermediate data. In scenarios where large analysis files are opened concurrently, the default temporary folder might become a bottleneck, impacting performance and throughput. It is recommended to use a more performant and larger Kubernetes volume.
+
+Example: A `values.yaml` snippet for optimizing the Spotfire Web Player temp disk performance.
+```yaml
+extraVolumeMounts:
+  - mountPath: /opt/spotfire/nodemanager/nm/services/WEB_PLAYER/Temp
+    name: webplayer-temp-dir-volume
+extraVolumes:
+  - name: webplayer-temp-dir-volume
+    ephemeral: # See Kubernetes documentation for ephemeral volumes: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/
+      volumeClaimTemplate:
+        metadata:
+          labels:
+            type: webplayer-ephemeral-volume
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: <STORAGE_CLASS_NAME> # Replace with your storage class name.
+          resources:
+            requests:
+              storage: 10Gi # Specify the desired storage size.
+```
+
+**Note**: For Azure AKS clusters, see also: [Use Azure Container Storage with local NVMe](https://learn.microsoft.com/en-us/azure/storage/container-storage/use-container-storage-with-local-disk).
+
+## Uninstalling
+
+To uninstall the `<SPOTFIRE_WEBPLAYER_RELEASE>` release:
+
+```bash
+helm --namespace "<NAMESPACE>" uninstall "<SPOTFIRE_WEBPLAYER_RELEASE>"
+```
+
+## Upgrading
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+### Upgrading Spotfire Server and Spotfire services
+
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+### Upgrading helm chart version
+
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changed, moved, or renamed parameters before upgrading the release.
 
 ## Values
 
@@ -236,7 +323,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
@@ -244,8 +331,8 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| image.tag | string | `"14.8.0-HF-004-v6.0.4"` | The container image tag to use. |
-| kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
+| image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
+| kedaAutoscaling | object | Default values for KEDA autoscaling, see values.yaml. | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
 | kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
@@ -268,6 +355,19 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| podDeletionCost.costFormula | string | `"-100000*spotfire_Spotfire_WorkerHost_MayBeRecycled + spotfire_Spotfire_Webplayer_open_documents + 2*spotfire_Spotfire_Webplayer_cached_documents + 5*spotfire_Spotfire_Webplayer_analyses_under_scheduled_updates_control"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
+| podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | readinessProbe.enabled | bool | `false` |  |
 | readinessProbe.failureThreshold | int | `10` |  |
@@ -276,7 +376,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | readinessProbe.initialDelaySeconds | int | `60` |  |
 | readinessProbe.periodSeconds | int | `3` |  |
 | replicaCount | int | `1` |  |
-| resources | object | `{}` |  |
+| resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
 | securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | service.port | int | `9501` |  |
 | service.type | string | `"ClusterIP"` |  |
@@ -290,6 +390,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `3` |  |
 | tolerations | list | `[]` |  |
+| topologySpreadConstraints | list | `[]` |  |
 | volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | volumes.customModules.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |

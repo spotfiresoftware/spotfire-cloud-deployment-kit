@@ -27,40 +27,74 @@ This chart is tested to work with [Elasticsearch](https://www.elastic.co/elastic
 
 ## Prerequisites
 
-- A deployed Spotfire Server release using the [Spotfire Server](../spotfire-server/README.md) chart.
-- A Spotfire distribution file (`Spotfire.Dxp.sdn` or `Spotfire.Dxp.netcore-linux.sdn`) with client packages deployed to a deployment area (so that the required licenses are in place for the Spotfire Automation Services to start).
+- A deployed Spotfire Server release using the [Spotfire Server](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-server/README.md) chart.
+- A Spotfire distribution file (`Spotfire.Dxp.sdn`) with client packages deployed to a deployment area (so that the required licenses are in place for the Spotfire Automation Services to start).
 
 ## Usage
 
-### Installing
+Replace all placeholders (shown in angle brackets like `<NAMESPACE>`) with your actual values before running the commands.
 
-1. Export the `SPOTFIRE_SERVER` value to connect to the `spotfire-server` service:
-    ```bash
-    export SPOTFIRE_SERVER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=spotfire-server --output=jsonpath={.items..metadata.name})
-    ```
-2.  Forward the logs to the `log-forwarder` service:
-    ```bash
-    export LOG_FORWARDER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=log-forwarder --output=jsonpath={.items..metadata.name})
-    ```
-3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
-    ```bash
-    helm install my-release . \
-        --set acceptEUA=true \
-        --set global.spotfire.image.registry="127.0.0.1:32000" \
-        --set global.spotfire.image.pullPolicy="Always" \
-        --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-        --set logging.logForwarderAddress="$LOG_FORWARDER" \
-        -f my-values.yaml
-    ```
+### Step 1: Create namespace
 
-**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+```bash
+kubectl create namespace "<NAMESPACE>"
+```
 
-**Note**: You must provide your private registry address where the Spotfire container images are stored.
+### Step 2: Prepare Spotfire Server service addresses
 
-See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+Automation Services needs the Spotfire Server backend service name, and optionally the log-forwarder service name if you want application logs sent to the Spotfire log-forwarder.
 
-#### Configuring
+If the Spotfire Server chart was installed in the same namespace with the release name `<SPOTFIRE_SERVER_RELEASE>`, typical values are:
+
+- `nodemanagerConfig.serverBackendAddress="<SPOTFIRE_SERVER_RELEASE>-spotfire-server"`
+- `logging.logForwarderAddress="<SPOTFIRE_SERVER_RELEASE>-log-forwarder"` when the Spotfire Server chart log-forwarder is enabled
+
+### Step 3: Deploy the Spotfire Service for Automation Services chart
+
+Create a `values.yaml` file (for example, `spotfire-automationservices-values.yaml`). See the [Values table](#values) for details of the values.
+
+```yaml
+# spotfire-automationservices-values.yaml
+acceptEUA: true
+
+global:
+  spotfire:
+    image:
+      registry: "<REGISTRY>"
+      pullPolicy: Always
+
+nodemanagerConfig:
+  serverBackendAddress: "<SPOTFIRE_SERVER_SERVICE>"
+
+logging:
+  logForwarderAddress: "<LOG_FORWARDER_SERVICE>"
+```
+
+Install the chart:
+
+```bash
+helm install "<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --create-namespace \
+  --values spotfire-automationservices-values.yaml
+```
+
+**Note**:
+- Setting `acceptEUA: true` means you agree that your use of the Spotfire software is governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+- Replace `<REGISTRY>` with your private registry address where the Spotfire container images are stored.
+- Replace `<SPOTFIRE_SERVER_SERVICE>` with the Spotfire Server service name that Automation Services should connect to.
+- Replace `<LOG_FORWARDER_SERVICE>` with the log-forwarder service name if you want to forward logs to the Spotfire log-forwarder. If you do not want to use a log-forwarder service, omit `logging.logForwarderAddress`.
+
+Check pod status:
+
+```bash
+kubectl get pods --namespace "<NAMESPACE>" \
+  -l "app.kubernetes.io/name=spotfire-automationservices,app.kubernetes.io/instance=<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>"
+```
+
+## Configuration
+
+### Configuring
 
 You can override the default configuration settings by providing a custom configuration file.
 
@@ -78,20 +112,20 @@ See [Service configuration files](https://docs.tibco.com/pub/spotfire_server/lat
 
 Example: Use `my-Spotfire.Dxp.Worker.Automation.config` instead of the default `Spotfire.Dxp.Worker.Automation.config`:
 ```bash
-helm install my-release . \
+helm install "<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>" . \
     --set acceptEUA=true \
-    --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-    --set logging.logForwarderAddress="$LOG_FORWARDER" \
+  --set nodemanagerConfig.serverBackendAddress="<SPOTFIRE_SERVER_SERVICE>" \
+  --set logging.logForwarderAddress="<LOG_FORWARDER_SERVICE>" \
     --set-file config.'Spotfire\.Dxp\.Worker\.Automation\.config'=my-Spotfire.Dxp.Worker.Automation.config
 ```
 
 **Note**: The keys are quoted because they contain periods. When you set them from the command line, you must escape the periods with a backslash as shown in the example.
 
-#### Getting the container default configuration files
+### Getting the container default configuration files
 
 You can copy the default configuration files from the container image to use them as templates for your custom configuration.
 
-**Note**: The configuration files content can be version dependent.
+**Note**: The configuration file content can vary by version.
 
 Example: Use the following command to get a copy of the original configuration file `Spotfire.Dxp.Worker.Automation.config`.
 You can replace the file name to get a copy any of the other container configuration files.
@@ -99,9 +133,9 @@ You can replace the file name to get a copy any of the other container configura
 docker run --rm spotfire/spotfire-automationservices:<imagetag> cat /opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Spotfire.Dxp.Worker.Automation.config > Spotfire.Dxp.Worker.Automation.config
 ```
 
-#### Custom modules
+### Custom modules
 
-The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See *helm/examples/webplayer-custom-modules/README.md* in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
+The image uses the modules that are built into the image and does not download images from or use a [Spotfire deployment area](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/deployments_and_deployment_areas.html). To use your own custom deployment files (or modules) you can use the argument `volumes.customModules` to set a Volume that will be used for loading extra custom modules. See user-guide/examples/webplayer-custom-modules/README.md  in the Spotfire Cloud Deployment Kit repository for an example of how to use this feature.
 
 ### Adding additional ODBC drivers for Spotfire Connectors
 
@@ -109,27 +143,27 @@ If you want to use certain Spotfire connectors that are not available in the def
 
 Once you have extended the image and included the necessary ODBC drivers, you must push the modified image to a registry that can be accessed by the Kubernetes cluster. Finally, update the `spotfire.image.*` values in your configuration to point to the new image.
 
-### Uninstalling
+## Scaling
 
-To uninstall/delete the `my-release` deployment:
-```bash
-helm uninstall my-release
+To change the number of replicas managed by Helm, update `replicaCount` in your values file and run `helm upgrade`.
+
+Example:
+
+```yaml
+replicaCount: 3
 ```
 
-See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
-
-### Scaling
-
-For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
 ```bash
-helm upgrade --install my-release . --reuse-values --set replicaCount=3
+helm upgrade "<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --values spotfire-automationservices-values.yaml
 ```
 
-#### Autoscaling with KEDA
+### Autoscaling with KEDA
 
-To use [KEDA](https://keda.sh/docs) for autoscaling, first install it in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
+To use [KEDA](https://keda.sh/docs) for autoscaling, first install KEDA in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
-Example: A `values.yml` snippet configuration for enabling autoscaling with KEDA:
+Example: A `values.yaml` snippet configuration for enabling autoscaling with KEDA:
 ```yaml
 kedaAutoscaling:
   enabled: true
@@ -146,9 +180,9 @@ The `spotfire-automationservices` has the following autoscaling defaults:
 
 With these default settings, if the queue reaches the configured threshold, then another instance is started to scale out the service. If the queue size falls below the threshold, then the service scales in.
 
-**Note**: You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts for long-running tasks, so that jobs are not aborted prematurely when an instance is stopped to scale in.
-
-**Note**: The metric used for autoscaling is scraped from the Spotfire Servers, so if there are more than one Spotfire Server Helm releases in the same namespace, `kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease` must also be set.
+**Note**:
+- You can tune `nodemanagerConfig.preStopDrainingTimeoutSeconds` and other timeouts for long-running tasks, so that jobs are not aborted prematurely when an instance is stopped to scale in.
+- The metric used for autoscaling is scraped from the Spotfire Servers, so if there are more than one Spotfire Server Helm releases in the same namespace, `kedaAutoscaling.spotfireConfig.spotfireServerHelmRelease` must also be set.
 
 For more advanced scenarios, see [kedaAutoscaling.advanced](https://keda.sh/docs/latest/concepts/scaling-deployments/#advanced) and [kedaAutoscaling.fallback](https://keda.sh/docs/latest/concepts/scaling-deployments/#fallback).
 
@@ -158,18 +192,71 @@ kedaAutoscaling:
   triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
+**Note**: For more details on the autoscaling defaults, see `templates/keda-autoscaling.yaml` in the chart.
 
-#### Improved performance and concurrency for temporary folder
+#### Update the Pod Deletion Cost annotation automatically
 
-To optimize data reuse, the Spotfire Automation Services uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Temp`) to store temporary files and data. In certain scenarios, like when opening large analysis files concurrently, or when exporting large analysis files using Automation Services, it is recommended to use a more performant and larger Kubernetes volume. For more details, see [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+The [controller.kubernetes.io/pod-deletion-cost](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost) pod annotation influences in which order Kubernetes selects the pod to delete, for example, during scale-in.
 
-### Upgrading
+Note that pod annotations should not be updated 'too' often (minutes rather than seconds), depending on the size of the cluster. The reason for this is that the Kubernetes API server is highly optimized for reads. `sleepIntervalSeconds` controls how often the updater should run, `thresholdPercent` and `minAbsDelta` controls how large the change must be for the annotation to be updated, that is, it specifies the size of a meaningful change.
 
-When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
+```yaml
+podDeletionCost:
+  enabled: true
+```
 
-#### Upgrading helm chart version
+The `spotfire-automationservices` has the following defaults:
+- cost formula: `spotfire_Spotfire_Automation_Services_active_jobs`.
+- sleepIntervalSeconds: `120`.
+- `thresholdPercent`: `10`
+- `minAbsDelta`: `1`
 
-Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
+## Performance and Storage
+
+### Improved performance and concurrency for temporary folder
+
+To optimize data reuse, the Spotfire Automation Services uses its temporary folder (default: `/opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Temp`) to store temporary files and intermediate data. In scenarios where large analysis files are opened concurrently, or large analysis files are exported with Automation Services, the default temporary folder might become a bottleneck, impacting performance and throughput. It is recommended to use a more performant and larger Kubernetes volume.
+
+Example: A `values.yaml` snippet for optimizing the Spotfire Automation Services temp disk performance.
+```yaml
+extraVolumeMounts:
+  - mountPath: /opt/spotfire/nodemanager/nm/services/AUTOMATION_SERVICES/Temp
+    name: automationservices-temp-dir-volume
+extraVolumes:
+  - name: automationservices-temp-dir-volume
+    ephemeral: # See Kubernetes documentation for ephemeral volumes: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/
+      volumeClaimTemplate:
+        metadata:
+          labels:
+            type: automationservices-ephemeral-volume
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: <STORAGE_CLASS_NAME> # Replace with your storage class name.
+          resources:
+            requests:
+              storage: 10Gi # Specify the desired storage size.
+```
+
+**Note**: For Azure AKS clusters, see also: [Use Azure Container Storage with local NVMe](https://learn.microsoft.com/en-us/azure/storage/container-storage/use-container-storage-with-local-disk).
+
+## Uninstalling
+
+To uninstall the `<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>` release:
+
+```bash
+helm --namespace "<NAMESPACE>" uninstall "<SPOTFIRE_AUTOMATIONSERVICES_RELEASE>"
+```
+
+## Upgrading
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+### Upgrading Spotfire Server and Spotfire services
+
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+### Upgrading helm chart version
+
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changed, moved, or renamed parameters before upgrading the release.
 
 {{ template "chart.valuesSection" . }}

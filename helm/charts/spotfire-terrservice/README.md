@@ -1,6 +1,6 @@
 # spotfire-terrservice
 
-![Version: 4.0.4](https://img.shields.io/badge/Version-4.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.25.0](https://img.shields.io/badge/AppVersion-1.25.0-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
 
 A Helm chart for Spotfire® Enterprise Runtime for R - Server Edition
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 4.0.4 |
+| file://../spotfire-common | spotfire-common | 5.0.0 |
 
 ## Overview
 
@@ -28,72 +28,108 @@ The TERR service pod includes:
 - Service annotations for [Prometheus](https://prometheus.io/) scrapers. The Prometheus server discovers the service endpoint using these specifications and scrapes metrics from the exporter.
 - Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
-This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/), and [KEDA](https://keda.sh/).
+This chart is tested to work with [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
 ## Prerequisites
 
-- A deployed Spotfire Server release using the [Spotfire Server](../spotfire-server/README.md) chart.
+- A deployed Spotfire Server release using the [Spotfire Server](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-server/README.md) chart.
 
 ## Usage
 
-### Installing
+Replace all placeholders (shown in angle brackets like `<NAMESPACE>`) with your actual values before running the commands.
 
-1. Export the `SPOTFIRE_SERVER` value to connect to the `spotfire-server` service:
-    ```bash
-    export SPOTFIRE_SERVER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=spotfire-server --output=jsonpath={.items..metadata.name})
-    ```
-2.  Forward the logs to the `log-forwarder` service:
-    ```bash
-    export LOG_FORWARDER=$(kubectl get services --selector=app.kubernetes.io/part-of=spotfire,app.kubernetes.io/name=log-forwarder --output=jsonpath={.items..metadata.name})
-    ```
-3. Install this chart with the release name `my-release` and custom values from `my-values.yaml`:
-    ```bash
-    helm install my-release . \
-        --set acceptEUA=true \
-        --set global.spotfire.image.registry="127.0.0.1:32000" \
-        --set global.spotfire.image.pullPolicy="Always" \
-        --set nodemanagerConfig.serverBackendAddress="$SPOTFIRE_SERVER" \
-        --set logging.logForwarderAddress="$LOG_FORWARDER" \
-        -f my-values.yaml
-    ```
+### Step 1: Create namespace
 
-**Note**: This Spotfire Helm chart requires setting the parameter `acceptEUA` or the parameter `global.spotfire.acceptEUA` to the value `true`.
-By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+```bash
+kubectl create namespace "<NAMESPACE>"
+```
 
-**Note**: You must provide your private registry address where the Spotfire container images are stored.
+### Step 2: Prepare Spotfire Server service addresses
 
-See [helm install](https://helm.sh/docs/helm/helm_install/) for command documentation.
+The TERR service needs the Spotfire Server backend service name, and optionally the log-forwarder service name if you want application logs sent to the Spotfire log-forwarder.
 
-#### Configuration
+If the Spotfire Server chart was installed in the same namespace with the release name `<SPOTFIRE_SERVER_RELEASE>`, typical values are:
 
-To set [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/custom_configuration_properties.html), add the name of the property as a key under the `configuration` section in your Helm values.
+- `nodemanagerConfig.serverBackendAddress="<SPOTFIRE_SERVER_RELEASE>-spotfire-server"`
+- `logging.logForwarderAddress="<SPOTFIRE_SERVER_RELEASE>-log-forwarder"` when the Spotfire Server chart log-forwarder is enabled
+
+### Step 3: Deploy the Spotfire Service for TERR chart
+
+Create a `values.yaml` file (for example, `spotfire-terrservice-values.yaml`). See the [Values table](#values) for details of the values.
+
+```yaml
+# spotfire-terrservice-values.yaml
+acceptEUA: true
+
+global:
+  spotfire:
+    image:
+      registry: "<REGISTRY>"
+      pullPolicy: Always
+
+nodemanagerConfig:
+  serverBackendAddress: "<SPOTFIRE_SERVER_SERVICE>"
+
+logging:
+  logForwarderAddress: "<LOG_FORWARDER_SERVICE>"
+```
+
+Install the chart:
+
+```bash
+helm install "<SPOTFIRE_TERRSERVICE_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --create-namespace \
+  --values spotfire-terrservice-values.yaml
+```
+
+**Note**:
+- Setting `acceptEUA: true` means you agree that your use of the Spotfire software is governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+- Replace `<REGISTRY>` with your private registry address where the Spotfire container images are stored.
+- Replace `<SPOTFIRE_SERVER_SERVICE>` with the Spotfire Server service name that the TERR service should connect to.
+- Replace `<LOG_FORWARDER_SERVICE>` with the log-forwarder service name if you want to forward logs to the Spotfire log-forwarder. If you do not want to use a log-forwarder service, omit `logging.logForwarderAddress`.
+
+Check pod status:
+
+```bash
+kubectl get pods --namespace "<NAMESPACE>" \
+  -l "app.kubernetes.io/name=spotfire-terrservice,app.kubernetes.io/instance=<SPOTFIRE_TERRSERVICE_RELEASE>"
+```
+
+## Configuration
+
+### Custom configuration properties
+
+To set [Custom configuration properties](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/custom_configuration_properties.html), add the property names as keys under the `configuration` section in your values file.
 
 Example:
-```ini
-# The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
-engine.session.max: 5
 
-# The number of TERR engines preallocated and available for new sessions in the TERR service queue.
-engine.queue.size: 10
+```yaml
+configuration:
+  # The maximum number of TERR engine sessions that are allowed to run concurrently in the TERR service.
+  engine.session.max: "5"
+
+  # The number of TERR engines preallocated and available for new sessions in the TERR service queue.
+  engine.queue.size: "10"
 ```
 
-### Uninstalling
+## Scaling
 
-To uninstall/delete the `my-release` deployment:
+To change the number of replicas managed by Helm, update `replicaCount` in your values file and run `helm upgrade`.
+
+Example:
+
+```yaml
+replicaCount: 3
+```
+
 ```bash
-helm uninstall my-release
+helm upgrade "<SPOTFIRE_TERRSERVICE_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --values spotfire-terrservice-values.yaml
 ```
 
-See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
-
-### Scaling
-
-For scaling the `my-release` deployment, do a helm upgrade, providing the target number of pod instances in the `replicaCount` variable.
-```bash
-helm upgrade --install my-release . --reuse-values --set replicaCount=3
-```
-
-#### Autoscaling with KEDA
+### Autoscaling with KEDA
 
 To use [KEDA](https://keda.sh/docs) for autoscaling, first install KEDA in the Kubernetes cluster. You must also install a Prometheus instance that scrapes metrics from the Spotfire pods.
 
@@ -112,12 +148,13 @@ kedaAutoscaling:
 ```
 
 The `spotfire-terrservice` has the following autoscaling defaults:
-- metric: `spotfire_service_queue_engines_inUse` ( _serviceQueueEnginesInUse_ TERR service counter).
+- metric: `spotfire_service_queue_engines_inUse` (_serviceQueueEnginesInUse_ TERR service counter).
 - query: the sum of `spotfire_service_queue_engines_inUse` of the TERR service instances for the release name.
 
 The counter _serviceQueueEnginesInUse_ provides the total number of engines currently executing.
 By default, the TERR service has `number of cores - 1` available slots, which means that `kedaAutoscaling.threshold` should be synchronized with `resources.limits.cpu`.
-Typically, you want to scale out before all the available capacity is taken. Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
+Typically, you want to scale out before all the available capacity is taken.
+Therefore, the `kedaAutoscaling.threshold` should be lower than `resources.limits.cpu`.
 Note that clients requesting a slot typically wait until a slot is available.
 
 For more information, see [Monitoring the Spotfire Service for TERR using JMX](https://docs.tibco.com/pub/terrsrv/latest/doc/html/TIB_terrsrv_install/_shared/install/topics/monitoring_the_service_using_jmx.html).
@@ -133,19 +170,72 @@ kedaAutoscaling:
   triggers: {} # list of triggers to activate scaling of the target resource
 ```
 
-**Note**: For more details on the autoscaling defaults, refer to the file templates/keda-autoscaling.yaml inside the chart.
+**Note**: For more details on the autoscaling defaults, see `templates/keda-autoscaling.yaml` in the chart.
 
-#### Improved performance and concurrency for temporary folder
+#### Update the Pod Deletion Cost annotation automatically
 
-To store intermediate results during analysis and optimize data reuse, the TERR service uses its temporary folder (default: `/tmp`). In scenarios where large data sets or concurrent computations are involved, the default temporary folder might become a bottleneck, impacting performance and throughput. To address this, it is recommended to use a more performant and larger Kubernetes volume for the temporary folder. For more details, see [Improved performance and concurrency for temporary folder](../spotfire-server/README.md#improved-performance-and-concurrency-for-temporary-folder) in the Spotfire Server documentation.
+The [controller.kubernetes.io/pod-deletion-cost](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost) pod annotation influences in which order Kubernetes selects the pod to delete, for example, during scale-in.
 
-### Upgrading
+Note that pod annotations should not be updated 'too' often (minutes rather than seconds), depending on the size of the cluster. The reason for this is that the Kubernetes API server is highly optimized for reads. `sleepIntervalSeconds` controls how often the updater should run, `thresholdPercent` and `minAbsDelta` controls how large the change must be for the annotation to be updated, that is, it specifies the size of a meaningful change.
 
-When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services. See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for helm command documentation.
+```yaml
+podDeletionCost:
+  enabled: true
+```
 
-#### Upgrading helm chart version
+The `spotfire-terrservice` has the following defaults:
+- cost formula: `spotfire_service_queue_engines_inUse`.
+- sleepIntervalSeconds: `120`.
+- `thresholdPercent`: `10`
+- `minAbsDelta`: `1`
 
-Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changes, moved, or renamed parameters before upgrading the release.
+## Performance and Storage
+
+### Improved performance and concurrency for temporary folder
+
+To optimize data reuse, the TERR service uses its temporary folder (default: `/tmp`) to store temporary files and intermediate data. In scenarios where large data sets or concurrent computations are involved, the default temporary folder might become a bottleneck, impacting performance and throughput. It is recommended to use a more performant and larger Kubernetes volume.
+
+Example: A `values.yaml` snippet for optimizing the TERR service temp disk performance.
+```yaml
+extraVolumeMounts:
+  - mountPath: /tmp
+    name: terrservice-temp-dir-volume
+extraVolumes:
+  - name: terrservice-temp-dir-volume
+    ephemeral: # See Kubernetes documentation for ephemeral volumes: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/
+      volumeClaimTemplate:
+        metadata:
+          labels:
+            type: terrservice-ephemeral-volume
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          storageClassName: <STORAGE_CLASS_NAME> # Replace with your storage class name.
+          resources:
+            requests:
+              storage: 10Gi # Specify the desired storage size.
+```
+
+**Note**: For Azure AKS clusters, see also: [Use Azure Container Storage with local NVMe](https://learn.microsoft.com/en-us/azure/storage/container-storage/use-container-storage-with-local-disk).
+
+## Uninstalling
+
+To uninstall the `<SPOTFIRE_TERRSERVICE_RELEASE>` release:
+
+```bash
+helm --namespace "<NAMESPACE>" uninstall "<SPOTFIRE_TERRSERVICE_RELEASE>"
+```
+
+## Upgrading
+
+See [helm upgrade](https://helm.sh/docs/helm/helm_upgrade/) for command documentation.
+
+### Upgrading Spotfire Server and Spotfire services
+
+When you upgrade to a newer Spotfire Server version and newer Spotfire services versions, upgrade the Spotfire Server first, and then upgrade the Spotfire services.
+
+### Upgrading helm chart version
+
+Please review the [release notes](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/releases) for any changed, moved, or renamed parameters before upgrading the release.
 
 ## Values
 
@@ -167,7 +257,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
@@ -175,7 +265,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| image.tag | string | `"1.25.0-v6.0.4"` | The container image tag to use. |
+| image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -198,6 +288,19 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| podDeletionCost.costFormula | string | `"spotfire_service_queue_engines_inUse"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | readinessProbe.enabled | bool | `false` |  |
 | readinessProbe.failureThreshold | int | `10` |  |
@@ -220,6 +323,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `3` |  |
 | tolerations | list | `[]` |  |
+| topologySpreadConstraints | list | `[]` |  |
 | volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | volumes.packages.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |

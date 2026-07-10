@@ -16,87 +16,262 @@
 
 ## Overview
 
-The Spotfire Helm chart is an umbrella chart that includes multiple components for deploying a Spotfire analytics platform. It consists of the following components:
+The Spotfire platform Helm chart is an umbrella chart for deploying a [Spotfire® analytics platform](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- [spotfire-server](../spotfire-server/README.md)
-- [spotfire-webplayer](../spotfire-webplayer/README.md)
-- [spotfire-automationservices](../spotfire-automationservices/README.md)
-- [spotfire-terrservice](../spotfire-terrservice/README.md)
-- [spotfire-rservice](../spotfire-rservice/README.md)
-- [spotfire-pythonservice](../spotfire-pythonservice/README.md)
+## Prerequisites
+
+- Familiarity with [Kubernetes](http://kubernetes.io/)
+- Familiarity with [Helm](https://helm.sh/) charts (Helm 3+)
+- An existing Spotfire database (see [Setting up the Spotfire database](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/getting_started_with_the_spotfire_environment.html))
+- Familiarity with the individual Spotfire helm charts
+
+## Components
+
+- [spotfire-server](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-server/README.md)
+- [spotfire-webplayer](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-webplayer/README.md)
+- [spotfire-automationservices](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-automationservices/README.md)
+- [spotfire-terrservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-terrservice/README.md)
+- [spotfire-rservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-rservice/README.md)
+- [spotfire-pythonservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-pythonservice/README.md)
 - [PostgreSQL database](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) ⚠️  
 
-Warning: The PostgreSQL chart is included as an example and is intended for demo and testing purposes only. It is important to note that the spotfire Helm chart does not take responsibility for data persistence in the Spotfire database. It is your responsibility to ensure that you have a proper data persistence strategy in place. Failure to do so may result in data loss. Please make sure you are familiar with the documentation of your chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate measures to ensure data persistence.
+The Spotfire Server component is always installed and does not have an 'enabled' setting. All other components (Web Player, Automation Services, TERR Service, R Service, Python Service, and PostgreSQL) are disabled by default and can be enabled individually by setting their 'enabled' value to 'true'.
 
-Note: For more advanced configurations, where you need multiple instances of a single chart, such as two web players with different configurations, you can either deploy the chart directly to add another instance or create new umbrella that suits your needs.  The 'publicAddress' field is required.
-
-## Installation
-
-```bash
-helm install my-release . --render-subchart-notes --set global.spotfire.acceptEUA=true \
-    --set postgresql.enabled=true \
-    --set postgresql.image.repository=bitnamilegacy/postgresql \
-    --set postgresql.primary.resourcesPreset=small \
-    --set global.postgresql.auth.postgresPassword=DBAdminPassword \
-    --set spotfire-webplayer.enabled=true \
-    --set spotfire-automationservices.enabled=true \
-    --set spotfire-terrservice.enabled=true \
-    --set spotfire-rservice.enabled=true \
-    --set spotfire-pythonservice.enabled=true \
-    --set spotfire-server.configuration.site.publicAddress=http://localhost/
-```
-
-This will deploy the Spotfire platform with all components enabled using the embedded PostgreSQL database.
-
-**Note**: The embedded PostgreSQL Helm chart requires `postgresql.image.repository=bitnamilegacy/postgresql` and `postgresql.primary.resourcesPreset=small` to be set. The password for the database user `postgres` is set to `DBAdminPassword`.
-
-**Warning**: Due to a limitation in the PostgreSQL Helm chart, if you uninstall the Spotfire platform chart using `helm uninstall my-release` and then reinstall it with a different value for `global.postgresql.auth.postgresPassword` (the PostgreSQL admin password), the new password will be ignored because the PostgreSQL PVC still contains the old password. This will cause the Spotfire deployments to fail. To use a different PostgreSQL admin password, you must first delete the PVC (`kubectl delete pvc data-my-release-postgresql-0`), which will also delete all data stored in the PostgreSQL database. For more information, see the [Bitnami PostgreSQL bug #2061](https://github.com/bitnami/charts/issues/2061).
-
-### Using an external Spotfire database
-
-To use an external database, you need to provide the database connection details to the database. We will use a PostgreSQL database for this example but you can use any other database supported by Spotfire.
-
-First, install the PostgreSQL chart using Helm: 
-
-```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install spotfiredatabase bitnami/postgresql --set global.postgresql.auth.postgresPassword=PostgresAdminPassword
-```
-
-It will create a new PostgreSQL database with the password `PostgresAdminPassword` and the service name `spotfiredatabase-postgresql`.
-
-Create a file named `spotfire-database.yaml` with the following content:
-
-```yaml
-spotfire-server:
-  database:
-    bootstrap:
-      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
-      driverClass: "org.postgresql.Driver"
-      username: "spotfire"
-      password: "SpotfireDatabasePassword"
-    create-db:
-      enabled: true
-      adminUsername: "postgres"
-      adminPassword: "PostgresAdminPassword"
-      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
-      adminPasswordExistingSecret:
-        name: ""
-        key: ""
-```
-
-If needed, adjust the values in the file to match your database configuration. 
-
-Then install the chart with the release name `my-release` using the database configuration:
-
-```bash
-helm install my-release . --render-subchart-notes --set postgresql.enabled=false --set global.spotfire.acceptEUA=true --values spotfire-database.yaml
-```
-
-Note that the `postgresql.enabled` parameter is set to `false` to disable the embedded PostgreSQL database.
+**Note**: For more advanced deployment scenarios, such as running multiple instances of a single chart with different configurations (e.g., two web players), you can deploy individual service charts multiple times. See [Step 4: Deploy additional service instances (optional)](#step-4-deploy-additional-service-instances-optional) for examples.
 
 ## Usage
 
-For detailed usage instructions, please refer to the README.md files of the individual components.
+Replace all placeholders (shown in angle brackets like `<NAMESPACE>`) with your actual values before running the commands.
+
+**Note**:
+
+- The Spotfire Helm charts deployed using this umbrella chart require setting the parameter `acceptEUA` for each chart, or the parameter `global.spotfire.acceptEUA` to the value `true`. By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+- The `spotfire-server.configuration.site.publicAddress` field is required for all deployments.
+- You must set `global.spotfire.image.registry` to your private registry address where the Spotfire container images are stored.
+
+### Step 1: Create namespace
+
+```bash
+kubectl create namespace "<NAMESPACE>"
+```
+
+### Step 2: Prepare deployment values
+
+Complete either Step 2a or Step 2b depending on your setup.
+
+#### Step 2a: Use the embedded PostgreSQL chart
+
+This option uses the embedded PostgreSQL chart as the Spotfire database and enables all Spotfire services.
+
+**Warning**: The PostgreSQL chart is included as an example and is intended for demo and testing purposes only. It is important to note that the Spotfire Helm chart does not take responsibility for data persistence in the Spotfire database. It is your responsibility to ensure that you have a proper data persistence strategy in place. Failure to do so may result in data loss. Please make sure you are familiar with the documentation of your chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate measures to ensure data persistence.
+
+Create a `values.yaml` file (for example, `spotfire-platform-values.yaml`):
+
+```yaml
+# spotfire-platform-values.yaml
+global:
+  spotfire:
+    acceptEUA: true
+    image:
+      registry: "<REGISTRY>"
+
+spotfire-server:
+  configuration:
+    site:
+      publicAddress: "<SPOTFIRE_PUBLIC_ADDRESS>"
+
+postgresql:
+  enabled: true
+  image:
+    repository: bitnamilegacy/postgresql
+  primary:
+    resourcesPreset: small
+
+spotfire-webplayer:
+  enabled: true
+
+spotfire-automationservices:
+  enabled: true
+
+spotfire-terrservice:
+  enabled: true
+
+spotfire-rservice:
+  enabled: true
+
+spotfire-pythonservice:
+  enabled: true
+```
+
+**Note**:
+
+- The embedded PostgreSQL Helm chart requires `postgresql.image.repository=bitnamilegacy/postgresql` and `postgresql.primary.resourcesPreset=small`.
+- When using the embedded PostgreSQL chart, the PostgreSQL admin password is stored in the secret `<SPOTFIRE_PLATFORM_RELEASE>-postgresql` under the key `postgres-password`.
+
+**Warning**: Due to how the Bitnami PostgreSQL Helm chart works, if you uninstall the Spotfire platform chart and reinstall it while the PostgreSQL PVC still exists, PostgreSQL will continue using the password stored in that PVC. Delete the PVC first (`kubectl delete pvc data-<SPOTFIRE_PLATFORM_RELEASE>-postgresql-0`) to reset it. This also deletes all stored data. For more information, see the [Bitnami PostgreSQL bug #2061](https://github.com/bitnami/charts/issues/2061).
+
+#### Step 2b: Use an existing supported database
+
+This option connects to an existing supported database and enables all Spotfire services.
+
+**Note**: When using an existing database, you need to provide the connection details for the database. This example uses a PostgreSQL database, but you can use any other supported database. For configuration details, see the `Supported database Configuration` section in the spotfire-server helm chart README.
+
+Create a secret with the database passwords:
+
+```bash
+kubectl create secret generic spotfire-database-credentials \
+  --namespace="<NAMESPACE>" \
+  --from-literal=spotfireDatabasePassword="<SPOTFIRE_DATABASE_PASSWORD>" \
+  --from-literal=databaseAdminPassword="<DB_ADMIN_PASSWORD>"
+```
+
+Then create a `values.yaml` file (for example, `spotfire-platform-values.yaml`). Details of available values can be found in the [values](#values) section.
+
+```yaml
+# spotfire-platform-values.yaml
+global:
+  spotfire:
+    acceptEUA: true
+    image:
+      registry: "<REGISTRY>"
+
+spotfire-server:
+  configuration:
+    site:
+      publicAddress: "<SPOTFIRE_PUBLIC_ADDRESS>"
+  database:
+    bootstrap:
+      databaseUrl: "jdbc:postgresql://<DB_HOST>:<DB_PORT>/<DB_NAME>"
+      driverClass: "org.postgresql.Driver"
+      username: "<SPOTFIRE_DATABASE_USERNAME>"
+      passwordExistingSecret:
+        name: spotfire-database-credentials
+        key: spotfireDatabasePassword
+    create-db:
+      enabled: true
+      adminUsername: "<DB_ADMIN_USERNAME>"
+      databaseUrl: "jdbc:postgresql://<DB_HOST>:<DB_PORT>/"
+      spotfiredbDbname: "<DB_NAME>"
+      adminPasswordExistingSecret:
+        name: spotfire-database-credentials
+        key: databaseAdminPassword
+
+postgresql:
+  enabled: false
+
+spotfire-webplayer:
+  enabled: true
+
+spotfire-automationservices:
+  enabled: true
+
+spotfire-terrservice:
+  enabled: true
+
+spotfire-rservice:
+  enabled: true
+
+spotfire-pythonservice:
+  enabled: true
+```
+
+### Step 3: Deploy the Spotfire platform chart
+
+Install the chart using the values file for the deployment path you chose in Step 2.
+
+```bash
+helm install "<SPOTFIRE_PLATFORM_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --create-namespace \
+  --render-subchart-notes \
+  --values spotfire-platform-values.yaml
+```
+
+Then check pod status:
+
+```bash
+kubectl get pods --namespace "<NAMESPACE>" \
+  -l "app.kubernetes.io/instance=<SPOTFIRE_PLATFORM_RELEASE>"
+```
+
+### Step 4: Deploy additional service instances (optional)
+
+To deploy Spotfire services with different settings, deploy the individual service chart multiple times using unique release names and distinct configuration values.
+
+#### Example: Deploy two web players belonging to different resource pools
+
+This example shows how to deploy two web players in separate resource pools with a Spotfire server using release name `<SPOTFIRE_PLATFORM_RELEASE>` in namespace `<NAMESPACE>`.
+
+1. Deploy the spotfire-platform chart by following one of the examples above.
+
+**Note**: Record the release name used, as it will be needed in the `serverBackendAddress` field (e.g., `<SPOTFIRE_PLATFORM_RELEASE>-spotfire-server`).
+
+2. Create your resource pools in the Spotfire Server administration interface once the server is running. For more details on how to create resource pools, [see here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/creating_resource_pools.html).
+
+3. Create a file named `wp1.yaml` with the following content:
+
+   ```yaml
+   webplayerConfig:
+     # -- The web player resource pool name.
+     resourcePool: "wp1"
+   nodemanagerConfig:
+     serverBackendAddress: <SPOTFIRE_PLATFORM_RELEASE>-spotfire-server
+   logging:
+     logLevel: debug
+     logForwarderAddress: <SPOTFIRE_PLATFORM_RELEASE>-log-forwarder
+   ```
+
+4. Create a file named `wp2.yaml` with the following content:
+
+   ```yaml
+   webplayerConfig:
+     # -- The web player resource pool name.
+     resourcePool: "wp2"
+   nodemanagerConfig:
+     serverBackendAddress: <SPOTFIRE_PLATFORM_RELEASE>-spotfire-server
+   logging:
+     logLevel: debug
+     logForwarderAddress: <SPOTFIRE_PLATFORM_RELEASE>-log-forwarder
+   ```
+
+5. After creating the YAML files, deploy the web player chart by following the steps outlined in the spotfire-webplayer chart Usage section. Use unique release names for each deployment (for example, `<SPOTFIRE_PLATFORM_RELEASE>-wp1` and `<SPOTFIRE_PLATFORM_RELEASE>-wp2`) and reference the values files created in the previous steps (using `--values wp1.yaml` or `--values wp2.yaml`).
+
+This pattern can be applied to any component to deploy multiple instances with different configurations.
+
+
+## Uninstalling
+
+To uninstall the `<SPOTFIRE_PLATFORM_RELEASE>` deployment:
+```bash
+helm --namespace <NAMESPACE> uninstall "<SPOTFIRE_PLATFORM_RELEASE>"
+```
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+## Upgrading
+
+### Upgrading Spotfire Server and Spotfire services
+
+Review the README files for the enabled component charts before upgrading. When you upgrade the platform chart, the bundled Spotfire Server and enabled service charts are upgraded together according to the versions defined by this platform chart release.
+
+If you are using a custom values file, update it first and then run `helm upgrade` with that file.
+
+### Upgrading helm chart version
+
+Upgrade the chart using the same values file you used for installation:
+
+```bash
+helm upgrade "<SPOTFIRE_PLATFORM_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --render-subchart-notes \
+  --values spotfire-platform-values.yaml
+```
+
+## Detailed instructions
+
+For detailed usage instructions, see the README.md files of the individual components listed in the [Overview](#overview) section.
 
 {{ template "chart.valuesSection" . }}
+
+
+

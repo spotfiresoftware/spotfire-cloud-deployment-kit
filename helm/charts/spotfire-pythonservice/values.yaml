@@ -27,7 +27,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-pythonservice
   # -- The container image tag to use.
-  tag: "1.25.0-v6.0.4"
+  tag: "15.0.0-v7.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -38,7 +38,7 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: fluent/fluent-bit
     # -- The image tag to use for fluent-bit logging sidecar.
-    tag: "4.2.2"
+    tag: "4.2.3"
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -172,11 +172,51 @@ kedaAutoscaling:
     # -- REQUIRED. The URL for the Prometheus server from where metrics are fetched.
     prometheusServerAddress: http://prometheus-server.monitor.svc.cluster.local
 
+# -- Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details.
+# @default -- Default values for Pod Deletion Cost, see values.yaml.
+podDeletionCost:
+  # -- Enable updating of pod deletion cost annotation.
+  enabled: false
+  # -- Number of replicas.
+  replicaCount: 1
+
+  image:
+    # -- Image registry for the podDeletionCost.
+    registry:
+    # -- Image repository for the podDeletionCost.
+    repository: spotfire/spotfire-config
+    # -- Image tag for the podDeletionCost.
+    tag: "15.0.0-v7.0.0"
+    # -- Image pull policy for the podDeletionCost.
+    pullPolicy: IfNotPresent
+    # -- Image pull secrets for the podDeletionCost.
+    pullSecrets: []
+
+  # -- Specifies the standard Kubernetes resource requests and/or limits
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # --  An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0.
+  costFormula: "spotfire_service_queue_engines_inUse"
+  # -- How long to wait between checks (seconds).
+  sleepIntervalSeconds: "120"
+  # -- Minimum % change to trigger a patch.
+  thresholdPercent: "10"
+  # -- Minimum numeric change to trigger a patch.
+  minAbsDelta: "1"
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+topologySpreadConstraints: []
 
 # -- (object) Add [Custom configuration properties](https://docs.tibco.com/pub/sf-pysrv/latest/doc/html/TIB_sf-pysrv_install/_shared/install/topics/custom_configuration_properties.html).
 # Keys under configuration should be named the same as the configuration property, for example 'engine.execution.timeout'.

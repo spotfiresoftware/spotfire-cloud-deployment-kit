@@ -30,7 +30,11 @@ If you have not created a persistent volume claim, you can do so with the follow
 
 ## Driver deployment
 
-See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for additional information.<br>
+There are two methods for deploying a JDBC driver.
+See [Installing database drivers for Information Designer](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html) for additional information.
+
+### Method 1: Installing JDBC drivers manually
+
 To make the JDBC driver available to the Spotfire server at `<installation directory>/tomcat/custom-ext-informationservices`, follow these steps:
 
 1. Deploy a BusyBox container with the persistent volume mounted on `/drivers` and copy the driver to the `/drivers` folder.
@@ -76,8 +80,14 @@ To make the JDBC driver available to the Spotfire server at `<installation direc
           subPath: "drivers"
     ```
 
+### Method 2: Installing JDBC drivers in the server administration pages
 
-## Add a data source template to the Spotfire configuration
+Alternatively, you can deploy a JDBC driver by uploading a Spotfire Package (SPK) file that contains the driver
+   through the Spotfire Server web administration interface.<br><br>
+
+For prerequisites and detailed steps to build and upload an SPK, see the [official documentation](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/installing_database_drivers_for_information_designer.html).
+
+## Add a data source template to the Spotfire environment
 
 1. Refer to the spotfire community article [JDBC Data Access Connectivity Details ](https://spotfi.re/community/jdbc-templates) to determine the correct data source template to add. Create an xml file with the template data. For example, for AWS Athena:
     `<DATA-SOURCE-NAME>-ds-template.xml`
@@ -98,7 +108,7 @@ To make the JDBC driver available to the Spotfire server at `<installation direc
     kubectl create configmap <DATA-SOURCE-NAME>-datasource-template --from-file=<TEMPLATE-FILE-PATH>
     ```
 
-3. Create a new values file and deploy the Spotfire chart with the additional values for Helm. This file uses the newly created ConfigMap as a data source template to add to the Spotfire configuration, and executes the configuration script to add the data source template to the Spotfire configuration. Replace `<DATA-SOURCE-TEMPLATE-NAME>` and `<DATA-SOURCE-NAME>` with appropriate values.<br>
+3. Create a new values file and deploy the Spotfire chart with the additional values for Helm. This file uses the newly created ConfigMap as a data source template to add to the Spotfire environment, and executes the script to add the data source template to Spotfire. Replace `<DATA-SOURCE-TEMPLATE-NAME>` and `<DATA-SOURCE-NAME>` with appropriate values.<br>
    For more information on configuration script execution, see the ['Configuration' section in the Readme for the `spotfire-server` Helm chart](../helm/charts/spotfire-server/README.md#configuration). For the `add-ds-template` command, refer to the [add-ds-template command-line reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/add-ds-template.html).
     
     `ds-template-configuration.yaml`
@@ -116,7 +126,7 @@ To make the JDBC driver available to the Spotfire server at `<installation direc
         configurationScripts:
           - name: configure-<DATA-SOURCE-NAME>-ds-template
             script: |
-              add-ds-template --bootstrap-config=${BOOTSTRAP_FILE} --configuration=/opt/spotfire/configuration.xml --name="<DATA-SOURCE-TEMPLATE-NAME>" --enabled=true /opt/spotfire/<DATA-SOURCE-NAME>config/<DATA-SOURCE-NAME>-ds-template.xml
+              add-ds-template --bootstrap-config="${BOOTSTRAP_FILE}" --tool-password="${TOOL_PASSWORD}" --name="<DATA-SOURCE-TEMPLATE-NAME>" --enabled=true /opt/spotfire/<DATA-SOURCE-NAME>config/<DATA-SOURCE-NAME>-ds-template.xml
     ```
     **Note:** <br>
     1. If you are deploying in an existing environment, you must also set the property `configuration.apply="always"`. For more information on this, see the ['Managing configuration on helm upgrade or installation'-section section in the Readme for the `spotfire-server` Helm chart](../helm/charts/spotfire-server/README.md#managing-configuration-on-helm-upgrade-or-installation).

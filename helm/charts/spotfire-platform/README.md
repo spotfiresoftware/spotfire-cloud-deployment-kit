@@ -1,6 +1,6 @@
 # spotfire-platform
 
-![Version: 4.0.4](https://img.shields.io/badge/Version-4.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.8-v6.0.4](https://img.shields.io/badge/AppVersion-14.8--v6.0.4-informational?style=flat-square)
+![Version: 5.0.0](https://img.shields.io/badge/Version-5.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0-v7.0.0](https://img.shields.io/badge/AppVersion-15.0--v7.0.0-informational?style=flat-square)
 
 This is an umbrella chart for Spotfire, a chart that groups several Spotfire services together. It allows you to deploy, upgrade, and manage a Spotfire environment with optional Spotfire services.
 
@@ -10,98 +10,269 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-automationservices/ | spotfire-automationservices | 4.0.4 |
-| file://../spotfire-pythonservice/ | spotfire-pythonservice | 4.0.4 |
-| file://../spotfire-rservice/ | spotfire-rservice | 4.0.4 |
-| file://../spotfire-server/ | spotfire-server | 4.0.4 |
-| file://../spotfire-terrservice/ | spotfire-terrservice | 4.0.4 |
-| file://../spotfire-webplayer/ | spotfire-webplayer | 4.0.4 |
+| file://../spotfire-automationservices/ | spotfire-automationservices | 5.0.0 |
+| file://../spotfire-pythonservice/ | spotfire-pythonservice | 5.0.0 |
+| file://../spotfire-rservice/ | spotfire-rservice | 5.0.0 |
+| file://../spotfire-server/ | spotfire-server | 5.0.0 |
+| file://../spotfire-terrservice/ | spotfire-terrservice | 5.0.0 |
+| file://../spotfire-webplayer/ | spotfire-webplayer | 5.0.0 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.7.* |
 
 ## Overview
 
-The Spotfire Helm chart is an umbrella chart that includes multiple components for deploying a Spotfire analytics platform. It consists of the following components:
+The Spotfire platform Helm chart is an umbrella chart for deploying a [Spotfire® analytics platform](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/introduction_to_the_spotfire_environment.html) on a [Kubernetes](http://kubernetes.io/) cluster using the [Helm](https://helm.sh/) package manager.
 
-- [spotfire-server](../spotfire-server/README.md)
-- [spotfire-webplayer](../spotfire-webplayer/README.md)
-- [spotfire-automationservices](../spotfire-automationservices/README.md)
-- [spotfire-terrservice](../spotfire-terrservice/README.md)
-- [spotfire-rservice](../spotfire-rservice/README.md)
-- [spotfire-pythonservice](../spotfire-pythonservice/README.md)
+## Prerequisites
+
+- Familiarity with [Kubernetes](http://kubernetes.io/)
+- Familiarity with [Helm](https://helm.sh/) charts (Helm 3+)
+- An existing Spotfire database (see [Setting up the Spotfire database](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/getting_started_with_the_spotfire_environment.html))
+- Familiarity with the individual Spotfire helm charts
+
+## Components
+
+- [spotfire-server](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-server/README.md)
+- [spotfire-webplayer](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-webplayer/README.md)
+- [spotfire-automationservices](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-automationservices/README.md)
+- [spotfire-terrservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-terrservice/README.md)
+- [spotfire-rservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-rservice/README.md)
+- [spotfire-pythonservice](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/helm/charts/spotfire-pythonservice/README.md)
 - [PostgreSQL database](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) ⚠️ 
 
-Warning: The PostgreSQL chart is included as an example and is intended for demo and testing purposes only. It is important to note that the spotfire Helm chart does not take responsibility for data persistence in the Spotfire database. It is your responsibility to ensure that you have a proper data persistence strategy in place. Failure to do so may result in data loss. Please make sure you are familiar with the documentation of your chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate measures to ensure data persistence.
+The Spotfire Server component is always installed and does not have an 'enabled' setting. All other components (Web Player, Automation Services, TERR Service, R Service, Python Service, and PostgreSQL) are disabled by default and can be enabled individually by setting their 'enabled' value to 'true'.
 
-Note: For more advanced configurations, where you need multiple instances of a single chart, such as two web players with different configurations, you can either deploy the chart directly to add another instance or create new umbrella that suits your needs.  The 'publicAddress' field is required.
-
-## Installation
-
-```bash
-helm install my-release . --render-subchart-notes --set global.spotfire.acceptEUA=true \
-    --set postgresql.enabled=true \
-    --set postgresql.image.repository=bitnamilegacy/postgresql \
-    --set postgresql.primary.resourcesPreset=small \
-    --set global.postgresql.auth.postgresPassword=DBAdminPassword \
-    --set spotfire-webplayer.enabled=true \
-    --set spotfire-automationservices.enabled=true \
-    --set spotfire-terrservice.enabled=true \
-    --set spotfire-rservice.enabled=true \
-    --set spotfire-pythonservice.enabled=true \
-    --set spotfire-server.configuration.site.publicAddress=http://localhost/
-```
-
-This will deploy the Spotfire platform with all components enabled using the embedded PostgreSQL database.
-
-**Note**: The embedded PostgreSQL Helm chart requires `postgresql.image.repository=bitnamilegacy/postgresql` and `postgresql.primary.resourcesPreset=small` to be set. The password for the database user `postgres` is set to `DBAdminPassword`.
-
-**Warning**: Due to a limitation in the PostgreSQL Helm chart, if you uninstall the Spotfire platform chart using `helm uninstall my-release` and then reinstall it with a different value for `global.postgresql.auth.postgresPassword` (the PostgreSQL admin password), the new password will be ignored because the PostgreSQL PVC still contains the old password. This will cause the Spotfire deployments to fail. To use a different PostgreSQL admin password, you must first delete the PVC (`kubectl delete pvc data-my-release-postgresql-0`), which will also delete all data stored in the PostgreSQL database. For more information, see the [Bitnami PostgreSQL bug #2061](https://github.com/bitnami/charts/issues/2061).
-
-### Using an external Spotfire database
-
-To use an external database, you need to provide the database connection details to the database. We will use a PostgreSQL database for this example but you can use any other database supported by Spotfire.
-
-First, install the PostgreSQL chart using Helm:
-
-```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm install spotfiredatabase bitnami/postgresql --set global.postgresql.auth.postgresPassword=PostgresAdminPassword
-```
-
-It will create a new PostgreSQL database with the password `PostgresAdminPassword` and the service name `spotfiredatabase-postgresql`.
-
-Create a file named `spotfire-database.yaml` with the following content:
-
-```yaml
-spotfire-server:
-  database:
-    bootstrap:
-      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
-      driverClass: "org.postgresql.Driver"
-      username: "spotfire"
-      password: "SpotfireDatabasePassword"
-    create-db:
-      enabled: true
-      adminUsername: "postgres"
-      adminPassword: "PostgresAdminPassword"
-      databaseUrl: "jdbc:postgresql://spotfiredatabase-postgresql/"
-      adminPasswordExistingSecret:
-        name: ""
-        key: ""
-```
-
-If needed, adjust the values in the file to match your database configuration.
-
-Then install the chart with the release name `my-release` using the database configuration:
-
-```bash
-helm install my-release . --render-subchart-notes --set postgresql.enabled=false --set global.spotfire.acceptEUA=true --values spotfire-database.yaml
-```
-
-Note that the `postgresql.enabled` parameter is set to `false` to disable the embedded PostgreSQL database.
+**Note**: For more advanced deployment scenarios, such as running multiple instances of a single chart with different configurations (e.g., two web players), you can deploy individual service charts multiple times. See [Step 4: Deploy additional service instances (optional)](#step-4-deploy-additional-service-instances-optional) for examples.
 
 ## Usage
 
-For detailed usage instructions, please refer to the README.md files of the individual components.
+Replace all placeholders (shown in angle brackets like `<NAMESPACE>`) with your actual values before running the commands.
+
+**Note**:
+
+- The Spotfire Helm charts deployed using this umbrella chart require setting the parameter `acceptEUA` for each chart, or the parameter `global.spotfire.acceptEUA` to the value `true`. By doing so, you agree that your use of the Spotfire software running in the managed containers will be governed by the terms of the [Cloud Software Group, Inc. End User Agreement](https://www.cloud.com/legal/terms).
+- The `spotfire-server.configuration.site.publicAddress` field is required for all deployments.
+- You must set `global.spotfire.image.registry` to your private registry address where the Spotfire container images are stored.
+
+### Step 1: Create namespace
+
+```bash
+kubectl create namespace "<NAMESPACE>"
+```
+
+### Step 2: Prepare deployment values
+
+Complete either Step 2a or Step 2b depending on your setup.
+
+#### Step 2a: Use the embedded PostgreSQL chart
+
+This option uses the embedded PostgreSQL chart as the Spotfire database and enables all Spotfire services.
+
+**Warning**: The PostgreSQL chart is included as an example and is intended for demo and testing purposes only. It is important to note that the Spotfire Helm chart does not take responsibility for data persistence in the Spotfire database. It is your responsibility to ensure that you have a proper data persistence strategy in place. Failure to do so may result in data loss. Please make sure you are familiar with the documentation of your chosen database (e.g., PostgreSQL, Oracle, SQL Server) and take appropriate measures to ensure data persistence.
+
+Create a `values.yaml` file (for example, `spotfire-platform-values.yaml`):
+
+```yaml
+# spotfire-platform-values.yaml
+global:
+  spotfire:
+    acceptEUA: true
+    image:
+      registry: "<REGISTRY>"
+
+spotfire-server:
+  configuration:
+    site:
+      publicAddress: "<SPOTFIRE_PUBLIC_ADDRESS>"
+
+postgresql:
+  enabled: true
+  image:
+    repository: bitnamilegacy/postgresql
+  primary:
+    resourcesPreset: small
+
+spotfire-webplayer:
+  enabled: true
+
+spotfire-automationservices:
+  enabled: true
+
+spotfire-terrservice:
+  enabled: true
+
+spotfire-rservice:
+  enabled: true
+
+spotfire-pythonservice:
+  enabled: true
+```
+
+**Note**:
+
+- The embedded PostgreSQL Helm chart requires `postgresql.image.repository=bitnamilegacy/postgresql` and `postgresql.primary.resourcesPreset=small`.
+- When using the embedded PostgreSQL chart, the PostgreSQL admin password is stored in the secret `<SPOTFIRE_PLATFORM_RELEASE>-postgresql` under the key `postgres-password`.
+
+**Warning**: Due to how the Bitnami PostgreSQL Helm chart works, if you uninstall the Spotfire platform chart and reinstall it while the PostgreSQL PVC still exists, PostgreSQL will continue using the password stored in that PVC. Delete the PVC first (`kubectl delete pvc data-<SPOTFIRE_PLATFORM_RELEASE>-postgresql-0`) to reset it. This also deletes all stored data. For more information, see the [Bitnami PostgreSQL bug #2061](https://github.com/bitnami/charts/issues/2061).
+
+#### Step 2b: Use an existing supported database
+
+This option connects to an existing supported database and enables all Spotfire services.
+
+**Note**: When using an existing database, you need to provide the connection details for the database. This example uses a PostgreSQL database, but you can use any other supported database. For configuration details, see the `Supported database Configuration` section in the spotfire-server helm chart README.
+
+Create a secret with the database passwords:
+
+```bash
+kubectl create secret generic spotfire-database-credentials \
+  --namespace="<NAMESPACE>" \
+  --from-literal=spotfireDatabasePassword="<SPOTFIRE_DATABASE_PASSWORD>" \
+  --from-literal=databaseAdminPassword="<DB_ADMIN_PASSWORD>"
+```
+
+Then create a `values.yaml` file (for example, `spotfire-platform-values.yaml`). Details of available values can be found in the [values](#values) section.
+
+```yaml
+# spotfire-platform-values.yaml
+global:
+  spotfire:
+    acceptEUA: true
+    image:
+      registry: "<REGISTRY>"
+
+spotfire-server:
+  configuration:
+    site:
+      publicAddress: "<SPOTFIRE_PUBLIC_ADDRESS>"
+  database:
+    bootstrap:
+      databaseUrl: "jdbc:postgresql://<DB_HOST>:<DB_PORT>/<DB_NAME>"
+      driverClass: "org.postgresql.Driver"
+      username: "<SPOTFIRE_DATABASE_USERNAME>"
+      passwordExistingSecret:
+        name: spotfire-database-credentials
+        key: spotfireDatabasePassword
+    create-db:
+      enabled: true
+      adminUsername: "<DB_ADMIN_USERNAME>"
+      databaseUrl: "jdbc:postgresql://<DB_HOST>:<DB_PORT>/"
+      spotfiredbDbname: "<DB_NAME>"
+      adminPasswordExistingSecret:
+        name: spotfire-database-credentials
+        key: databaseAdminPassword
+
+postgresql:
+  enabled: false
+
+spotfire-webplayer:
+  enabled: true
+
+spotfire-automationservices:
+  enabled: true
+
+spotfire-terrservice:
+  enabled: true
+
+spotfire-rservice:
+  enabled: true
+
+spotfire-pythonservice:
+  enabled: true
+```
+
+### Step 3: Deploy the Spotfire platform chart
+
+Install the chart using the values file for the deployment path you chose in Step 2.
+
+```bash
+helm install "<SPOTFIRE_PLATFORM_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --create-namespace \
+  --render-subchart-notes \
+  --values spotfire-platform-values.yaml
+```
+
+Then check pod status:
+
+```bash
+kubectl get pods --namespace "<NAMESPACE>" \
+  -l "app.kubernetes.io/instance=<SPOTFIRE_PLATFORM_RELEASE>"
+```
+
+### Step 4: Deploy additional service instances (optional)
+
+To deploy Spotfire services with different settings, deploy the individual service chart multiple times using unique release names and distinct configuration values.
+
+#### Example: Deploy two web players belonging to different resource pools
+
+This example shows how to deploy two web players in separate resource pools with a Spotfire server using release name `<SPOTFIRE_PLATFORM_RELEASE>` in namespace `<NAMESPACE>`.
+
+1. Deploy the spotfire-platform chart by following one of the examples above.
+
+**Note**: Record the release name used, as it will be needed in the `serverBackendAddress` field (e.g., `<SPOTFIRE_PLATFORM_RELEASE>-spotfire-server`).
+
+2. Create your resource pools in the Spotfire Server administration interface once the server is running. For more details on how to create resource pools, [see here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/creating_resource_pools.html).
+
+3. Create a file named `wp1.yaml` with the following content:
+
+   ```yaml
+   webplayerConfig:
+     # -- The web player resource pool name.
+     resourcePool: "wp1"
+   nodemanagerConfig:
+     serverBackendAddress: <SPOTFIRE_PLATFORM_RELEASE>-spotfire-server
+   logging:
+     logLevel: debug
+     logForwarderAddress: <SPOTFIRE_PLATFORM_RELEASE>-log-forwarder
+   ```
+
+4. Create a file named `wp2.yaml` with the following content:
+
+   ```yaml
+   webplayerConfig:
+     # -- The web player resource pool name.
+     resourcePool: "wp2"
+   nodemanagerConfig:
+     serverBackendAddress: <SPOTFIRE_PLATFORM_RELEASE>-spotfire-server
+   logging:
+     logLevel: debug
+     logForwarderAddress: <SPOTFIRE_PLATFORM_RELEASE>-log-forwarder
+   ```
+
+5. After creating the YAML files, deploy the web player chart by following the steps outlined in the spotfire-webplayer chart Usage section. Use unique release names for each deployment (for example, `<SPOTFIRE_PLATFORM_RELEASE>-wp1` and `<SPOTFIRE_PLATFORM_RELEASE>-wp2`) and reference the values files created in the previous steps (using `--values wp1.yaml` or `--values wp2.yaml`).
+
+This pattern can be applied to any component to deploy multiple instances with different configurations.
+
+## Uninstalling
+
+To uninstall the `<SPOTFIRE_PLATFORM_RELEASE>` deployment:
+```bash
+helm --namespace <NAMESPACE> uninstall "<SPOTFIRE_PLATFORM_RELEASE>"
+```
+
+See [helm uninstall](https://helm.sh/docs/helm/helm_uninstall/) for command documentation.
+
+## Upgrading
+
+### Upgrading Spotfire Server and Spotfire services
+
+Review the README files for the enabled component charts before upgrading. When you upgrade the platform chart, the bundled Spotfire Server and enabled service charts are upgraded together according to the versions defined by this platform chart release.
+
+If you are using a custom values file, update it first and then run `helm upgrade` with that file.
+
+### Upgrading helm chart version
+
+Upgrade the chart using the same values file you used for installation:
+
+```bash
+helm upgrade "<SPOTFIRE_PLATFORM_RELEASE>" . \
+  --namespace="<NAMESPACE>" \
+  --render-subchart-notes \
+  --values spotfire-platform-values.yaml
+```
+
+## Detailed instructions
+
+For detailed usage instructions, see the README.md files of the individual components listed in the [Overview](#overview) section.
 
 ## Values
 
@@ -143,7 +314,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | spotfire-automationservices.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-automationservices.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-automationservices.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-automationservices.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-automationservices.fullnameOverride | string | `""` |  |
@@ -151,7 +322,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-automationservices.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-automationservices.image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| spotfire-automationservices.image.tag | string | `"14.8.0-HF-004-v6.0.4"` | The container image tag to use. |
+| spotfire-automationservices.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-automationservices.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-automationservices.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-automationservices.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -176,6 +347,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-automationservices.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-automationservices.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-automationservices.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-automationservices.podDeletionCost.costFormula | string | `"-100000*spotfire_Spotfire_WorkerHost_MayBeRecycled + spotfire_Spotfire_Automation_Services_active_jobs"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-automationservices.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-automationservices.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| spotfire-automationservices.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-automationservices.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-automationservices.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-automationservices.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-automationservices.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-automationservices.readinessProbe.enabled | bool | `false` |  |
 | spotfire-automationservices.readinessProbe.failureThreshold | int | `10` |  |
@@ -198,6 +382,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-automationservices.startupProbe.periodSeconds | int | `3` |  |
 | spotfire-automationservices.tolerations | list | `[]` |  |
+| spotfire-automationservices.topologySpreadConstraints | list | `[]` |  |
 | spotfire-automationservices.volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | spotfire-automationservices.volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | spotfire-automationservices.volumes.customModules.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
@@ -223,7 +408,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | spotfire-pythonservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-pythonservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-pythonservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-pythonservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-pythonservice.fullnameOverride | string | `""` |  |
@@ -231,7 +416,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-pythonservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-pythonservice.image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| spotfire-pythonservice.image.tag | string | `"1.25.0-v6.0.4"` | The container image tag to use. |
+| spotfire-pythonservice.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-pythonservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-pythonservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-pythonservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -254,6 +439,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-pythonservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-pythonservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-pythonservice.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-pythonservice.podDeletionCost.costFormula | string | `"spotfire_service_queue_engines_inUse"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-pythonservice.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-pythonservice.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| spotfire-pythonservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-pythonservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-pythonservice.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-pythonservice.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-pythonservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-pythonservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-pythonservice.readinessProbe.failureThreshold | int | `10` |  |
@@ -276,6 +474,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-pythonservice.startupProbe.periodSeconds | int | `3` |  |
 | spotfire-pythonservice.tolerations | list | `[]` |  |
+| spotfire-pythonservice.topologySpreadConstraints | list | `[]` |  |
 | spotfire-pythonservice.volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | spotfire-pythonservice.volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | spotfire-pythonservice.volumes.packages.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
@@ -301,7 +500,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | spotfire-rservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-rservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-rservice.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-rservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-rservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-rservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-rservice.fullnameOverride | string | `""` |  |
@@ -309,7 +508,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-rservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides the global.spotfire.image.registry value. |
 | spotfire-rservice.image.repository | string | `"spotfire/spotfire-rservice"` | The spotfire-server image repository. |
-| spotfire-rservice.image.tag | string | `"1.25.0-v6.0.4"` | The container image tag to use. |
+| spotfire-rservice.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-rservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details. |
 | spotfire-rservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-rservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -332,6 +531,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-rservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-rservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-rservice.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-rservice.podDeletionCost.costFormula | string | `"spotfire_service_queue_engines_inUse"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-rservice.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-rservice.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| spotfire-rservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-rservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-rservice.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-rservice.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-rservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-rservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-rservice.readinessProbe.failureThreshold | int | `10` |  |
@@ -354,6 +566,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-rservice.startupProbe.periodSeconds | int | `3` |  |
 | spotfire-rservice.tolerations | list | `[]` |  |
+| spotfire-rservice.topologySpreadConstraints | list | `[]` |  |
 | spotfire-rservice.volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | spotfire-rservice.volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | spotfire-rservice.volumes.packages.existingClaim | string | `""` | If 'persistentVolumeClaim.create' is 'false' (the default), then use this value to define an already existing persistent volume claim. |
@@ -381,7 +594,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.cliPod.image.pullSecrets | list | `[]` |  |
 | spotfire-server.cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | spotfire-server.cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.cliPod.image.tag | string | `"14.8.0-v6.0.4"` | The spotfireConfig container image tag to use. |
+| spotfire-server.cliPod.image.tag | string | `"15.0.0-v7.0.0"` | The spotfireConfig container image tag to use. |
 | spotfire-server.cliPod.logLevel | string | `""` | Set to TRACE to increase log level. Defaults to DEBUG if unset. |
 | spotfire-server.cliPod.nodeSelector | object | `{}` |  |
 | spotfire-server.cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -389,6 +602,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.cliPod.resources | object | `{}` | The resources setting for cliPod. |
 | spotfire-server.cliPod.securityContext | object | `{}` | The securityContext setting for cliPod. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
 | spotfire-server.cliPod.tolerations | list | `[]` |  |
+| spotfire-server.cliPod.topologySpreadConstraints | list | `[]` |  |
 | spotfire-server.configJob.affinity | object | `{}` |  |
 | spotfire-server.configJob.extraEnvVars | list | `[]` | Additional environment variables for all spotfire-server pods to use.  - name: NAME    value: value |
 | spotfire-server.configJob.extraEnvVarsCM | string | `""` |  |
@@ -400,8 +614,8 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configJob.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.configJob.image.tag | string | `"14.8.0-v6.0.4"` | The spotfireConfig container image tag to use. |
-| spotfire-server.configJob.logLevel | string | `""` | Set to `TRACE` to increase log level. Defaults to `DEBUG` if unset. |
+| spotfire-server.configJob.image.tag | string | `"15.0.0-v7.0.0"` | The spotfireConfig container image tag to use. |
+| spotfire-server.configJob.logLevel | string | `""` | Set verbosity for debugging config-job execution. Empty (default): Standard output with DEBUG logging from the configuration tool. `DEBUG`: Shows raw bash script lines + DEBUG-level configuration tool logging. `TRACE`: Shows expanded bash commands with values + TRACE-level configuration tool logging. |
 | spotfire-server.configJob.nodeSelector | object | `{}` |  |
 | spotfire-server.configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | spotfire-server.configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
@@ -436,7 +650,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"14.8.0-HF-004-v6.0.4"` | The container image tag to use. |
+| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-server.configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | spotfire-server.configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | spotfire-server.configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -482,11 +696,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
 | spotfire-server.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-server.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-server.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-server.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-server.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-server.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | spotfire-server.haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | spotfire-server.haproxy.enabled | bool | `true` |  |
+| spotfire-server.haproxy.image | object | `{"tag":"3.2.19"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
+| spotfire-server.haproxy.image.tag | string | `"3.2.19"` | overrides the image tag whose default is the haproxy chart appVersion. Use empty string to use the chart default or pick [a specific version](https://hub.docker.com/r/haproxytech/haproxy-alpine/tags?name=3.2). |
 | spotfire-server.haproxy.includes | object | `{}` |  |
 | spotfire-server.haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | spotfire-server.haproxy.kind | string | `"Deployment"` |  |
@@ -534,7 +750,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | spotfire-server.image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| spotfire-server.image.tag | string | `"14.8.0-v6.0.4"` | The container image tag to use. |
+| spotfire-server.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-server.ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | spotfire-server.ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | spotfire-server.ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -585,6 +801,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-server.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-server.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-server.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-server.podDeletionCost.costFormula | string | `"-1000*spotfire_SpotfireServer_IsIdle + spotfire_InformationServices_InformationServicesMetrics_InformationServicesJobs + spotfire_SpotfireServer_ServerMetrics_UploadingAttachments"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-server.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-server.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-server.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-server.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-server.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-server.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-server.podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
+| spotfire-server.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-server.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-server.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-server.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-server.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all the containers inside the Pod. More info: `kubectl explain deployment.spec.template.spec.securityContext` |
 | spotfire-server.readinessProbe.enabled | bool | `false` |  |
 | spotfire-server.replicaCount | int | `1` | The number of Spotfire Server containers. |
@@ -604,6 +833,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.startupProbe.periodSeconds | int | `10` |  |
 | spotfire-server.tolerations | list | `[]` |  |
 | spotfire-server.toolPassword | string | `""` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod. |
+| spotfire-server.topologySpreadConstraints | list | `[]` |  |
 | spotfire-server.troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/spotfire/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | spotfire-server.troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | spotfire-server.volumes.certificates.existingClaim | string | `""` |  |
@@ -637,7 +867,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | spotfire-terrservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-terrservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-terrservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-terrservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-terrservice.fullnameOverride | string | `""` |  |
@@ -645,7 +875,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-terrservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-terrservice.image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| spotfire-terrservice.image.tag | string | `"1.25.0-v6.0.4"` | The container image tag to use. |
+| spotfire-terrservice.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
 | spotfire-terrservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-terrservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-terrservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -668,6 +898,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-terrservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-terrservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-terrservice.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-terrservice.podDeletionCost.costFormula | string | `"spotfire_service_queue_engines_inUse"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-terrservice.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-terrservice.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| spotfire-terrservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-terrservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-terrservice.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-terrservice.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-terrservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-terrservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-terrservice.readinessProbe.failureThreshold | int | `10` |  |
@@ -690,6 +933,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-terrservice.startupProbe.periodSeconds | int | `3` |  |
 | spotfire-terrservice.tolerations | list | `[]` |  |
+| spotfire-terrservice.topologySpreadConstraints | list | `[]` |  |
 | spotfire-terrservice.volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | spotfire-terrservice.volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | spotfire-terrservice.volumes.packages.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
@@ -717,7 +961,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
 | spotfire-webplayer.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-webplayer.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"4.2.2"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
 | spotfire-webplayer.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-webplayer.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-webplayer.fullnameOverride | string | `""` |  |
@@ -725,8 +969,8 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-webplayer.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-webplayer.image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| spotfire-webplayer.image.tag | string | `"14.8.0-HF-004-v6.0.4"` | The container image tag to use. |
-| spotfire-webplayer.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
+| spotfire-webplayer.image.tag | string | `"15.0.0-v7.0.0"` | The container image tag to use. |
+| spotfire-webplayer.kedaAutoscaling | object | Default values for KEDA autoscaling, see values.yaml. | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-webplayer.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-webplayer.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
 | spotfire-webplayer.kedaAutoscaling.minReplicas | int | `1` | The minimum number of replicas KEDA scales the resource down to. |
@@ -749,6 +993,19 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-webplayer.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-webplayer.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
+| spotfire-webplayer.podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| spotfire-webplayer.podDeletionCost.costFormula | string | `"-100000*spotfire_Spotfire_WorkerHost_MayBeRecycled + spotfire_Spotfire_Webplayer_open_documents + 2*spotfire_Spotfire_Webplayer_cached_documents + 5*spotfire_Spotfire_Webplayer_analyses_under_scheduled_updates_control"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
+| spotfire-webplayer.podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
+| spotfire-webplayer.podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.image.tag | string | `"15.0.0-v7.0.0"` | Image tag for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
+| spotfire-webplayer.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
+| spotfire-webplayer.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
+| spotfire-webplayer.podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
+| spotfire-webplayer.podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
 | spotfire-webplayer.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-webplayer.readinessProbe.enabled | bool | `false` |  |
 | spotfire-webplayer.readinessProbe.failureThreshold | int | `10` |  |
@@ -757,7 +1014,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.readinessProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-webplayer.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-webplayer.replicaCount | int | `1` |  |
-| spotfire-webplayer.resources | object | `{}` |  |
+| spotfire-webplayer.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
 | spotfire-webplayer.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-webplayer.service.port | int | `9501` |  |
 | spotfire-webplayer.service.type | string | `"ClusterIP"` |  |
@@ -771,6 +1028,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-webplayer.startupProbe.periodSeconds | int | `3` |  |
 | spotfire-webplayer.tolerations | list | `[]` |  |
+| spotfire-webplayer.topologySpreadConstraints | list | `[]` |  |
 | spotfire-webplayer.volumes.certificates.existingClaim | string | `""` | Defines an already-existing persistent volume claim. |
 | spotfire-webplayer.volumes.certificates.subPath | string | `""` | The subPath of the volume to be used for the volume mount |
 | spotfire-webplayer.volumes.customModules.existingClaim | string | `""` | When 'persistentVolumeClaim.create' is 'false', then use this value to define an already existing persistent volume claim. |
@@ -785,3 +1043,4 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.volumes.troubleshooting.persistentVolumeClaim.storageClassName | string | `""` | Specifies the name of the 'StorageClass' to use for the volumes.troubleshooting-claim. |
 | spotfire-webplayer.volumes.troubleshooting.persistentVolumeClaim.volumeName | string | `nil` | Specifies the name of the persistent volume to use for the volumes.troubleshooting-claim. |
 | spotfire-webplayer.webplayerConfig.resourcePool | string | `""` | The web player resource pool. |
+

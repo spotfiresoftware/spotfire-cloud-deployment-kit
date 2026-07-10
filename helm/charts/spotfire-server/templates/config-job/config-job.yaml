@@ -67,8 +67,10 @@ spec:
             {{ include "spotfire-server.database.adminEnvVars" . | nindent 12}}
             - name: LOG_APPENDER
               value: "console"
+            {{- if .Values.configJob.logLevel }}
             - name: LOG_LEVEL
               value: {{ .Values.configJob.logLevel | quote }}
+            {{- end }}
             - name: JOB_CREATE_DATABASE
               value: {{ index .Values "database" "create-db" "enabled" | quote }}
             - name: JOB_UPGRADE_DATABASE

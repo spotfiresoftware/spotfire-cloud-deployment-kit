@@ -1,0 +1,12 @@
+{{- if .Values.podDeletionCost.enabled -}}
+{{- $context := mergeOverwrite (dict) . (dict "componentName" "rservice") -}}
+{{ include "spotfire-common.poddeletioncost.serviceAccount" $context }}
+---
+{{ include "spotfire-common.poddeletioncost.role" $context }}
+---
+{{ include "spotfire-common.poddeletioncost.roleBinding" $context }}
+---
+{{ include "spotfire-common.poddeletioncost.configMap" $context }}
+---
+{{ include "spotfire-common.poddeletioncost.deployment" $context }}
+{{- end -}}

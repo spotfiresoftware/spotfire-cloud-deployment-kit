@@ -78,6 +78,13 @@ startupProbe:
   initialDelaySeconds: 60
   periodSeconds: 3
 tolerations: ""
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: spotfire-automationservices
 kedaAutoscaling:
   enabled: true
   pollingInterval: 90

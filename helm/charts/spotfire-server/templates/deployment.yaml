@@ -48,6 +48,9 @@ spec:
             - name: monitoring
               protocol: TCP
               containerPort: 9081
+            - name: info-services
+              protocol: TCP
+              containerPort: 9445
           {{- if .Values.startupProbe.enabled }}
           startupProbe: {{- omit .Values.startupProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
@@ -257,5 +260,9 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
         {{- toYaml . | nindent 8 }}
       {{- end }}

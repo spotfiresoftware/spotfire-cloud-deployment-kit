@@ -105,9 +105,11 @@ set -o errexit
 set -o nounset
 trap 'printStack' ERR
 
-if [ "${LOG_LEVEL}" = "DEBUG" ] ; then
+# Treat missing/empty LOG_LEVEL as empty to work with nounset.
+log_level="${LOG_LEVEL:-}"
+if [ "${log_level^^}" = "DEBUG" ] ; then
     set -v
-elif [ "${LOG_LEVEL}" = "TRACE" ] ; then
+elif [ "${log_level^^}" = "TRACE" ] ; then
     set -x
 fi
 

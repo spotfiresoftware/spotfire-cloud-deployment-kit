@@ -24,6 +24,7 @@ RUN apt-get update \
      unzip \
      cabextract \
      brotli \
+     jq \
      libjemalloc2 \
      libmimalloc3 \
      curl \
