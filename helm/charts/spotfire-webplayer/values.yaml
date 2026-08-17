@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-webplayer
   # -- The container image tag to use.
-  tag: "14.6.3-HF-014-v4.3.1"
+  tag: "14.6.3-HF-015-v4.3.2"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
