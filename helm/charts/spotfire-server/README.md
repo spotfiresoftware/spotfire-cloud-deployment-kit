@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 5.0.1](https://img.shields.io/badge/Version-5.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
+![Version: 5.0.2](https://img.shields.io/badge/Version-5.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
 
 Deploy Spotfire® Server on Kubernetes using Helm. This chart handles database schema setup, autoscaling, persistent storage, ingress routing, and configuration out of the box.
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 5.0.1 |
+| file://../spotfire-common | spotfire-common | 5.0.2 |
 | https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.55.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.27.* |
 
@@ -753,7 +753,7 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"15.0.0-v7.0.1"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"15.0.0-v7.0.2"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to TRACE to increase log level. Defaults to DEBUG if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -773,7 +773,7 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"15.0.0-v7.0.1"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"15.0.0-v7.0.2"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set verbosity for debugging config-job execution. Empty (default): Standard output with DEBUG logging from the configuration tool. `DEBUG`: Shows raw bash script lines + DEBUG-level configuration tool logging. `TRACE`: Shows expanded bash commands with values + TRACE-level configuration tool logging. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -809,7 +809,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"15.0.0-HF-001-v7.0.1"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"15.0.0-HF-002-v7.0.2"` | The container image tag to use. |
 | configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -909,7 +909,7 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"15.0.0-v7.0.1"` | The container image tag to use. |
+| image.tag | string | `"15.0.0-v7.0.2"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -967,7 +967,7 @@ For more details, see for example:
 | podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
 | podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |

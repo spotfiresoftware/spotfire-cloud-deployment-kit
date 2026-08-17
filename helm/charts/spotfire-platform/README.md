@@ -1,6 +1,6 @@
 # spotfire-platform
 
-![Version: 5.0.1](https://img.shields.io/badge/Version-5.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0-v7.0.1](https://img.shields.io/badge/AppVersion-15.0--v7.0.1-informational?style=flat-square)
+![Version: 5.0.2](https://img.shields.io/badge/Version-5.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0-v7.0.2](https://img.shields.io/badge/AppVersion-15.0--v7.0.2-informational?style=flat-square)
 
 This is an umbrella chart for Spotfire, a chart that groups several Spotfire services together. It allows you to deploy, upgrade, and manage a Spotfire environment with optional Spotfire services.
 
@@ -10,12 +10,12 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-automationservices/ | spotfire-automationservices | 5.0.1 |
-| file://../spotfire-pythonservice/ | spotfire-pythonservice | 5.0.1 |
-| file://../spotfire-rservice/ | spotfire-rservice | 5.0.1 |
-| file://../spotfire-server/ | spotfire-server | 5.0.1 |
-| file://../spotfire-terrservice/ | spotfire-terrservice | 5.0.1 |
-| file://../spotfire-webplayer/ | spotfire-webplayer | 5.0.1 |
+| file://../spotfire-automationservices/ | spotfire-automationservices | 5.0.2 |
+| file://../spotfire-pythonservice/ | spotfire-pythonservice | 5.0.2 |
+| file://../spotfire-rservice/ | spotfire-rservice | 5.0.2 |
+| file://../spotfire-server/ | spotfire-server | 5.0.2 |
+| file://../spotfire-terrservice/ | spotfire-terrservice | 5.0.2 |
+| file://../spotfire-webplayer/ | spotfire-webplayer | 5.0.2 |
 | oci://registry-1.docker.io/bitnamicharts | postgresql | 16.7.* |
 
 ## Overview
@@ -322,7 +322,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-automationservices.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-automationservices.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-automationservices.image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| spotfire-automationservices.image.tag | string | `"15.0.0-HF-001-v7.0.1"` | The container image tag to use. |
+| spotfire-automationservices.image.tag | string | `"15.0.0-HF-002-v7.0.2"` | The container image tag to use. |
 | spotfire-automationservices.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-automationservices.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-automationservices.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -354,7 +354,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-automationservices.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-automationservices.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-automationservices.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-automationservices.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-automationservices.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-automationservices.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
 | spotfire-automationservices.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-automationservices.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
@@ -416,7 +416,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-pythonservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-pythonservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-pythonservice.image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| spotfire-pythonservice.image.tag | string | `"15.0.0-v7.0.1"` | The container image tag to use. |
+| spotfire-pythonservice.image.tag | string | `"15.0.0-v7.0.2"` | The container image tag to use. |
 | spotfire-pythonservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-pythonservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-pythonservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -446,7 +446,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-pythonservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-pythonservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-pythonservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-pythonservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-pythonservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-pythonservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
 | spotfire-pythonservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-pythonservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
@@ -508,7 +508,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-rservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-rservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides the global.spotfire.image.registry value. |
 | spotfire-rservice.image.repository | string | `"spotfire/spotfire-rservice"` | The spotfire-server image repository. |
-| spotfire-rservice.image.tag | string | `"15.0.0-v7.0.1"` | The container image tag to use. |
+| spotfire-rservice.image.tag | string | `"15.0.0-v7.0.2"` | The container image tag to use. |
 | spotfire-rservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details. |
 | spotfire-rservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-rservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -538,7 +538,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-rservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-rservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-rservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-rservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-rservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-rservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
 | spotfire-rservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-rservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
@@ -594,7 +594,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-server.cliPod.image.pullSecrets | list | `[]` |  |
 | spotfire-server.cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | spotfire-server.cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.cliPod.image.tag | string | `"15.0.0-v7.0.1"` | The spotfireConfig container image tag to use. |
+| spotfire-server.cliPod.image.tag | string | `"15.0.0-v7.0.2"` | The spotfireConfig container image tag to use. |
 | spotfire-server.cliPod.logLevel | string | `""` | Set to TRACE to increase log level. Defaults to DEBUG if unset. |
 | spotfire-server.cliPod.nodeSelector | object | `{}` |  |
 | spotfire-server.cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -614,7 +614,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-server.configJob.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.configJob.image.tag | string | `"15.0.0-v7.0.1"` | The spotfireConfig container image tag to use. |
+| spotfire-server.configJob.image.tag | string | `"15.0.0-v7.0.2"` | The spotfireConfig container image tag to use. |
 | spotfire-server.configJob.logLevel | string | `""` | Set verbosity for debugging config-job execution. Empty (default): Standard output with DEBUG logging from the configuration tool. `DEBUG`: Shows raw bash script lines + DEBUG-level configuration tool logging. `TRACE`: Shows expanded bash commands with values + TRACE-level configuration tool logging. |
 | spotfire-server.configJob.nodeSelector | object | `{}` |  |
 | spotfire-server.configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -650,7 +650,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-server.configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"15.0.0-HF-001-v7.0.1"` | The container image tag to use. |
+| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"15.0.0-HF-002-v7.0.2"` | The container image tag to use. |
 | spotfire-server.configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | spotfire-server.configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | spotfire-server.configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -750,7 +750,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-server.image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | spotfire-server.image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| spotfire-server.image.tag | string | `"15.0.0-v7.0.1"` | The container image tag to use. |
+| spotfire-server.image.tag | string | `"15.0.0-v7.0.2"` | The container image tag to use. |
 | spotfire-server.ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | spotfire-server.ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | spotfire-server.ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -808,7 +808,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-server.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-server.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-server.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-server.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-server.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-server.podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
 | spotfire-server.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-server.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
@@ -875,7 +875,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-terrservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-terrservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-terrservice.image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| spotfire-terrservice.image.tag | string | `"15.0.0-v7.0.1"` | The container image tag to use. |
+| spotfire-terrservice.image.tag | string | `"15.0.0-v7.0.2"` | The container image tag to use. |
 | spotfire-terrservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-terrservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-terrservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -905,7 +905,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-terrservice.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-terrservice.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-terrservice.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-terrservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-terrservice.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-terrservice.podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
 | spotfire-terrservice.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-terrservice.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
@@ -969,7 +969,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-webplayer.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-webplayer.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-webplayer.image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| spotfire-webplayer.image.tag | string | `"15.0.0-HF-001-v7.0.1"` | The container image tag to use. |
+| spotfire-webplayer.image.tag | string | `"15.0.0-HF-002-v7.0.2"` | The container image tag to use. |
 | spotfire-webplayer.kedaAutoscaling | object | Default values for KEDA autoscaling, see values.yaml. | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-webplayer.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-webplayer.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -1000,7 +1000,7 @@ For detailed usage instructions, see the README.md files of the individual compo
 | spotfire-webplayer.podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | spotfire-webplayer.podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | spotfire-webplayer.podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| spotfire-webplayer.podDeletionCost.image.tag | string | `"15.0.0-v7.0.1"` | Image tag for the podDeletionCost. |
+| spotfire-webplayer.podDeletionCost.image.tag | string | `"15.0.0-v7.0.2"` | Image tag for the podDeletionCost. |
 | spotfire-webplayer.podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
 | spotfire-webplayer.podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | spotfire-webplayer.podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
