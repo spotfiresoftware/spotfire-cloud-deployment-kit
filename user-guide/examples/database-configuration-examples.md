@@ -4,6 +4,11 @@ This page provides examples of how to configure the database connection for the 
 
 For more information, see [the create-db reference](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html) in the Spotfire documentation, with the "Examples of creating a Spotfire database schema"-sections for each database type at the end.
 
+The examples use placeholder Kubernetes Secret names and keys for database
+credentials. They assume the referenced Secrets have been created. Treat them
+as reference examples and adapt the Secret names, keys, and database connection
+settings to your environment.
+
 ## PostgreSQL
 
 === "Standard"

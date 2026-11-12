@@ -43,6 +43,8 @@ For more information, see [Cloud Load Balancing overview](https://cloud.google.c
 Typically, you can use layer 4 load balancing for testing purposes or smaller deployments.
 You can use layer 7 load balancing for an enterprise deployment with advanced routing and SSL/TLS termination.
 
+**Security:** TLS is required before exposing Spotfire to the internet. The HTTP examples in this guide are for trusted development and testing only. Configure a certificate and HTTPS before production use.
+
 ### Alternative 1: Google Cloud Network Load Balancer direct to GKE service
 
 For simpler scenarios, you might prefer to set up a network Load Balancer together with a K8s service of type `LoadBalancer`.
@@ -86,7 +88,7 @@ When you create a service of type `LoadBalancer` in GKE, Google Cloud automatica
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
     (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire platform on Google Cloud,
 with a Google Cloud Network Load Balancer, using the default reverse proxy service (HAProxy).
@@ -161,7 +163,8 @@ After that, associate your domain with the external IP address of the created Go
         annotations:
           # This tells Google Cloud to create an External Load Balancer to realize his Ingress
           kubernetes.io/ingress.class: gce
-          # This enables HTTP connections from Internet clients
+          # Shown as "true" for this quickstart. Internet-facing deployments must
+          # set this to "false" and configure TLS (see Next steps).
           kubernetes.io/ingress.allow-http: "true"
     ```
     **Note:** Here we use the GCE (Google Container Engine) annotation `cloud.google.com/backend-config` to point to our custom backend health check.
@@ -197,7 +200,7 @@ After that, associate your domain with the external IP address of the created Go
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
     (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire Platform on Google Cloud,
 using a Google Application Load Balancer with the GKE Ingress controller.

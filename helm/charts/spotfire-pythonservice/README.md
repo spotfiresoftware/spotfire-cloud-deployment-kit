@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 2.3.4](https://img.shields.io/badge/Version-2.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.3](https://img.shields.io/badge/AppVersion-14.6.3-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.4](https://img.shields.io/badge/AppVersion-14.6.4-informational?style=flat-square)
 
 A Helm chart for Spotfire® Service for Python
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 2.3.4 |
+| file://../spotfire-common | spotfire-common | 2.4.0 |
 
 ## Overview
 
@@ -179,17 +179,18 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -212,7 +213,7 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | readinessProbe.enabled | bool | `false` |  |
 | readinessProbe.failureThreshold | int | `10` |  |
 | readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -221,12 +222,13 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | readinessProbe.periodSeconds | int | `3` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
-| securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | service.port | int | `9501` |  |
 | service.type | string | `"ClusterIP"` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `false` |  |
-| serviceAccount.name | string | `""` |  |
+| serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | startupProbe.enabled | bool | `true` |  |
 | startupProbe.failureThreshold | int | `20` |  |
 | startupProbe.httpGet.path | string | `"/spotfire/started"` |  |

@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 2.3.4](https://img.shields.io/badge/Version-2.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.3](https://img.shields.io/badge/AppVersion-14.6.3-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6.4](https://img.shields.io/badge/AppVersion-14.6.4-informational?style=flat-square)
 
 A Helm chart for Spotfire Server.
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 2.3.4 |
+| file://../spotfire-common | spotfire-common | 2.4.0 |
 | https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.55.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.27.* |
 
@@ -36,6 +36,16 @@ The Spotfire Server pod includes:
 - Predefined configuration for horizontal pod autoscaling with [KEDA](https://keda.sh/docs) and Prometheus.
 
 This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
+
+## Credential handling
+
+Use the `*ExistingSecret` values for database, administrator, Action Log, and
+encryption passwords in production. These references keep password values out
+of Helm values and workload manifests. Helm stores passwords supplied as values
+in release metadata and the chart copies them to its managed Kubernetes Secret.
+
+The `toolPassword` value has been removed. The chart automatically generates
+and preserves this internal configuration-tool password.
 
 ## Prerequisites
 
@@ -293,7 +303,15 @@ See the [Values](#values) section below for more details.
 
 **Note**: To deploy SDN files during helm upgrade or installation, see [Using persistent volumes for deploying SDNs/SPKs](#volume-for-deploying-sdnsspks).
 
-Example: A `values.yml` snippet configuration for running custom `spotfire-config` tool tasks:
+Create a Kubernetes Secret for the example user's password:
+
+```bash
+kubectl create secret generic spotfire-user-credentials \
+  --namespace="<NAMESPACE>" \
+  --from-literal=EXAMPLE_USER_PASSWORD="<YOUR-USER-PASSWORD>"
+```
+
+Then add this example to your `values.yaml`:
 ```yaml
 configuration:
   configurationScripts:
@@ -307,15 +325,33 @@ configuration:
         echo "Scripts are executed in the order in which they appear the values file."
 
   commandScripts:
-    - name: my_commands_script
-      script: create-user --bootstrap-config="${BOOTSTRAP_FILE}" --tool-password="${TOOL_PASSWORD}" --username="my_new_user" --password="password" --ignore-existing=true
+    - name: create_example_user
+      script: |
+        create-user \
+          --bootstrap-config="${BOOTSTRAP_FILE}" \
+          --tool-password="${TOOL_PASSWORD}" \
+          --username="example-user" \
+          --password="${EXAMPLE_USER_PASSWORD}" \
+          --ignore-existing=true
+
+configJob:
+  extraEnvVars:
+    - name: EXAMPLE_USER_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: spotfire-user-credentials
+          key: EXAMPLE_USER_PASSWORD
 ```
 
 You can use environment variables in the scripts. These include, but are not limited to, `CONFIGURATION_FILE`, `BOOTSTRAP_FILE`, and `TOOL_PASSWORD`.
 
+Command scripts run in the configuration job, so configure their environment with `configJob.extraEnvVars`, `configJob.extraEnvVarsSecret`, or `configJob.extraEnvVarsCM`.
+
+For bulk user management, use the Spotfire Server [`export-users`](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/export-users.html) and [`import-users`](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/import-users.html) commands instead of adding multiple `create-user` commands and credentials to Helm values.
+
 For more information about `config.sh` scripts, see the Spotfire Server documentation about [scripting a configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
 
-If your scripts require additional environment variables, to add environment variables from existing secrets or configmaps, use the `extraEnvVarsSecret` or `extraEnvVarsCM` chart variables.
+If your scripts require additional environment variables, use `configJob.extraEnvVars`, `configJob.extraEnvVarsSecret`, or `configJob.extraEnvVarsCM`.
 
 #### Managing configuration on helm upgrade or installation
 
@@ -618,7 +654,7 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"14.6.3-v4.3.4"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -627,7 +663,7 @@ For more details, see for example:
 | cliPod.securityContext | object | `{}` | The securityContext setting for cliPod. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
 | cliPod.tolerations | list | `[]` |  |
 | configJob.affinity | object | `{}` |  |
-| configJob.extraEnvVars | list | `[]` | Additional environment variables for all spotfire-server pods to use.  - name: NAME    value: value |
+| configJob.extraEnvVars | list | `[]` | Additional environment variables for the configuration job.  - name: NAME    value: value |
 | configJob.extraEnvVarsCM | string | `""` |  |
 | configJob.extraEnvVarsSecret | string | `""` |  |
 | configJob.extraInitContainers | list | `[]` | Additional init containers to add to the Spotfire server configuration pod. More info: `kubectl explain job.spec.template.spec.initContainers` |
@@ -637,8 +673,8 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"14.6.3-v4.3.4"` | The spotfireConfig container image tag to use. |
-| configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
+| configJob.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
+| configJob.logLevel | string | `""` | Set to `DEBUG` to show raw bash script lines, or `TRACE` to also enable trace-level configuration tool logging. Defaults to `INFO` if unset. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
@@ -650,12 +686,12 @@ For more details, see for example:
 | configuration.actionLog.categories | string | `""` | Action log categories and webCategories are a comma separated list of categories. See [config-action-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/action_log_categories.html) for a list of possible categories. default value when empty is "all" |
 | configuration.actionLog.database.config-action-log-database-logger | object | Configuration of actionlog database settings is only applicable if configuration.actionLog.enabled is true | Configure actionlog database. See [config-action-log-database-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information. |
 | configuration.actionLog.database.config-action-log-database-logger.additionalOptions | object | `{}` | Additional Options. See [config-action-log-database-logger - Options](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information. |
-| configuration.actionLog.database.config-action-log-database-logger.password | string | `""` | The password to be created for the Spotfire Actionlog database user. If not provided, this password is automatically generated. |
+| configuration.actionLog.database.config-action-log-database-logger.password | string | `""` | The password to be created for the Spotfire Actionlog database user. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. |
 | configuration.actionLog.database.config-action-log-database-logger.username | string | `"spotfire_actionlog"` | The user to create for actionlog database access |
 | configuration.actionLog.database.create-actionlogdb | object | Actionlog database is created only if configuration.actionLog.enabled is true | Create the actionlog database. See [create-actionlogdb](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-actionlogdb.html) for more information. |
 | configuration.actionLog.database.create-actionlogdb.actiondbDbname | string | `"spotfire_actionlog"` | Name for the Actionlog Database to be created to hold the Actionlog database table. |
-| configuration.actionLog.database.create-actionlogdb.adminPassword | string | `""` | Admin password for the actionlog database. |
-| configuration.actionLog.database.create-actionlogdb.adminPasswordExistingSecret | object | Not used unless .name is set | Read spotfire actionlog database password from an existing secret. If set, 'adminPassword' above is not used. |
+| configuration.actionLog.database.create-actionlogdb.adminPassword | string | `""` | Admin password for the actionlog database. For production, use `adminPasswordExistingSecret` instead. |
+| configuration.actionLog.database.create-actionlogdb.adminPasswordExistingSecret | object | Not used unless .name is set | Read the actionlog database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used. |
 | configuration.actionLog.database.create-actionlogdb.adminUsername | string | `"postgres"` | Admin username for the actionlog database. |
 | configuration.actionLog.database.create-actionlogdb.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | Like `configuration.actionLog.database.config-action-log-database-logger.databaseUrl` but is used for the connection when creating the actionlog database. Evaluated as a template. |
 | configuration.actionLog.database.create-actionlogdb.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation or the actionlog records are being stored on the spotfire database. |
@@ -664,8 +700,8 @@ For more details, see for example:
 | configuration.actionLog.database.create-actionlogdb.timeoutSeconds | string | `""` | Specifies the timeout, in seconds, for the operation. |
 | configuration.actionLog.database.create-actionlogdb.variant | string | `""` | For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option. |
 | configuration.apply | string | `"initialsetup"` | When to apply configurationScripts, commandScripts, admin user creation and action log settings. Possible values: * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release. * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool. * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database. |
-| configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation. These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
-| configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
+| configuration.commandScripts | list | `[]` | A list of command scripts to run whenever `configuration.apply` applies configuration. With the default `initialsetup`, these commands run only during the initial configuration. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
+| configuration.configurationScripts | list | `[]` | A list of configuration scripts to run whenever `configuration.apply` applies configuration. With the default `initialsetup`, these scripts run only during the initial configuration. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
 | configuration.deployment.clear | bool | `false` | Clear existing packages before any new files are added. Setting it `true` can cause extra delay because packages need to be added again every time the config-job is run. |
 | configuration.deployment.defaultDeployment.deploymentAreaName | string | `"Production"` | The name of the deployment area to create or update |
 | configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. *Warning*: If set to `true` and a deployment volume (see `volumes.deployments` key) is used, a folder with name `deploymentAreaName` will be created and potentially overwrite any existing deployment with the same name on the persistent volume. |
@@ -673,7 +709,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.3-HF-017-v4.3.4"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -681,25 +717,26 @@ For more details, see for example:
 | configuration.draining.minimumSeconds | int | `90` | The minimum time in seconds that the server should be draining, even if it is considered idle. |
 | configuration.draining.publishNotReadyAddresses | bool | `true` | Makes sure that service SRV records are preserved while terminating pods, typically used with the spotfire haproxy deployment. |
 | configuration.draining.timeoutSeconds | int | `180` | The draining timeout in seconds after which the service is forcibly shut down. |
-| configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
-| configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these command will be run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
+| configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. For production, use `encryptionPasswordExistingSecret` instead. If you do not set either option, the product default is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
+| configuration.encryptionPasswordExistingSecret | object | Not used unless .name is set | Read the encryption password from an existing Secret. Recommended for production. If set, `encryptionPassword` above is not used. Changing this value after data has been encrypted can make stored credentials unreadable. |
+| configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these commands run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
 | configuration.preferExistingConfig | bool | `false` | Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`). If no current active configuration exists, the default config is used. Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade. |
 | configuration.properties | object | Default values for kubernetes, see values.yaml. | Configuration properties The key name is the name of the property to set. If the value is a scalar the configuration tool command `set-config-prop` is used. To set a list or map the value should have the keys `itemName` and `value`. If the value is a map or object the configuration tool command `set-config-map-prop` is used. If the value is a list the configuration tool command `set-config-list-prop` is used. |
 | configuration.site | object | Spotfire Server joins the Default site. | Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information. |
 | configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
 | configuration.site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
 | configuration.spotfireAdmin.create | bool | `true` | Whether to create an admin user or not. |
-| configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade. |
-| configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read password from an existing secret instead of from values. If set, 'password' above is not used. |
+| configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface when `configuration.apply` is `always`, because the password is reset to this value on every helm installation or upgrade. With the default `initialsetup`, this value is applied only during the initial configuration. Changing it later updates the managed Secret but not the account; rotate the password using Spotfire administration tooling. |
+| configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read the password from an existing Secret instead of values. Recommended for production. If set, `password` above is not used. |
 | configuration.spotfireAdmin.username | string | `"admin"` | The user to create for the Spotfire admin. |
 | database.bootstrap | object | - | For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html). |
 | database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/spotfire"` | The JDBC URL of the database to be used by Spotfire Server. Evaluated as a template. |
-| database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. If not provided, this password is automatically generated. |
-| database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read spotfire database password from an existing secret. If set, 'password' above is not used. |
+| database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. |
+| database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read the Spotfire database password from an existing Secret. Recommended for production. If set, `password` above is not used. |
 | database.bootstrap.username | string | `"spotfire"` | Username to be created for the Spotfire Server database. If unset, the default value `spotfire` is used. |
 | database.create-db | object | - | For details related to `create-db` cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html). create-db cli also uses properties from database.bootstrap section. |
-| database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. |
-| database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read admin password from an existing secret. If set, 'password' above is not used. |
+| database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. For production, use `adminPasswordExistingSecret` instead. |
+| database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read the database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used. |
 | database.create-db.adminUsername | string | `"postgres"` | Admin username for the database server to be used as the Spotfire Server database. |
 | database.create-db.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. Evaluated as a template. |
 | database.create-db.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation |
@@ -717,15 +754,17 @@ For more details, see for example:
 | extraInitContainers | list | `[]` | Additional init containers to add to Spotfire server pod. More info: `kubectl explain deployment.spec.template.spec.initContainers` |
 | extraVolumeMounts | list | `[]` | Extra volumeMounts for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts` |
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
+| fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | haproxy.enabled | bool | `true` |  |
-| haproxy.image | object | `{"tag":"3.2.19"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
-| haproxy.image.tag | string | `"3.2.19"` | overrides the image tag whose default is the haproxy chart appVersion. Use empty string to use the chart default or pick [a specific version](https://hub.docker.com/r/haproxytech/haproxy-alpine/tags?name=3.2). |
+| haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
+| haproxy.image.repository | string | `"haproxytech/haproxy-alpine"` | overrides the image repository. |
+| haproxy.image.tag | string | `"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
 | haproxy.includes | object | `{}` |  |
 | haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | haproxy.kind | string | `"Deployment"` |  |
@@ -773,7 +812,7 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -806,7 +845,10 @@ For more details, see for example:
 | log-forwarder.extraPorts[1].name | string | `"forward"` |  |
 | log-forwarder.extraPorts[1].port | int | `24224` |  |
 | log-forwarder.extraPorts[1].protocol | string | `"TCP"` |  |
+| log-forwarder.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
 | log-forwarder.image.pullPolicy | string | `"IfNotPresent"` |  |
+| log-forwarder.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for log-forwarder. |
+| log-forwarder.image.tag | string | `"4.2.3"` | The image tag to use for log-forwarder. |
 | log-forwarder.kind | string | `"Deployment"` |  |
 | log-forwarder.labels."app.kubernetes.io/component" | string | `"logging"` |  |
 | log-forwarder.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
@@ -820,6 +862,10 @@ For more details, see for example:
 | log-forwarder.service.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
 | logging.logForwarderAddress | string | `""` | Specifies a logForwarderAddress. If left empty, then the default `log-forwarder` is used in the case where `log-forwarder.enabled=true`. Template. |
 | logging.logLevel | string | `""` | The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info. |
+| networkPolicy | object | `{"enabled":true,"logForwarder":{"additionalAllowedFrom":[]},"registration":{"additionalAllowedFrom":[]}}` | Controls the ingress NetworkPolicy for Spotfire Server Pods. A CNI must enforce NetworkPolicy; otherwise traffic remains unrestricted. |
+| networkPolicy.enabled | bool | `true` | Creates policies that preserve standard Server and clustering traffic, restrict registration, and restrict log-forwarder ingestion; extra-container ports require an additional NetworkPolicy. |
+| networkPolicy.logForwarder.additionalAllowedFrom | list | `[]` | Additional NetworkPolicy peers allowed to send logs to the log-forwarder, for example workloads in another namespace. |
+| networkPolicy.registration.additionalAllowedFrom | list | `[]` | Additional NetworkPolicy peers allowed to reach the registration port, for example a Prometheus workload or node managers in another namespace. |
 | nodeSelector | object | `{}` |  |
 | podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
@@ -832,6 +878,7 @@ For more details, see for example:
 | service.clusterIP | string | `"None"` |  |
 | service.type | string | `"ClusterIP"` |  |
 | serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in Spotfire Server Pods. |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
 | spotfireServerJava.extraJavaOpts | list | `[]` | Additional `JAVA_OPTS` for spotfire-server pods. |
@@ -842,7 +889,6 @@ For more details, see for example:
 | startupProbe.initialDelaySeconds | int | `60` |  |
 | startupProbe.periodSeconds | int | `10` |  |
 | tolerations | list | `[]` |  |
-| toolPassword | string | `""` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/spotfire/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | volumes.certificates.existingClaim | string | `""` |  |

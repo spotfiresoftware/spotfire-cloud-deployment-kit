@@ -3,8 +3,12 @@ database:
     databaseUrl: "jdbc:sqlserver://server:1433;DatabaseName=spotfire"
     driverClass: "com.microsoft.sqlserver.jdbc.SQLServerDriver"
     # username: "spotfire"
-    password: "spotfirePassword"
+    passwordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "spotfire-database-password"
   create-db:
     adminUsername: "sa"
-    adminPassword: "saPassword"
+    adminPasswordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "database-admin-password"
     databaseUrl: "jdbc:sqlserver://server:1433"

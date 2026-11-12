@@ -21,7 +21,6 @@ cache/
 
 # Helm
 helm/packages/*
-helm/**/Chart.lock
 
 # Scans
 sbom/

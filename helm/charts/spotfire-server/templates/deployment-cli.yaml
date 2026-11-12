@@ -21,6 +21,7 @@ spec:
     spec:
       {{- include "spotfire-server.cliPod.imagePullSecrets" . | nindent 6}}
       serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       {{- if .Values.cliPod.extraInitContainers }}
       initContainers:
         {{- tpl (toYaml .Values.cliPod.extraInitContainers) $ | nindent 8 }}
@@ -40,16 +41,19 @@ spec:
             - name: {{ .Values.volumes.certificates.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/certs
               subPath: {{ .Values.volumes.certificates.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
             - name: {{ .Values.volumes.customExt.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/custom-ext
               subPath: {{ .Values.volumes.customExt.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.customExtInformationservices.existingClaim }}
             - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/custom-ext-informationservices
               subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.libraryImportExport.existingClaim }}
             - name: {{ .Values.volumes.libraryImportExport.existingClaim }}-volume

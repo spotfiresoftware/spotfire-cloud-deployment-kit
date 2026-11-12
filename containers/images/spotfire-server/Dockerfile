@@ -8,7 +8,6 @@ FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
-RUN rm -rf /tmp/spotfireserver-*.x86_64/jdk/
 
 #
 # spotfire-server specific
@@ -38,8 +37,8 @@ COPY --chown=spotfire:spotfire scripts/ scripts/
 COPY --chown=spotfire:spotfire config/ config/
 
 # Environment
-ENV PATH=$PATH:/opt/spotfire/spotfireserver/tomcat/spotfire-bin/ \
-  SPOTFIRE_JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64/ \
+ENV PATH=/opt/spotfire/spotfireserver/jdk/bin:$PATH:/opt/spotfire/spotfireserver/tomcat/spotfire-bin/ \
+  SPOTFIRE_JAVA_HOME=/opt/spotfire/spotfireserver/jdk/ \
   STARTUPCHECK_TIMEOUT_SECONDS="60" \
   STARTUPCHECK_ADMIN_USER="N" \
   STARTUPCHECK_VALID_DEPLOYMENT="N" \

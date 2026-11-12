@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.6.3-v4.3.4"
+  tag: "14.6.4-v4.4.0"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -35,9 +35,11 @@ image:
 fluentBitSidecar:
   image:
     # -- The image repository for fluent-bit logging sidecar.
-    repository: fluent/fluent-bit
-    # -- The image tag to use for fluent-bit logging sidecar.
+    repository: cr.fluentbit.io/fluent/fluent-bit
+    # -- The release tag corresponding to the pinned fluent-bit logging sidecar digest.
     tag: "4.2.3"
+    # -- The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image.
+    digest: sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -73,9 +75,22 @@ service:
   ## -- It should be set to None when haproxy is enabled (haproxy.enabled)
   clusterIP: None
 
+# -- Controls the ingress NetworkPolicy for Spotfire Server Pods. A CNI must enforce NetworkPolicy; otherwise traffic remains unrestricted.
+networkPolicy:
+  # -- Creates policies that preserve standard Server and clustering traffic, restrict registration, and restrict log-forwarder ingestion; extra-container ports require an additional NetworkPolicy.
+  enabled: true
+  registration:
+    # -- Additional NetworkPolicy peers allowed to reach the registration port, for example a Prometheus workload or node managers in another namespace.
+    additionalAllowedFrom: []
+  logForwarder:
+    # -- Additional NetworkPolicy peers allowed to send logs to the log-forwarder, for example workloads in another namespace.
+    additionalAllowedFrom: []
+
 serviceAccount:
   # Specifies whether to use a service account.
   create: true
+  # -- Mount Kubernetes API credentials in Spotfire Server Pods.
+  automountServiceAccountToken: false
   # Annotations to add to the service account.
   annotations: {}
   # Service account name. If not set and create is true, a name is generated.
@@ -257,7 +272,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.3-v4.3.4"
+    tag: "14.6.4-v4.4.0"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -281,17 +296,17 @@ cliPod:
 # ===============================
 
 configJob:
-  # -- Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset.
+  # -- Set to `DEBUG` to show raw bash script lines, or `TRACE` to also enable trace-level configuration tool logging. Defaults to `INFO` if unset.
   logLevel: ""
   # -- Set the length of time in seconds to keep job and its logs until the job is removed.
   ttlSecondsAfterFinished: 7200
-  # -- Additional environment variables for all spotfire-server pods to use.
+  # -- Additional environment variables for the configuration job.
   #  - name: NAME
   #    value: value
   extraEnvVars: []
-  # The name of the ConfigMap containing the extra environment variables all spotfire-server pods use.
+  # The name of the ConfigMap containing additional environment variables for the configuration job.
   extraEnvVarsCM: ""
-  # The name of the Secret containing extra environment variables all spotfire-server pods use.
+  # The name of the Secret containing additional environment variables for the configuration job.
   extraEnvVarsSecret: ""
   # -- Extra volumeMounts for the configJob Job.
   # More info: `kubectl explain job.spec.template.spec.containers.volumeMounts`
@@ -319,7 +334,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.3-v4.3.4"
+    tag: "14.6.4-v4.4.0"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -412,9 +427,6 @@ logging:
   # -- The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info.
   logLevel: ""
 
-# -- The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod.
-toolPassword: ""
-
 database:
   # -- For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html).
   # @default -- -
@@ -426,10 +438,9 @@ database:
     # -- Username to be created for the Spotfire Server database.
     # If unset, the default value `spotfire` is used.
     username: "spotfire"
-    # -- Password to be created for the Spotfire Server database.
-    # If not provided, this password is automatically generated.
+    # -- Password to be created for the Spotfire Server database. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated.
     password: ""
-    # -- Read spotfire database password from an existing secret. If set, 'password' above is not used.
+    # -- Read the Spotfire database password from an existing Secret. Recommended for production. If set, `password` above is not used.
     # @default -- Not used unless .name is set
     passwordExistingSecret:
       ## -- Name of the secret. Evaluated as a template.
@@ -444,9 +455,9 @@ database:
     enabled: true
     # -- Admin username for the database server to be used as the Spotfire Server database.
     adminUsername: "postgres"
-    # -- Admin password for the database server to be used as the Spotfire Server database.
+    # -- Admin password for the database server to be used as the Spotfire Server database. For production, use `adminPasswordExistingSecret` instead.
     adminPassword: ""
-    # -- Read admin password from an existing secret. If set, 'password' above is not used.
+    # -- Read the database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used.
     # @default -- Not used unless .name is set
     adminPasswordExistingSecret:
       ## -- Name of the secret. Evaluated as a template.
@@ -484,10 +495,18 @@ configuration:
   # Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade.
   preferExistingConfig: false
 
-  # -- The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command.
+  # -- The password for encrypting passwords that are stored in the database. For production, use `encryptionPasswordExistingSecret` instead. If you do not set either option, the product default is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command.
   encryptionPassword: ""
+  # -- Read the encryption password from an existing Secret. Recommended for production. If set, `encryptionPassword` above is not used. Changing this value after data has been encrypted can make stored credentials unreadable.
+  # @default -- Not used unless .name is set
+  encryptionPasswordExistingSecret:
+    ## -- Name of the Secret. Evaluated as a template.
+    name: ""
+    ## -- Key to read the encryption password from. Evaluated as a template.
+    key: ENCRYPTION_PASSWORD
 
-  # -- A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`.
+  # -- A list of configuration scripts to run whenever `configuration.apply` applies configuration.
+  # With the default `initialsetup`, these scripts run only during the initial configuration. Each list item should have the keys `name` and `script`.
   # See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
   # Commands in these scripts should operate only on a local `configuration.xml`.
   # Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here.
@@ -496,8 +515,8 @@ configuration:
   # - name: my_configuration_script_name
   #   script: "my configuration script content"
 
-  # -- A list of command scripts to run during helm installation.
-  # These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`.
+  # -- A list of command scripts to run whenever `configuration.apply` applies configuration.
+  # With the default `initialsetup`, these commands run only during the initial configuration. Each list item should have the keys `name` and `script`.
   # See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
   # Commands in these scripts should NOT operate on `configuration.xml`.
   # Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here.
@@ -505,7 +524,7 @@ configuration:
   # - name: my_command_script_name
   #   script: "my configuration script content"
 
-  # -- The same as `commandScripts` but these command will be run before the configuration is imported.
+  # -- The same as `commandScripts` but these commands run before the configuration is imported.
   # On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration.
   preConfigCommandScripts: []
   # - name:
@@ -516,10 +535,11 @@ configuration:
     create: true
     # -- The user to create for the Spotfire admin.
     username: "admin"
-    # -- The password to create for the Spotfire admin. If not provided, this password is automatically generated.
-    # Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade.
+    # -- The password to create for the Spotfire admin. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated.
+    # Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface when `configuration.apply` is `always`, because the password is reset to this value on every helm installation or upgrade.
+    # With the default `initialsetup`, this value is applied only during the initial configuration. Changing it later updates the managed Secret but not the account; rotate the password using Spotfire administration tooling.
     password: ""
-    # -- Read password from an existing secret instead of from values. If set, 'password' above is not used.
+    # -- Read the password from an existing Secret instead of values. Recommended for production. If set, `password` above is not used.
     # @default -- Not used unless .name is set
     passwordExistingSecret:
       name: ""
@@ -610,7 +630,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.6.3-HF-017-v4.3.4"
+        tag: "14.6.4-v4.4.0"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -653,9 +673,9 @@ configuration:
         adminUsername: "postgres"
         # -- Like `configuration.actionLog.database.config-action-log-database-logger.databaseUrl` but is used for the connection when creating the actionlog database. Evaluated as a template.
         databaseUrl: "jdbc:postgresql://HOSTNAME/"
-        # -- Admin password for the actionlog database.
+        # -- Admin password for the actionlog database. For production, use `adminPasswordExistingSecret` instead.
         adminPassword: ""
-        # -- Read spotfire actionlog database password from an existing secret. If set, 'adminPassword' above is not used.
+        # -- Read the actionlog database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used.
         # @default -- Not used unless .name is set
         adminPasswordExistingSecret:
           ## -- Name of the secret. Evaluated as a template.
@@ -679,10 +699,10 @@ configuration:
         databaseUrl: "jdbc:postgresql://HOSTNAME/spotfire_actionlog"
         # -- The user to create for actionlog database access
         username : "spotfire_actionlog"
-        # -- The password to be created for the Spotfire Actionlog database user.
-        # If not provided, this password is automatically generated.
+        # -- The password to be created for the Spotfire Actionlog database user. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated.
         password:  ""
         passwordExistingSecret:
+          ## -- Read the actionlog database password from an existing Secret. Recommended for production. If set, `password` above is not used.
           ## -- Name of the secret. Evaluated as a template.
           name: ""
           ## -- Key to read the spotfire database password from. Evaluated as a template.
@@ -745,8 +765,10 @@ haproxy:
 
   # -- overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy)
   image:
-    # -- overrides the image tag whose default is the haproxy chart appVersion. Use empty string to use the chart default or pick [a specific version](https://hub.docker.com/r/haproxytech/haproxy-alpine/tags?name=3.2).
-    tag: "3.2.19"
+    # -- overrides the image repository.
+    repository: haproxytech/haproxy-alpine
+    # -- overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image.
+    tag: "3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"
 
   # -- Spotfire specific configuration related to haproxy.
   # @default -- Caching of static resource and debug response headers enabled.
@@ -883,6 +905,12 @@ log-forwarder:
       name: forward
       containerPort: 24224
   image:
+    # -- The image repository for log-forwarder.
+    repository: cr.fluentbit.io/fluent/fluent-bit
+    # -- The image tag to use for log-forwarder.
+    tag: "4.2.3"
+    # -- The image digest to use for log-forwarder. Clear when using an unpinned custom image.
+    digest: "sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"
     pullPolicy: IfNotPresent
   podAnnotations:
     prometheus.io/path: /api/v1/metrics/prometheus

@@ -38,6 +38,27 @@ SPOTFIREDB_PASSWORD
 {{- end -}}
 {{- end -}}
 
+{{/*
+Spotfire database administrator secret, either an external existingSecret or spotfire managed secret
+*/}}
+{{- define "spotfire-server.databaseadmin.secret.name" -}}
+{{- $createdb := index .Values.database "create-db" -}}
+{{- if $createdb.adminPasswordExistingSecret.name -}}
+{{- tpl $createdb.adminPasswordExistingSecret.name $ -}}
+{{- else -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "spotfire-server.databaseadmin.secret.passwordkey" -}}
+{{- $createdb := index .Values.database "create-db" -}}
+{{- if $createdb.adminPasswordExistingSecret.name -}}
+{{- tpl $createdb.adminPasswordExistingSecret.key $ -}}
+{{- else -}}
+DBSERVER_ADMIN_PASSWORD
+{{- end -}}
+{{- end -}}
+
 /*
 Spotfire actionlog database secrets, either an external existingSecret or spotfire managed secret
 */
@@ -57,6 +78,53 @@ Spotfire actionlog database secrets, either an external existingSecret or spotfi
 {{- else -}}
 ACTIONDB_PASSWORD
 {{- end -}}
+{{- end -}}
+
+{{/*
+Spotfire actionlog database administrator secret, either an external existingSecret or spotfire managed secret
+*/}}
+{{- define "spotfire-server.actionlogdatabaseadmin.secret.name" -}}
+{{- $create := index .Values.configuration.actionLog.database "create-actionlogdb" -}}
+{{- if $create.adminPasswordExistingSecret.name -}}
+{{- tpl $create.adminPasswordExistingSecret.name $ -}}
+{{- else -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "spotfire-server.actionlogdatabaseadmin.secret.passwordkey" -}}
+{{- $create := index .Values.configuration.actionLog.database "create-actionlogdb" -}}
+{{- if $create.adminPasswordExistingSecret.name -}}
+{{- tpl $create.adminPasswordExistingSecret.key $ -}}
+{{- else -}}
+ACTIONDB_ADMIN_PASSWORD
+{{- end -}}
+{{- end -}}
+
+{{/*
+Spotfire encryption password secret, either an external existingSecret or spotfire managed secret
+*/}}
+{{- define "spotfire-server.encryption.secret.name" -}}
+{{- if .Values.configuration.encryptionPasswordExistingSecret.name -}}
+{{- tpl .Values.configuration.encryptionPasswordExistingSecret.name $ -}}
+{{- else -}}
+{{- include "spotfire-server.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "spotfire-server.encryption.secret.passwordkey" -}}
+{{- if .Values.configuration.encryptionPasswordExistingSecret.name -}}
+{{- tpl .Values.configuration.encryptionPasswordExistingSecret.key $ -}}
+{{- else -}}
+ENCRYPTION_PASSWORD
+{{- end -}}
+{{- end -}}
+
+{{/*
+TOOL_PASSWORD is generated and stored only in the spotfire managed secret.
+*/}}
+{{- define "spotfire-server.tool.secret.name" -}}
+{{- include "spotfire-server.fullname" . -}}
 {{- end -}}
 
 /*
@@ -162,12 +230,16 @@ Database info needed to bootstrap and upgrade server
 - name: TOOL_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ include "spotfire-server.spotfiredatabase.secret.name" . | quote }}
+      name: {{ include "spotfire-server.tool.secret.name" . | quote }}
       key: TOOL_PASSWORD
       optional: false
-{{- if .Values.configuration.encryptionPassword }}
+{{- if or .Values.configuration.encryptionPasswordExistingSecret.name .Values.configuration.encryptionPassword }}
 - name: ENCRYPTION_PASSWORD
-  value: {{ .Values.configuration.encryptionPassword | quote }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "spotfire-server.encryption.secret.name" . | quote }}
+      key: {{ include "spotfire-server.encryption.secret.passwordkey" . | quote }}
+      optional: false
 {{- end }}
 {{- end -}}
 
@@ -225,16 +297,12 @@ Actionlog configuration environment variables needed to create and configure Act
   value: {{ required "Actiondb admin url is required" (tpl $create.databaseUrl $) | quote }}
 - name: ACTIONDB_ADMIN_USERNAME
   value: {{ get $create "adminUsername" | quote }}
-{{- if $create.adminPasswordExistingSecret.name }}
 - name: ACTIONDB_ADMIN_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ tpl $create.adminPasswordExistingSecret.name $ }}
-      key: {{ tpl $create.adminPasswordExistingSecret.key $ }}
-{{- else }}
-- name: ACTIONDB_ADMIN_PASSWORD
-  value: {{ required "actionlog database adminPassword must be set" (get $create "adminPassword") | quote }}
-{{- end }}
+      name: {{ include "spotfire-server.actionlogdatabaseadmin.secret.name" . | quote }}
+      key: {{ include "spotfire-server.actionlogdatabaseadmin.secret.passwordkey" . | quote }}
+      optional: false
 - name: ACTIONDB_ORACLE_ROOT_FOLDER
   value: {{ get $create "oracleRootfolder" | quote }}
 - name: ACTIONDB_ORACLE_TABLESPACE_PREFIX
@@ -280,16 +348,12 @@ Database admin credentials environment variables needed to create a Spotfire sch
 {{- if $createdb.enabled }}
 - name: DBSERVER_ADMIN_USERNAME
   value: {{ required "database.create-db.adminUsername must be set" $createdb.adminUsername | quote }}
-{{- if $createdb.adminPasswordExistingSecret.name }}
 - name: DBSERVER_ADMIN_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ tpl $createdb.adminPasswordExistingSecret.name $ }}
-      key: {{ tpl $createdb.adminPasswordExistingSecret.key $ }}
-{{- else }}
-- name: DBSERVER_ADMIN_PASSWORD
-  value: {{ required "database.create-db.adminPassword must be set" $createdb.adminPassword | quote }}
-{{- end }}
+      name: {{ include "spotfire-server.databaseadmin.secret.name" . | quote }}
+      key: {{ include "spotfire-server.databaseadmin.secret.passwordkey" . | quote }}
+      optional: false
 - name: DBSERVER_CLASS
   value: {{ required "database.bootstrap.driverClass must be set" .Values.database.bootstrap.driverClass | quote }}
 - name: DBSERVER_URL

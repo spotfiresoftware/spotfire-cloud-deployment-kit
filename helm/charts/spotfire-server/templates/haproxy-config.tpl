@@ -79,11 +79,14 @@ frontend spotfire
     compression type {{ .Values.spotfireConfig.compression.type }}
     {{- end }}
 
-    # Deny all non-spotfire requests
+    # Spotfire Server enforces its own authentication and authorization,
+    # the purpose is to reduce scanner noise in logs etc.
+
+    ## Deny all non-spotfire requests
     http-request deny status 403 content-type text/html string "403 Forbidden" unless { path -m beg /spotfire/ } || { path / } || { path /spotfire } || { path /SpotfireWeb/ViewAnalysis.aspx }
 
-    # Deny external access to Spotfire Server health check url
-    http-request deny deny_status 404 if { path /spotfire/rest/status/getStatus }
+    ## Deny external access to Spotfire Server health check url.
+    http-request deny deny_status 404 if { path,url_dec -i -m beg /spotfire/rest/status/getStatus }
 
     {{- if .Values.spotfireConfig.debug }}
 

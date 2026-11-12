@@ -108,7 +108,8 @@ trap 'printStack' ERR
 if [ "${LOG_LEVEL}" = "DEBUG" ] ; then
     set -v
 elif [ "${LOG_LEVEL}" = "TRACE" ] ; then
-    set -x
+    # xtrace expands command arguments, which can expose credentials in pod logs.
+    set -v
 fi
 
 # Version information

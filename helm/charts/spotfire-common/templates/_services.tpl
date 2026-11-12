@@ -86,6 +86,24 @@ Create the name of the spotfire-service account to use
 {{- end }}
 
 {{/*
+Create the Spotfire service account
+*/}}
+{{- define "spotfire-common.spotfire-service.serviceAccount" -}}
+{{- if .Values.serviceAccount.create -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "spotfire-common.spotfire-service.serviceAccountName" . }}
+  labels:
+    {{- include "spotfire-common.spotfire-service.labels" . | nindent 4 }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return the proper image name (for spotfire-service image)
 */}}
 {{- define "spotfire-common.spotfire-service.image" -}}

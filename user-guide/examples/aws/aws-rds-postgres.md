@@ -124,7 +124,7 @@ For more information, see [Creating an Amazon RDS DB instance](https://docs.aws.
         bootstrap:
           databaseUrl: "jdbc:postgresql://<db-instance-name-endpoint>:5432/<db-instance-name>"
           username: "<changeAdminUsername>"
-          adminPassword: "<changeAdminPass>"
+          password: "<changeAdminPass>"
         create-db:
           adminUsername: "<changeAdminUsername>"
           adminPassword: "<changeAdminPass>"

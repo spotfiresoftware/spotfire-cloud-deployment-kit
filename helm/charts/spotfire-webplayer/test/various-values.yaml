@@ -8,16 +8,23 @@ config:
   Spotfire.Dxp.Worker.Host.dll.config: <xml></xml>
   Spotfire.Dxp.Worker.Web.config: <xml></xml>
 securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
   privileged: false
   runAsNonRoot: true
   runAsUser: 1000
-  runAsGroup: 0
 podSecurityContext:
   fsGroup: 1000
   runAsUser: 1000
   runAsGroup: 0
 fluentBitSidecar:
   securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
     privileged: false
     runAsNonRoot: true
     runAsUser: 1000
@@ -26,6 +33,7 @@ fluentBitSidecar:
     pullPolicy: IfNotPresent
     repository: fluent/fluent-bit
     tag: 1.9.9
+    digest: ""
   resources:
     requests:
       cpu: 10m
@@ -78,8 +86,9 @@ serviceAccount:
   annotations:
     annotationA: a
     annotationB: b
-  create: false
-  name: ""
+  automountServiceAccountToken: true
+  create: true
+  name: serviceaccountname
 startupProbe:
   failureThreshold: 20
   httpGet:

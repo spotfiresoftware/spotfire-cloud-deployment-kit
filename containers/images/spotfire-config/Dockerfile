@@ -8,7 +8,7 @@ FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
-RUN java -jar /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool.jar
+RUN /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/jdk/bin/java -jar /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool.jar
 
 #
 # spotfire-config specific
@@ -33,6 +33,7 @@ LABEL org.opencontainers.image.title="spotfire/spotfire-config" \
 WORKDIR /opt/spotfire/
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/spotfireserver-*.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool spotfireconfigtool/
+COPY --from=extract --chown=spotfire:spotfire /tmp/spotfireserver-*.x86_64/jdk spotfireconfigtool/jdk/
 COPY --chown=spotfire:spotfire bootstrap.sh ./
 
 ENV BOOTSTRAP_FILE=bootstrap.xml
@@ -45,5 +46,5 @@ USER spotfire
 # config.sh is a wrapper that enforces the End User Agreement, then calls the actual config tool
 RUN mkdir -p /opt/spotfire/bin
 COPY --chown=spotfire:spotfire eua-check.sh /opt/spotfire/bin/config.sh
-ENV PATH=$PATH:/opt/spotfire/bin
+ENV PATH=/opt/spotfire/spotfireconfigtool/jdk/bin:/opt/spotfire/bin:$PATH
 ENTRYPOINT ["config.sh"]

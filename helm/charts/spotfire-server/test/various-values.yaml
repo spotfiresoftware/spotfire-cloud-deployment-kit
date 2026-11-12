@@ -17,6 +17,7 @@ troubleshooting:
       dumpPath: /opt/spotfire/troubleshooting/jvm-heap-dumps
 serviceAccount:
   create: true
+  automountServiceAccountToken: true
   name: serviceaccountname
   annotations:
     myAnnotation: myAnnotationValue
@@ -199,6 +200,7 @@ fluentBitSidecar:
     pullPolicy: Never
     repository: fluent/fluent-bit
     tag: 1.9.9
+    digest: ""
   securityContext:
     privileged: true
     runAsNonRoot: true
@@ -354,7 +356,6 @@ startupProbe:
     port: service
   initialDelaySeconds: 60
   periodSeconds: 10
-toolPassword: mytoolpassword
 kedaAutoscaling:
   enabled: true
   pollingInterval: 90
@@ -426,6 +427,8 @@ volumes:
           storage: 10Gi
       storageClassName: storageclassname
       volumeName: volumename
+networkPolicy:
+  enabled: true
 configuration:
   # Ideally this should be tested better
   properties: {}
@@ -448,7 +451,9 @@ configuration:
     enabled: true
     minimumSeconds: 90
     timeoutSeconds: 180
-  encryptionPassword: encryption/password
+  encryptionPasswordExistingSecret:
+    name: encryption-password-secret
+    key: encryption-password-key
   spotfireAdmin:
     passwordExistingSecret:
       name: theSecretForAdminCredentials

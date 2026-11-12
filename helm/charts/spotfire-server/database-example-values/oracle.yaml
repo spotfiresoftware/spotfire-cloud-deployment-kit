@@ -3,10 +3,14 @@ database:
     databaseUrl: "jdbc:oracle:thin:@server:1521:spotfire"
     driverClass: "oracle.jdbc.OracleDriver"
     # username: "spotfire"
-    password: "spotfirePassword"
+    passwordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "spotfire-database-password"
   create-db:
     adminUsername: "system"
-    adminPassword: "systemPassword"
+    adminPasswordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "database-admin-password"
     databaseUrl: "jdbc:oracle:thin:@server:1521:ORCL"
     oracleTablespacePrefix: "spotfire"
     oracleRootfolder: 'C:\Oracle19c'

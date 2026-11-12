@@ -23,6 +23,7 @@ spec:
       {{- include "spotfire-server.imagePullSecrets" . | nindent 6}}
       terminationGracePeriodSeconds: {{ add (ternary .Values.configuration.draining.timeoutSeconds 0 .Values.configuration.draining.enabled) 30 }}
       serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- if .Values.extraInitContainers }}
@@ -68,9 +69,8 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- if or .Values.extraEnvVarsSecret .Values.extraEnvVarsCM }}
           envFrom:
-            - secretRef:
-                name: {{ template "spotfire-server.spotfiredatabase.secret.name" . }}
             {{- if .Values.extraEnvVarsSecret }}
             - secretRef:
                 name: {{ tpl .Values.extraEnvVarsSecret $ }}
@@ -79,6 +79,7 @@ spec:
             - configMapRef:
                 name: {{ tpl .Values.extraEnvVarsCM $ }}
             {{- end }}
+          {{- end }}
           env:
             {{- if .Values.extraEnvVars }}
             {{ tpl (toYaml .Values.extraEnvVars) $ | nindent 12 }}
@@ -113,16 +114,19 @@ spec:
           - name: {{ .Values.volumes.certificates.existingClaim }}-volume
             mountPath: /opt/spotfire/spotfireserver/tomcat/certs
             subPath: {{ .Values.volumes.certificates.subPath | quote }}
+            readOnly: true
           {{- end }}
           {{- if .Values.volumes.customExt.existingClaim }}
           - name: {{ .Values.volumes.customExt.existingClaim }}-volume
             mountPath: /opt/spotfire/spotfireserver/tomcat/custom-ext
             subPath: {{ .Values.volumes.customExt.subPath | quote }}
+            readOnly: true
           {{- end }}
           {{- if .Values.volumes.customExtInformationservices.existingClaim }}
           - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
             mountPath: /opt/spotfire/spotfireserver/tomcat/custom-ext-informationservices
             subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
+            readOnly: true
           {{- end }}
           {{- if or .Values.volumes.libraryImportExport.persistentVolumeClaim.create .Values.volumes.libraryImportExport.existingClaim }}
           {{- $claimName := ( include "spotfire-server.volumes.library-import-export.pvc.name" . ) }}
@@ -134,7 +138,7 @@ spec:
             mountPath: /opt/spotfire/troubleshooting/
             subPathExpr: $(POD_NAME)
         - name: fluent-bit
-          image: "{{ .Values.fluentBitSidecar.image.repository }}:{{ .Values.fluentBitSidecar.image.tag }}"
+          image: {{ include "spotfire-common.images.image" (dict "image" .Values.fluentBitSidecar.image) | quote }}
           imagePullPolicy: "{{ .Values.fluentBitSidecar.image.pullPolicy }}"
           securityContext:
             {{- toYaml .Values.fluentBitSidecar.securityContext | nindent 12 }}

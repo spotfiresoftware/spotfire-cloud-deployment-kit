@@ -46,6 +46,7 @@ service:
   type: ClusterIP
 serviceAccount:
   annotations: {}
+  automountServiceAccountToken: true
   create: true
   name: serviceaccountname
 startupProbe:
@@ -105,12 +106,19 @@ podSecurityContext:
   runAsUser: 1000
   runAsGroup: 0
 securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
   privileged: false
   runAsNonRoot: true
   runAsUser: 1000
-  runAsGroup: 0
 fluentBitSidecar:
   securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
     privileged: false
     runAsNonRoot: true
     runAsUser: 1000
@@ -119,6 +127,7 @@ fluentBitSidecar:
     pullPolicy: Always
     repository: fluent/fluent-bit
     tag: 1.9.9
+    digest: ""
   resources:
     requests:
       cpu: 10m

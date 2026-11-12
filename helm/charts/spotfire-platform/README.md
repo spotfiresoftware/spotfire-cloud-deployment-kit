@@ -1,6 +1,6 @@
 # spotfire-platform
 
-![Version: 2.3.4](https://img.shields.io/badge/Version-2.3.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6-v4.3.4](https://img.shields.io/badge/AppVersion-14.6--v4.3.4-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6-v4.4.0](https://img.shields.io/badge/AppVersion-14.6--v4.4.0-informational?style=flat-square)
 
 This is an umbrella chart for Spotfire, a chart that groups several Spotfire services together. It allows you to deploy, upgrade, and manage a Spotfire environment with optional Spotfire services.
 
@@ -10,12 +10,12 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-automationservices/ | spotfire-automationservices | 2.3.4 |
-| file://../spotfire-pythonservice/ | spotfire-pythonservice | 2.3.4 |
-| file://../spotfire-rservice/ | spotfire-rservice | 2.3.4 |
-| file://../spotfire-server/ | spotfire-server | 2.3.4 |
-| file://../spotfire-terrservice/ | spotfire-terrservice | 2.3.4 |
-| file://../spotfire-webplayer/ | spotfire-webplayer | 2.3.4 |
+| file://../spotfire-automationservices/ | spotfire-automationservices | 2.4.0 |
+| file://../spotfire-pythonservice/ | spotfire-pythonservice | 2.4.0 |
+| file://../spotfire-rservice/ | spotfire-rservice | 2.4.0 |
+| file://../spotfire-server/ | spotfire-server | 2.4.0 |
+| file://../spotfire-terrservice/ | spotfire-terrservice | 2.4.0 |
+| file://../spotfire-webplayer/ | spotfire-webplayer | 2.4.0 |
 | https://charts.bitnami.com/bitnami | postgresql | 16.7.* |
 
 ## Overview
@@ -141,17 +141,18 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-automationservices.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-automationservices.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| spotfire-automationservices.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-automationservices.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-automationservices.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-automationservices.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-automationservices.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| spotfire-automationservices.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| spotfire-automationservices.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-automationservices.fullnameOverride | string | `""` |  |
 | spotfire-automationservices.image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | spotfire-automationservices.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-automationservices.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-automationservices.image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| spotfire-automationservices.image.tag | string | `"14.6.3-HF-017-v4.3.4"` | The container image tag to use. |
+| spotfire-automationservices.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-automationservices.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-automationservices.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-automationservices.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -176,7 +177,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-automationservices.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-automationservices.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| spotfire-automationservices.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| spotfire-automationservices.podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-automationservices.readinessProbe.enabled | bool | `false` |  |
 | spotfire-automationservices.readinessProbe.failureThreshold | int | `10` |  |
 | spotfire-automationservices.readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -185,12 +186,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-automationservices.replicaCount | int | `1` |  |
 | spotfire-automationservices.resources | object | `{}` |  |
-| spotfire-automationservices.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| spotfire-automationservices.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-automationservices.service.port | int | `9501` |  |
 | spotfire-automationservices.service.type | string | `"ClusterIP"` |  |
-| spotfire-automationservices.serviceAccount.annotations | object | `{}` |  |
-| spotfire-automationservices.serviceAccount.create | bool | `false` |  |
-| spotfire-automationservices.serviceAccount.name | string | `""` |  |
+| spotfire-automationservices.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| spotfire-automationservices.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| spotfire-automationservices.serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| spotfire-automationservices.serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | spotfire-automationservices.startupProbe.enabled | bool | `true` |  |
 | spotfire-automationservices.startupProbe.failureThreshold | int | `20` |  |
 | spotfire-automationservices.startupProbe.httpGet.path | string | `"/spotfire/started"` |  |
@@ -221,17 +223,18 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-pythonservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-pythonservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| spotfire-pythonservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-pythonservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-pythonservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-pythonservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-pythonservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| spotfire-pythonservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| spotfire-pythonservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-pythonservice.fullnameOverride | string | `""` |  |
 | spotfire-pythonservice.image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | spotfire-pythonservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-pythonservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-pythonservice.image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| spotfire-pythonservice.image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| spotfire-pythonservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-pythonservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-pythonservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-pythonservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -254,7 +257,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-pythonservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-pythonservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| spotfire-pythonservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| spotfire-pythonservice.podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-pythonservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-pythonservice.readinessProbe.failureThreshold | int | `10` |  |
 | spotfire-pythonservice.readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -263,12 +266,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-pythonservice.replicaCount | int | `1` |  |
 | spotfire-pythonservice.resources | object | `{}` |  |
-| spotfire-pythonservice.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| spotfire-pythonservice.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-pythonservice.service.port | int | `9501` |  |
 | spotfire-pythonservice.service.type | string | `"ClusterIP"` |  |
-| spotfire-pythonservice.serviceAccount.annotations | object | `{}` |  |
-| spotfire-pythonservice.serviceAccount.create | bool | `false` |  |
-| spotfire-pythonservice.serviceAccount.name | string | `""` |  |
+| spotfire-pythonservice.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| spotfire-pythonservice.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| spotfire-pythonservice.serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| spotfire-pythonservice.serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | spotfire-pythonservice.startupProbe.enabled | bool | `true` |  |
 | spotfire-pythonservice.startupProbe.failureThreshold | int | `20` |  |
 | spotfire-pythonservice.startupProbe.httpGet.path | string | `"/spotfire/started"` |  |
@@ -299,17 +303,18 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-rservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-rservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| spotfire-rservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-rservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-rservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-rservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-rservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-rservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-rservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| spotfire-rservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| spotfire-rservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-rservice.fullnameOverride | string | `""` |  |
 | spotfire-rservice.image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | spotfire-rservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-rservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides the global.spotfire.image.registry value. |
 | spotfire-rservice.image.repository | string | `"spotfire/spotfire-rservice"` | The spotfire-server image repository. |
-| spotfire-rservice.image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| spotfire-rservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-rservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details. |
 | spotfire-rservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-rservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -332,7 +337,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-rservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-rservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| spotfire-rservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| spotfire-rservice.podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-rservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-rservice.readinessProbe.failureThreshold | int | `10` |  |
 | spotfire-rservice.readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -341,12 +346,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-rservice.replicaCount | int | `1` |  |
 | spotfire-rservice.resources | object | `{}` |  |
-| spotfire-rservice.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| spotfire-rservice.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-rservice.service.port | int | `9501` |  |
 | spotfire-rservice.service.type | string | `"ClusterIP"` |  |
-| spotfire-rservice.serviceAccount.annotations | object | `{}` |  |
-| spotfire-rservice.serviceAccount.create | bool | `false` |  |
-| spotfire-rservice.serviceAccount.name | string | `""` |  |
+| spotfire-rservice.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| spotfire-rservice.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| spotfire-rservice.serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| spotfire-rservice.serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | spotfire-rservice.startupProbe.enabled | bool | `true` |  |
 | spotfire-rservice.startupProbe.failureThreshold | int | `20` |  |
 | spotfire-rservice.startupProbe.httpGet.path | string | `"/spotfire/started"` |  |
@@ -381,7 +387,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.cliPod.image.pullSecrets | list | `[]` |  |
 | spotfire-server.cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | spotfire-server.cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.cliPod.image.tag | string | `"14.6.3-v4.3.4"` | The spotfireConfig container image tag to use. |
+| spotfire-server.cliPod.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
 | spotfire-server.cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | spotfire-server.cliPod.nodeSelector | object | `{}` |  |
 | spotfire-server.cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -390,7 +396,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.cliPod.securityContext | object | `{}` | The securityContext setting for cliPod. More info: `kubectl explain deployment.spec.template.spec.containers.securityContext` |
 | spotfire-server.cliPod.tolerations | list | `[]` |  |
 | spotfire-server.configJob.affinity | object | `{}` |  |
-| spotfire-server.configJob.extraEnvVars | list | `[]` | Additional environment variables for all spotfire-server pods to use.  - name: NAME    value: value |
+| spotfire-server.configJob.extraEnvVars | list | `[]` | Additional environment variables for the configuration job.  - name: NAME    value: value |
 | spotfire-server.configJob.extraEnvVarsCM | string | `""` |  |
 | spotfire-server.configJob.extraEnvVarsSecret | string | `""` |  |
 | spotfire-server.configJob.extraInitContainers | list | `[]` | Additional init containers to add to the Spotfire server configuration pod. More info: `kubectl explain job.spec.template.spec.initContainers` |
@@ -400,8 +406,8 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configJob.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.configJob.image.tag | string | `"14.6.3-v4.3.4"` | The spotfireConfig container image tag to use. |
-| spotfire-server.configJob.logLevel | string | `""` | Set to `DEBUG` or `TRACE` to increase log level. Defaults to `INFO` if unset. |
+| spotfire-server.configJob.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
+| spotfire-server.configJob.logLevel | string | `""` | Set to `DEBUG` to show raw bash script lines, or `TRACE` to also enable trace-level configuration tool logging. Defaults to `INFO` if unset. |
 | spotfire-server.configJob.nodeSelector | object | `{}` |  |
 | spotfire-server.configJob.podAnnotations | object | `{}` | Podannotations for configJob |
 | spotfire-server.configJob.podSecurityContext | object | `{}` | The podSecurityContext setting for configJob. More info: `kubectl explain job.spec.template.spec.securityContext` |
@@ -413,12 +419,12 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.actionLog.categories | string | `""` | Action log categories and webCategories are a comma separated list of categories. See [config-action-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/action_log_categories.html) for a list of possible categories. default value when empty is "all" |
 | spotfire-server.configuration.actionLog.database.config-action-log-database-logger | object | Configuration of actionlog database settings is only applicable if configuration.actionLog.enabled is true | Configure actionlog database. See [config-action-log-database-logger](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information. |
 | spotfire-server.configuration.actionLog.database.config-action-log-database-logger.additionalOptions | object | `{}` | Additional Options. See [config-action-log-database-logger - Options](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-action-log-database-logger.html) for more information. |
-| spotfire-server.configuration.actionLog.database.config-action-log-database-logger.password | string | `""` | The password to be created for the Spotfire Actionlog database user. If not provided, this password is automatically generated. |
+| spotfire-server.configuration.actionLog.database.config-action-log-database-logger.password | string | `""` | The password to be created for the Spotfire Actionlog database user. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. |
 | spotfire-server.configuration.actionLog.database.config-action-log-database-logger.username | string | `"spotfire_actionlog"` | The user to create for actionlog database access |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb | object | Actionlog database is created only if configuration.actionLog.enabled is true | Create the actionlog database. See [create-actionlogdb](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-actionlogdb.html) for more information. |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.actiondbDbname | string | `"spotfire_actionlog"` | Name for the Actionlog Database to be created to hold the Actionlog database table. |
-| spotfire-server.configuration.actionLog.database.create-actionlogdb.adminPassword | string | `""` | Admin password for the actionlog database. |
-| spotfire-server.configuration.actionLog.database.create-actionlogdb.adminPasswordExistingSecret | object | Not used unless .name is set | Read spotfire actionlog database password from an existing secret. If set, 'adminPassword' above is not used. |
+| spotfire-server.configuration.actionLog.database.create-actionlogdb.adminPassword | string | `""` | Admin password for the actionlog database. For production, use `adminPasswordExistingSecret` instead. |
+| spotfire-server.configuration.actionLog.database.create-actionlogdb.adminPasswordExistingSecret | object | Not used unless .name is set | Read the actionlog database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used. |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.adminUsername | string | `"postgres"` | Admin username for the actionlog database. |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | Like `configuration.actionLog.database.config-action-log-database-logger.databaseUrl` but is used for the connection when creating the actionlog database. Evaluated as a template. |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation or the actionlog records are being stored on the spotfire database. |
@@ -427,8 +433,8 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.timeoutSeconds | string | `""` | Specifies the timeout, in seconds, for the operation. |
 | spotfire-server.configuration.actionLog.database.create-actionlogdb.variant | string | `""` | For connecting to MS SQL or Oracle on Amazon RDS, specify `rds`, for MS SQL on Azure, specify `azure`, otherwise omit the option. |
 | spotfire-server.configuration.apply | string | `"initialsetup"` | When to apply configurationScripts, commandScripts, admin user creation and action log settings. Possible values: * "always" = Apply on every `helm install` or `helm upgrade`. Note: Configuration made from other tools than helm might be overwritten when updating the helm release. * "initialsetup" = Only apply if Spotfire server database does not already have a configuration. It is suitable for setting up the initial configuration of the environment but where further configuration is done using the spotfire configuration tool. * "never" = Do not apply. Configuration must be configured using the spotfire configuration tool directly towards the database. |
-| spotfire-server.configuration.commandScripts | list | `[]` | A list of command scripts to run during helm installation. These commands will run once only and not subsequent helm release upgrades. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
-| spotfire-server.configuration.configurationScripts | list | `[]` | A list of configuration scripts to apply during helm installation. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
+| spotfire-server.configuration.commandScripts | list | `[]` | A list of command scripts to run whenever `configuration.apply` applies configuration. With the default `initialsetup`, these commands run only during the initial configuration. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should NOT operate on `configuration.xml`. Operations such as adding/removing users and assigning licenses are typical administrative commands that can be specified here. |
+| spotfire-server.configuration.configurationScripts | list | `[]` | A list of configuration scripts to run whenever `configuration.apply` applies configuration. With the default `initialsetup`, these scripts run only during the initial configuration. Each list item should have the keys `name` and `script`. See [config.sh run script](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html). Commands in these scripts should operate only on a local `configuration.xml`. Commands such as `set-config-prop` and `modify-ds-template` are examples of commands that can be used here. The local `configuration.xml` file is automatically imported after all configuration steps run in the order in which they are defined below. |
 | spotfire-server.configuration.deployment.clear | bool | `false` | Clear existing packages before any new files are added. Setting it `true` can cause extra delay because packages need to be added again every time the config-job is run. |
 | spotfire-server.configuration.deployment.defaultDeployment.deploymentAreaName | string | `"Production"` | The name of the deployment area to create or update |
 | spotfire-server.configuration.deployment.defaultDeployment.enabled | bool | `true` | Create deployment area with default Spotfire.Dxp.sdn taken from spotfire-deployment image. *Warning*: If set to `true` and a deployment volume (see `volumes.deployments` key) is used, a folder with name `deploymentAreaName` will be created and potentially overwrite any existing deployment with the same name on the persistent volume. |
@@ -436,7 +442,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"14.6.3-HF-017-v4.3.4"` | The container image tag to use. |
+| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-server.configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | spotfire-server.configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | spotfire-server.configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -444,25 +450,26 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.draining.minimumSeconds | int | `90` | The minimum time in seconds that the server should be draining, even if it is considered idle. |
 | spotfire-server.configuration.draining.publishNotReadyAddresses | bool | `true` | Makes sure that service SRV records are preserved while terminating pods, typically used with the spotfire haproxy deployment. |
 | spotfire-server.configuration.draining.timeoutSeconds | int | `180` | The draining timeout in seconds after which the service is forcibly shut down. |
-| spotfire-server.configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. If you do not set this option, then a static password is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
-| spotfire-server.configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these command will be run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
+| spotfire-server.configuration.encryptionPassword | string | `""` | The password for encrypting passwords that are stored in the database. For production, use `encryptionPasswordExistingSecret` instead. If you do not set either option, the product default is used. See \-\-encryption-password for the [bootstrap](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html) command. |
+| spotfire-server.configuration.encryptionPasswordExistingSecret | object | Not used unless .name is set | Read the encryption password from an existing Secret. Recommended for production. If set, `encryptionPassword` above is not used. Changing this value after data has been encrypted can make stored credentials unreadable. |
+| spotfire-server.configuration.preConfigCommandScripts | list | `[]` | The same as `commandScripts` but these commands run before the configuration is imported. On new installations the commands will be run before any spotfire servers are started, because spotfire server will not start before there is a configuration. |
 | spotfire-server.configuration.preferExistingConfig | bool | `false` | Run the configuration job steps starting from the currently active configuration or from the Spotfire default config (created with `config.sh create-default-config`). If no current active configuration exists, the default config is used. Note: When set to false, all configuration done with external tools other than helm will be overwritten on an upgrade. |
 | spotfire-server.configuration.properties | object | Default values for kubernetes, see values.yaml. | Configuration properties The key name is the name of the property to set. If the value is a scalar the configuration tool command `set-config-prop` is used. To set a list or map the value should have the keys `itemName` and `value`. If the value is a map or object the configuration tool command `set-config-map-prop` is used. If the value is a list the configuration tool command `set-config-list-prop` is used. |
 | spotfire-server.configuration.site | object | Spotfire Server joins the Default site. | Site settings. See [sites](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/sites.html) for more information. |
 | spotfire-server.configuration.site.name | string | `"Default"` | The name of the site that the Spotfire Server should belong to. The site must be created beforehand. See [create-site](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-site.html) for more information. |
 | spotfire-server.configuration.site.publicAddress | string | `""` | The address that clients use for connecting to the system. It is also used for generating absolute URLs. |
 | spotfire-server.configuration.spotfireAdmin.create | bool | `true` | Whether to create an admin user or not. |
-| spotfire-server.configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface because the password is reset to this value on every helm installation or upgrade. |
-| spotfire-server.configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read password from an existing secret instead of from values. If set, 'password' above is not used. |
+| spotfire-server.configuration.spotfireAdmin.password | string | `""` | The password to create for the Spotfire admin. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. Although possible, it is not recommended to change the user's password directly in the Spotfire administrative user interface when `configuration.apply` is `always`, because the password is reset to this value on every helm installation or upgrade. With the default `initialsetup`, this value is applied only during the initial configuration. Changing it later updates the managed Secret but not the account; rotate the password using Spotfire administration tooling. |
+| spotfire-server.configuration.spotfireAdmin.passwordExistingSecret | object | Not used unless .name is set | Read the password from an existing Secret instead of values. Recommended for production. If set, `password` above is not used. |
 | spotfire-server.configuration.spotfireAdmin.username | string | `"admin"` | The user to create for the Spotfire admin. |
 | spotfire-server.database.bootstrap | object | - | For details related to bootstrap properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/bootstrap.html). |
 | spotfire-server.database.bootstrap.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/spotfire"` | The JDBC URL of the database to be used by Spotfire Server. Evaluated as a template. |
-| spotfire-server.database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. If not provided, this password is automatically generated. |
-| spotfire-server.database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read spotfire database password from an existing secret. If set, 'password' above is not used. |
+| spotfire-server.database.bootstrap.password | string | `""` | Password to be created for the Spotfire Server database. For production, use `passwordExistingSecret` instead. If not provided, this password is automatically generated. |
+| spotfire-server.database.bootstrap.passwordExistingSecret | object | Not used unless .name is set | Read the Spotfire database password from an existing Secret. Recommended for production. If set, `password` above is not used. |
 | spotfire-server.database.bootstrap.username | string | `"spotfire"` | Username to be created for the Spotfire Server database. If unset, the default value `spotfire` is used. |
 | spotfire-server.database.create-db | object | - | For details related to `create-db` cli properties, visit the product documentation [here](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/create-db.html). create-db cli also uses properties from database.bootstrap section. |
-| spotfire-server.database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. |
-| spotfire-server.database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read admin password from an existing secret. If set, 'password' above is not used. |
+| spotfire-server.database.create-db.adminPassword | string | `""` | Admin password for the database server to be used as the Spotfire Server database. For production, use `adminPasswordExistingSecret` instead. |
+| spotfire-server.database.create-db.adminPasswordExistingSecret | object | Not used unless .name is set | Read the database administrator password from an existing Secret. Recommended for production. If set, `adminPassword` above is not used. |
 | spotfire-server.database.create-db.adminUsername | string | `"postgres"` | Admin username for the database server to be used as the Spotfire Server database. |
 | spotfire-server.database.create-db.databaseUrl | string | `"jdbc:postgresql://HOSTNAME/"` | Like `database.bootstrap.databaseUrl` but is used for the connection when creating the spotfire database. Evaluated as a template. |
 | spotfire-server.database.create-db.doNotCreateUser | bool | `false` | Set this to true, in case supported databases (AWS Postgres, Aurora Postgres, Azure Postgres, Google Cloud Postgres) does not allow user creation |
@@ -480,15 +487,17 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.extraInitContainers | list | `[]` | Additional init containers to add to Spotfire server pod. More info: `kubectl explain deployment.spec.template.spec.initContainers` |
 | spotfire-server.extraVolumeMounts | list | `[]` | Extra volumeMounts for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts` |
 | spotfire-server.extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
+| spotfire-server.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-server.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-server.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-server.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-server.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-server.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-server.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-server.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | spotfire-server.haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | spotfire-server.haproxy.enabled | bool | `true` |  |
-| spotfire-server.haproxy.image | object | `{"tag":"3.2.19"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
-| spotfire-server.haproxy.image.tag | string | `"3.2.19"` | overrides the image tag whose default is the haproxy chart appVersion. Use empty string to use the chart default or pick [a specific version](https://hub.docker.com/r/haproxytech/haproxy-alpine/tags?name=3.2). |
+| spotfire-server.haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
+| spotfire-server.haproxy.image.repository | string | `"haproxytech/haproxy-alpine"` | overrides the image repository. |
+| spotfire-server.haproxy.image.tag | string | `"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
 | spotfire-server.haproxy.includes | object | `{}` |  |
 | spotfire-server.haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | spotfire-server.haproxy.kind | string | `"Deployment"` |  |
@@ -536,7 +545,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | spotfire-server.image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| spotfire-server.image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| spotfire-server.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-server.ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | spotfire-server.ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | spotfire-server.ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -569,7 +578,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.log-forwarder.extraPorts[1].name | string | `"forward"` |  |
 | spotfire-server.log-forwarder.extraPorts[1].port | int | `24224` |  |
 | spotfire-server.log-forwarder.extraPorts[1].protocol | string | `"TCP"` |  |
+| spotfire-server.log-forwarder.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
 | spotfire-server.log-forwarder.image.pullPolicy | string | `"IfNotPresent"` |  |
+| spotfire-server.log-forwarder.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for log-forwarder. |
+| spotfire-server.log-forwarder.image.tag | string | `"4.2.3"` | The image tag to use for log-forwarder. |
 | spotfire-server.log-forwarder.kind | string | `"Deployment"` |  |
 | spotfire-server.log-forwarder.labels."app.kubernetes.io/component" | string | `"logging"` |  |
 | spotfire-server.log-forwarder.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
@@ -583,6 +595,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.log-forwarder.service.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
 | spotfire-server.logging.logForwarderAddress | string | `""` | Specifies a logForwarderAddress. If left empty, then the default `log-forwarder` is used in the case where `log-forwarder.enabled=true`. Template. |
 | spotfire-server.logging.logLevel | string | `""` | The Spotfire Server log-level. Set to `debug`, `trace`, `minimal` or leave empty for info. |
+| spotfire-server.networkPolicy | object | `{"enabled":true,"logForwarder":{"additionalAllowedFrom":[]},"registration":{"additionalAllowedFrom":[]}}` | Controls the ingress NetworkPolicy for Spotfire Server Pods. A CNI must enforce NetworkPolicy; otherwise traffic remains unrestricted. |
+| spotfire-server.networkPolicy.enabled | bool | `true` | Creates policies that preserve standard Server and clustering traffic, restrict registration, and restrict log-forwarder ingestion; extra-container ports require an additional NetworkPolicy. |
+| spotfire-server.networkPolicy.logForwarder.additionalAllowedFrom | list | `[]` | Additional NetworkPolicy peers allowed to send logs to the log-forwarder, for example workloads in another namespace. |
+| spotfire-server.networkPolicy.registration.additionalAllowedFrom | list | `[]` | Additional NetworkPolicy peers allowed to reach the registration port, for example a Prometheus workload or node managers in another namespace. |
 | spotfire-server.nodeSelector | object | `{}` |  |
 | spotfire-server.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-server.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
@@ -595,6 +611,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.service.clusterIP | string | `"None"` |  |
 | spotfire-server.service.type | string | `"ClusterIP"` |  |
 | spotfire-server.serviceAccount.annotations | object | `{}` |  |
+| spotfire-server.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in Spotfire Server Pods. |
 | spotfire-server.serviceAccount.create | bool | `true` |  |
 | spotfire-server.serviceAccount.name | string | `""` |  |
 | spotfire-server.spotfireServerJava.extraJavaOpts | list | `[]` | Additional `JAVA_OPTS` for spotfire-server pods. |
@@ -605,7 +622,6 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.startupProbe.initialDelaySeconds | int | `60` |  |
 | spotfire-server.startupProbe.periodSeconds | int | `10` |  |
 | spotfire-server.tolerations | list | `[]` |  |
-| spotfire-server.toolPassword | string | `""` | The Spotfire config tool password to use for `bootstrap.xml`. If not provided, this password is automatically generated. The password is only used locally inside pods for use to together with the configuration and is not usable for anything outside the pod. |
 | spotfire-server.troubleshooting.jvm.heapDumpOnOutOfMemoryError.dumpPath | string | `"/opt/spotfire/troubleshooting/jvm-heap-dumps"` | Define a path where the generated dump is exported. By default, this gets mounted in EmptyDir: {} internally, which survives container restarts. In case you want to persist troubleshooting information to an external location, you can override the default behaviour by specifying PVC in `volumes.troubleshooting`. |
 | spotfire-server.troubleshooting.jvm.heapDumpOnOutOfMemoryError.enabled | bool | `true` | Enable or disable for a heap dump in case of OutOfMemoryError. |
 | spotfire-server.volumes.certificates.existingClaim | string | `""` |  |
@@ -637,17 +653,18 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-terrservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-terrservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| spotfire-terrservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-terrservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-terrservice.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-terrservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-terrservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| spotfire-terrservice.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| spotfire-terrservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-terrservice.fullnameOverride | string | `""` |  |
 | spotfire-terrservice.image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | spotfire-terrservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-terrservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-terrservice.image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| spotfire-terrservice.image.tag | string | `"14.6.3-v4.3.4"` | The container image tag to use. |
+| spotfire-terrservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-terrservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-terrservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-terrservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -670,7 +687,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-terrservice.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-terrservice.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| spotfire-terrservice.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| spotfire-terrservice.podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-terrservice.readinessProbe.enabled | bool | `false` |  |
 | spotfire-terrservice.readinessProbe.failureThreshold | int | `10` |  |
 | spotfire-terrservice.readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -679,12 +696,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-terrservice.replicaCount | int | `1` |  |
 | spotfire-terrservice.resources | object | `{}` |  |
-| spotfire-terrservice.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| spotfire-terrservice.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-terrservice.service.port | int | `9501` |  |
 | spotfire-terrservice.service.type | string | `"ClusterIP"` |  |
-| spotfire-terrservice.serviceAccount.annotations | object | `{}` |  |
-| spotfire-terrservice.serviceAccount.create | bool | `false` |  |
-| spotfire-terrservice.serviceAccount.name | string | `""` |  |
+| spotfire-terrservice.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| spotfire-terrservice.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| spotfire-terrservice.serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| spotfire-terrservice.serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | spotfire-terrservice.startupProbe.enabled | bool | `true` |  |
 | spotfire-terrservice.startupProbe.failureThreshold | int | `20` |  |
 | spotfire-terrservice.startupProbe.httpGet.path | string | `"/spotfire/started"` |  |
@@ -717,17 +735,18 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-webplayer.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-webplayer.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| spotfire-webplayer.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-webplayer.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| spotfire-webplayer.fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| spotfire-webplayer.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-webplayer.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| spotfire-webplayer.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| spotfire-webplayer.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-webplayer.fullnameOverride | string | `""` |  |
 | spotfire-webplayer.image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | spotfire-webplayer.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-webplayer.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-webplayer.image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| spotfire-webplayer.image.tag | string | `"14.6.3-HF-017-v4.3.4"` | The container image tag to use. |
+| spotfire-webplayer.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
 | spotfire-webplayer.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-webplayer.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-webplayer.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -751,7 +770,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.podAnnotations."prometheus.io/path" | string | `"/spotfire/metrics"` |  |
 | spotfire-webplayer.podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | spotfire-webplayer.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
-| spotfire-webplayer.podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| spotfire-webplayer.podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | spotfire-webplayer.readinessProbe.enabled | bool | `false` |  |
 | spotfire-webplayer.readinessProbe.failureThreshold | int | `10` |  |
 | spotfire-webplayer.readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -760,12 +779,13 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.readinessProbe.periodSeconds | int | `3` |  |
 | spotfire-webplayer.replicaCount | int | `1` |  |
 | spotfire-webplayer.resources | object | `{}` |  |
-| spotfire-webplayer.securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| spotfire-webplayer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | spotfire-webplayer.service.port | int | `9501` |  |
 | spotfire-webplayer.service.type | string | `"ClusterIP"` |  |
-| spotfire-webplayer.serviceAccount.annotations | object | `{}` |  |
-| spotfire-webplayer.serviceAccount.create | bool | `false` |  |
-| spotfire-webplayer.serviceAccount.name | string | `""` |  |
+| spotfire-webplayer.serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| spotfire-webplayer.serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| spotfire-webplayer.serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| spotfire-webplayer.serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | spotfire-webplayer.startupProbe.enabled | bool | `true` |  |
 | spotfire-webplayer.startupProbe.failureThreshold | int | `20` |  |
 | spotfire-webplayer.startupProbe.httpGet.path | string | `"/spotfire/started"` |  |

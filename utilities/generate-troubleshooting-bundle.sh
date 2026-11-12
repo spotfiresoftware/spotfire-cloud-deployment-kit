@@ -38,7 +38,7 @@ if [ $? != 0 ]; then
     print_usage
     exit ${ERROR_CODE_INVALID_ARGUMENTS}
 fi
-eval set -- $parsed_options
+eval set -- "$parsed_options"
 
 while true; do
     case "$1" in
@@ -107,13 +107,17 @@ fi
 #
 
 function collect_info() {
-    local command="$1"
-    local output_file="$2"
+    local output_file="$1"
+    shift
 
     echo "📄 ${output_file}" >&2
-    [[ "${VERBOSE}" == true ]] && echo "⚙️ ${command}" >&2
+    if [[ "${VERBOSE}" == true ]]; then
+        printf '⚙️' >&2
+        printf ' %q' "$@" >&2
+        printf '\n' >&2
+    fi
     mkdir -p "$(dirname "${output_file}")"
-    eval "${command}" > "${output_file}" || return $?
+    "$@" > "${output_file}" || return $?
 }
 
 function copy_applogs() {
@@ -144,7 +148,7 @@ function fetch_pod_info_and_logs() {
     local pod_output_dir="${OUTPUT_DIR}/pod-${pod}"
 
     # Collect pod information using 'kubectl describe pod' command
-    collect_info "kubectl --namespace '${NAMESPACE}' describe pod '${pod}'" "${pod_output_dir}/describe.txt" || return 1
+    collect_info "${pod_output_dir}/describe.txt" kubectl --namespace "${NAMESPACE}" describe pod "${pod}" || return 1
 
     # Get the list of containers in the pod
     containers=$(kubectl get pod "${pod}" --namespace "${NAMESPACE}" --output=jsonpath='{.spec.containers[*].name}' 2>/dev/null)
@@ -155,12 +159,12 @@ function fetch_pod_info_and_logs() {
 
     # Collect logs for each container in the pod
     for container in ${containers}; do
-        collect_info "kubectl --namespace '${NAMESPACE}' logs '${pod}' -c '${container}'" "${pod_output_dir}/stdout-${container}.log"
+        collect_info "${pod_output_dir}/stdout-${container}.log" kubectl --namespace "${NAMESPACE}" logs "${pod}" -c "${container}"
     done
 
     local main_container_restart_count=$(kubectl get pod ${pod} -n ${NAMESPACE} -o jsonpath='{.status.containerStatuses[0].restartCount}')
     if [ "${main_container_restart_count}" -gt 0 ]; then
-        collect_info "kubectl --namespace '${NAMESPACE}' logs --previous '${pod}'" "${pod_output_dir}/stdout-previous.log"
+        collect_info "${pod_output_dir}/stdout-previous.log" kubectl --namespace "${NAMESPACE}" logs --previous "${pod}"
     fi 
 }
 
@@ -196,12 +200,12 @@ echo "🔍 Collecting information for namespace ${NAMESPACE}"
 
 if [[ "${NO_HELM}" != "true" ]]; then
     # Helm (consider yaml/json output)
-    collect_info "helm list --namespace '${NAMESPACE}'" "${OUTPUT_DIR}/helm-releases.txt"
+    collect_info "${OUTPUT_DIR}/helm-releases.txt" helm list --namespace "${NAMESPACE}"
 
     # All helm releases containing spotfire components
     helmReleases=$(kubectl get pods --namespace "${NAMESPACE}" -l app.kubernetes.io/managed-by=Helm,app.kubernetes.io/part-of=spotfire --output=jsonpath='{.items[*].metadata.labels.app\.kubernetes\.io\/instance}' | tr ' ' '\n' | sort -u | tr '\n' ' ')
     for helmRelease in ${helmReleases}; do
-        collect_info "helm get values '${helmRelease}' --namespace '${NAMESPACE}'" "${OUTPUT_DIR}/helm-release-${helmRelease}-values.yaml"
+        collect_info "${OUTPUT_DIR}/helm-release-${helmRelease}-values.yaml" helm get values "${helmRelease}" --namespace "${NAMESPACE}"
     done
 else
     echo "ℹ️ Skipping helm releases and values"
@@ -209,22 +213,22 @@ fi
 
 # Cluster info
 if [[ "${NO_CLUSTER_INFO}" != "true" ]]; then
-    collect_info "kubectl cluster-info" "${OUTPUT_DIR}/cluster-info.txt"
-    collect_info "kubectl get nodes -o yaml" "${OUTPUT_DIR}/nodes.yaml"
-    collect_info "kubectl version" "${OUTPUT_DIR}/version.txt"
+    collect_info "${OUTPUT_DIR}/cluster-info.txt" kubectl cluster-info
+    collect_info "${OUTPUT_DIR}/nodes.yaml" kubectl get nodes -o yaml
+    collect_info "${OUTPUT_DIR}/version.txt" kubectl version
 else
     echo "ℹ️ Skipping cluster information"
 fi
 
 # Namespaced objects
 for kind in "${KUBERNETES_KINDS[@]:-${DEFAULT_KUBERNETES_TYPES[@]}}"; do
-    collect_info "kubectl get '${kind}' --namespace '${NAMESPACE}' -o yaml" "${OUTPUT_DIR}/${kind}.yaml"
-    collect_info "kubectl describe '${kind}' --namespace '${NAMESPACE}'" "${OUTPUT_DIR}/${kind}.txt"
+    collect_info "${OUTPUT_DIR}/${kind}.yaml" kubectl get "${kind}" --namespace "${NAMESPACE}" -o yaml
+    collect_info "${OUTPUT_DIR}/${kind}.txt" kubectl describe "${kind}" --namespace "${NAMESPACE}"
 done
 
 # Events
 kubectl_events_nowatch_columns="FirstSeen:.firstTimestamp,LastSeen:.lastTimestamp,Count:.count,From:.source.component,Kind:.involvedObject.kind,Object:.involvedObject.name,Type:.type,Reason:.reason,Message:.message"
-collect_info "kubectl get events --namespace '${NAMESPACE}' --sort-by=.metadata.creationTimestamp -o custom-columns='${kubectl_events_nowatch_columns}'" "${OUTPUT_DIR}/events.txt"
+collect_info "${OUTPUT_DIR}/events.txt" kubectl get events --namespace "${NAMESPACE}" --sort-by=.metadata.creationTimestamp -o "custom-columns=${kubectl_events_nowatch_columns}"
 
 spotfire_selector="app.kubernetes.io/part-of=spotfire"
 # Spotfire pods container stdout
@@ -236,7 +240,7 @@ done
 # Job pods container stdout
 allJobs=$(kubectl --namespace "${NAMESPACE}" get jobs --output=jsonpath='{.items[*].metadata.name}' --selector="${spotfire_selector}")
 for job in ${allJobs}; do
-    collect_info "kubectl --namespace '${NAMESPACE}' logs job/${job}" "${OUTPUT_DIR}/job-${job}-log.txt"
+    collect_info "${OUTPUT_DIR}/job-${job}-log.txt" kubectl --namespace "${NAMESPACE}" logs "job/${job}"
 done
 
 # Loop to copy server logs
