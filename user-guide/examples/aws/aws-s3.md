@@ -113,6 +113,10 @@ Execute this step only if the Spotfire environment is already deployed on the EK
               --bootstrap-config="${BOOTSTRAP_FILE}"
     ```
 
+   The chart disables automatic mounting of Kubernetes API credentials by default.
+   This does not disable IRSA: the Amazon EKS Pod Identity Webhook injects a separate
+   projected token for AWS STS into pods that use the annotated service account.
+
    For more information, see the [config-library-external-data-storage](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-library-external-data-storage.html) and [config-library-external-s3-blob-storage](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/config-library-external-s3-storage.html) documentation.
 
 2. Deploy the `spotfire-platform` Helm chart using the `aws-s3-bucket.yaml` values file.

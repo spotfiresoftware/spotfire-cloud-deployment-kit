@@ -24,6 +24,7 @@ spec:
       terminationGracePeriodSeconds: {{ add .Values.nodemanagerConfig.preStopDrainingTimeoutSeconds 30 }}
       {{- include "spotfire-common.spotfire-service.imagePullSecrets" . | nindent 6 }}
       serviceAccountName: {{ include "spotfire-common.spotfire-service.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- if .Values.extraInitContainers }}
@@ -69,11 +70,13 @@ spec:
           - name: ca-certificates-volume
             mountPath: /usr/local/share/ca-certificates
             subPath: {{ .Values.volumes.certificates.subPath | quote }}
+            readOnly: true
           {{- end }}
           {{- if or .Values.volumes.packages.persistentVolumeClaim.create .Values.volumes.packages.existingClaim }}
           - name: packages-volume
             mountPath: /opt/packages
             subPath: {{ .Values.volumes.packages.subPath | quote }}
+            readOnly: true
           {{- end }}
           - name: serviceconfig
             mountPath: /opt/spotfire/nodemanager/nm/services/PYTHON/conf/additional-custom.properties

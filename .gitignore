@@ -21,16 +21,16 @@ cache/
 
 # Helm
 helm/packages/*
-helm/**/Chart.lock
 
 # Scans
 sbom/
 cve/
 license-report.csv
 
-# mkdocs
+# mkdocs and similar
 .cache/
 site/
+.lycheecache
 
 # Python cache
 **/__pycache__/

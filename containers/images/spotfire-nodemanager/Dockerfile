@@ -9,7 +9,7 @@ FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 
 ARG SPOTFIRE_NODEMANAGER_VERSION
 ADD build/spotfirenodemanager-${SPOTFIRE_NODEMANAGER_VERSION}.x86_64.tar.gz /tmp
-RUN rm -rf /tmp/nodemanager-*/jdk/ /tmp/nodemanager-*/nm/upgrade/
+RUN rm -rf /tmp/nodemanager-*/nm/upgrade/
 
 #
 # spotfire-nodemanager specific
@@ -31,7 +31,8 @@ LABEL org.opencontainers.image.title="spotfire/nodemanager" \
     com.spotfire.image.type="commercial" \
     com.spotfire.image.distribution-scope="private"
 
-ENV SPOTFIRE_JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64/
+ENV SPOTFIRE_JAVA_HOME=/opt/spotfire/nodemanager/jdk/ \
+    PATH=/opt/spotfire/nodemanager/jdk/bin:$PATH
 
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \

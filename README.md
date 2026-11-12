@@ -72,7 +72,7 @@ When reporting issues or seeking help make sure to collect as much relevant info
 - Helm, container and Kubernetes versions 
 - Any other relevant information
 
-The script [generate-troubleshooting-bundle.sh](utilities/generate-troubleshooting-bundle.sh) can be used as starting point when collecting information from a Spotfire Helm deployment.
+The script [generate-troubleshooting-bundle.sh](utilities/generate-troubleshooting-bundle.sh) can be used as starting point when collecting information from a Spotfire Helm deployment. By default, it excludes Kubernetes Secret resources but exports user-supplied Helm values unchanged. Use the chart's `*ExistingSecret` values for credentials to keep password values out of that export.
 
 For issues related to third party products, see their respective documentation.
 

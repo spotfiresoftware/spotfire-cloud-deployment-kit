@@ -46,6 +46,8 @@ For more information, see the [AWS Load Balancer documentation](https://docs.aws
 Typically, you can use layer 4 load balancing for testing purposes or smaller deployments.
 You can use layer 7 load balancing for an enterprise deployment with advanced routing and SSL/TLS termination.
 
+**Security:** TLS is required before exposing Spotfire to the internet. The HTTP examples in this guide are for trusted development and testing only. Configure a certificate and HTTPS before production use.
+
 ### Alternative 1: AWS Network Load Balancer (NLB)
 
 For simpler scenarios, you might prefer to set up a network Load Balancer together with a K8s service of type `LoadBalancer`.
@@ -102,7 +104,7 @@ The [AWS Network Load Balancer](https://docs.aws.amazon.com/elasticloadbalancing
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
    (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire platform on AWS,
 with an AWS Network Load Balancer, using the default reverse proxy service (HAProxy).
@@ -192,10 +194,10 @@ After that, associate your domain with the external IP address of the created AW
           kubernetes.io/ingress.class: alb
           # This enables HTTP connections from Internet clients
           alb.ingress.kubernetes.io/scheme: internet-facing  # Use "internal" for internal ALB
-          # Optional: Enable HTTP to HTTPS redirection
+          # Required for internet-facing deployments: enable HTTPS and redirect HTTP.
           #alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
           #alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
-          # Optional: Attach a TLS certificate for HTTPS
+          # Required for internet-facing deployments: attach a TLS certificate.
           #alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account-id:certificate/certificate-id
     ```
 
@@ -229,7 +231,7 @@ After that, associate your domain with the external IP address of the created AW
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
    (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire platform on AWS,
 using an AWS Application Load Balancer (ALB) with the AWS Ingress Controller.

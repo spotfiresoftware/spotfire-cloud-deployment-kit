@@ -8,7 +8,7 @@ FROM spotfire/spotfire-base:${SPOTFIRE_BASE_IMAGE_TAG} AS extract
 
 ARG SPOTFIRE_SERVER_VERSION
 ADD build/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64.tar.gz /tmp
-RUN java -jar /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool.jar
+RUN /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/jdk/bin/java -jar /tmp/spotfireserver-${SPOTFIRE_SERVER_VERSION}.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool.jar
 
 #
 # spotfire-config specific
@@ -33,10 +33,15 @@ LABEL org.opencontainers.image.title="spotfire/spotfire-config" \
 WORKDIR /opt/spotfire/
 
 COPY --from=extract --chown=spotfire:spotfire /tmp/spotfireserver-*.x86_64/tomcat/webapps/spotfire/tools/spotfireconfigtool spotfireconfigtool/
+COPY --from=extract --chown=spotfire:spotfire /tmp/spotfireserver-*.x86_64/jdk spotfireconfigtool/jdk/
 COPY --chown=spotfire:spotfire bootstrap.sh ./
 
-RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" \
-    && chmod +x kubectl && mv kubectl /usr/local/bin/
+ENV KUBECTL_VERSION=v1.36.3 \
+    KUBECTL_SHA256=ebbd080e7c2e275093b55915722043257eb24004363e20acb3c4d71919f88336
+
+RUN curl --fail --location --output /usr/local/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+    && echo "${KUBECTL_SHA256}  /usr/local/bin/kubectl" | sha256sum --check \
+    && chmod 0755 /usr/local/bin/kubectl
 
 ENV BOOTSTRAP_FILE=bootstrap.xml
 
@@ -48,5 +53,5 @@ USER spotfire
 # config.sh is a wrapper that enforces the End User Agreement, then calls the actual config tool
 RUN mkdir -p /opt/spotfire/bin
 COPY --chown=spotfire:spotfire eua-check.sh /opt/spotfire/bin/config.sh
-ENV PATH=$PATH:/opt/spotfire/bin
+ENV PATH=/opt/spotfire/spotfireconfigtool/jdk/bin:/opt/spotfire/bin:$PATH
 ENTRYPOINT ["config.sh"]

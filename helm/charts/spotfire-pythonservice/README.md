@@ -1,6 +1,6 @@
 # spotfire-pythonservice
 
-![Version: 5.0.4](https://img.shields.io/badge/Version-5.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.0.0](https://img.shields.io/badge/AppVersion-15.0.0-informational?style=flat-square)
+![Version: 6.0.0](https://img.shields.io/badge/Version-6.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.1.0](https://img.shields.io/badge/AppVersion-15.1.0-informational?style=flat-square)
 
 A Helm chart for Spotfire® Service for Python
 
@@ -16,7 +16,7 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 5.0.4 |
+| file://../spotfire-common | spotfire-common | 6.0.0 |
 
 ## Overview
 
@@ -268,17 +268,18 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
+| fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
-| fluentBitSidecar.image.repository | string | `"fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.3"` | The image tag to use for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
+| fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
-| fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. |
+| fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `nil` | The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy. |
 | image.pullSecrets | list | `[]` | Image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| image.tag | string | `"15.0.0-v7.0.4"` | The container image tag to use. |
+| image.tag | string | `"15.1.0-v8.0.0"` | The container image tag to use. |
 | kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -302,19 +303,23 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | podAnnotations."prometheus.io/port" | string | `"9080"` |  |
 | podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
 | podDeletionCost | object | Default values for Pod Deletion Cost, see values.yaml. | Pod Deletion Cost update configuration. See https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#pod-deletion-cost for more details. |
+| podDeletionCost.affinity | object | `{}` | Affinity for the podDeletionCost. |
 | podDeletionCost.costFormula | string | `"spotfire_service_queue_engines_inUse"` | An awk formula using the Prometheus metric names to calculate deletion cost. Missing or not found metrics default to 0. |
 | podDeletionCost.enabled | bool | `false` | Enable updating of pod deletion cost annotation. |
 | podDeletionCost.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the podDeletionCost. |
 | podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| podDeletionCost.image.tag | string | `"15.0.0-v7.0.4"` | Image tag for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.1.0-v8.0.0"` | Image tag for the podDeletionCost. |
 | podDeletionCost.minAbsDelta | string | `"1"` | Minimum numeric change to trigger a patch. |
+| podDeletionCost.nodeSelector | object | `{}` | Node selector for the podDeletionCost. |
+| podDeletionCost.podAnnotations | object | `{}` | Pod annotations for the podDeletionCost deployment. |
 | podDeletionCost.replicaCount | int | `1` | Number of replicas. |
 | podDeletionCost.resources | object | `{}` | Specifies the standard Kubernetes resource requests and/or limits |
 | podDeletionCost.sleepIntervalSeconds | string | `"120"` | How long to wait between checks (seconds). |
 | podDeletionCost.thresholdPercent | string | `"10"` | Minimum % change to trigger a patch. |
-| podSecurityContext | object | `{}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
+| podDeletionCost.tolerations | list | `[]` | Tolerations for the podDeletionCost. |
+| podSecurityContext | object | `{"seccompProfile":{"type":"RuntimeDefault"}}` | The Pod securityContext setting applies to all of the containers inside the Pod. |
 | readinessProbe.enabled | bool | `false` |  |
 | readinessProbe.failureThreshold | int | `10` |  |
 | readinessProbe.httpGet.path | string | `"/spotfire/readiness"` |  |
@@ -323,12 +328,13 @@ Please review the [release notes](https://github.com/spotfiresoftware/spotfire-c
 | readinessProbe.periodSeconds | int | `3` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
-| securityContext | object | `{}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
+| securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the service container. Overrides any securityContext setting on the Pod level. |
 | service.port | int | `9501` |  |
 | service.type | string | `"ClusterIP"` |  |
-| serviceAccount.annotations | object | `{}` |  |
-| serviceAccount.create | bool | `false` |  |
-| serviceAccount.name | string | `""` |  |
+| serviceAccount.annotations | object | `{}` | Annotations to add to the service account. Restart the service Pods after changing annotations. |
+| serviceAccount.automountServiceAccountToken | bool | `false` | Mount Kubernetes API credentials in the service Pods. |
+| serviceAccount.create | bool | `false` | Create the service account. Users upgrading with an externally managed account must set this to false. |
+| serviceAccount.name | string | `""` | The service account name. When create is false, the account must already exist; an empty name uses the namespace default. |
 | startupProbe.enabled | bool | `true` |  |
 | startupProbe.failureThreshold | int | `20` |  |
 | startupProbe.httpGet.path | string | `"/spotfire/started"` |  |

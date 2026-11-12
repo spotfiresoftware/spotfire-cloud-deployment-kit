@@ -42,6 +42,8 @@ For more information, see [Azure Architecture Center: Load-balancing options](ht
 Typically, you can use layer 4 load balancing for testing purposes or smaller deployments.
 You can use layer 7 load balancing for an enterprise deployment with advanced routing and SSL/TLS termination.
 
+**Security:** TLS is required before exposing Spotfire to the internet. The HTTP examples in this guide are for trusted development and testing only. Configure a certificate and HTTPS before production use.
+
 ### Alternative 1: Azure Load Balancer direct to AKS service
 
 For simpler scenarios, you might prefer to set up a network Load Balancer together with a K8s service of type `LoadBalancer`.
@@ -87,7 +89,7 @@ When you create a service of type `LoadBalancer` in AKS, Azure automatically pro
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
     (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire platform on Azure,
 with an Azure Load Balancer, using the default reverse proxy service (HAProxy).
@@ -212,8 +214,9 @@ You can do it directly from the `spotfire-platform` Helm chart.
         # -- Annotations for the ingress object. For valid annotations, see the documentation for your ingress controller.
         annotations:
           appgw.ingress.kubernetes.io/cookie-based-affinity: "true"
+          # Required for internet-facing deployments:
           # appgw.ingress.kubernetes.io/ssl-redirect: "true"
-          # appgw.ingress.kubernetes.io/appgw-ssl-certificate
+          # appgw.ingress.kubernetes.io/appgw-ssl-certificate: <certificate-name>
           # ...
     ```
 
@@ -247,7 +250,7 @@ You can do it directly from the `spotfire-platform` Helm chart.
 4. Add a record for the IP address to the DNS matching your configured domain name (as from the example, `spotfire.example.com`) in your DNS provider.
     (For testing purposes, you can just add it to your `/etc/hosts` file or to your local DNS resolver).
 
-5. Access the Spotfire web administration interface using your domain: http://spotfire.example.com.
+5. For trusted development and testing only, access the Spotfire web administration interface using your domain: http://spotfire.example.com.
 
 You have now deployed the Spotfire platform on Azure,
 using an Azure Application Gateway together with the Application Gateway Ingress Controller (AGIC).

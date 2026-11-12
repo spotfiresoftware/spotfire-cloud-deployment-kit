@@ -29,6 +29,16 @@ The Spotfire Server pod includes:
 
 This chart is tested to work with [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx), [Elasticsearch](https://www.elastic.co/elasticsearch/), [Prometheus](https://prometheus.io/) and [KEDA](https://keda.sh/).
 
+## Credential handling
+
+Use the `*ExistingSecret` values for database, administrator, Action Log, and
+encryption passwords in production. These references keep password values out
+of Helm values and workload manifests. Helm stores passwords supplied as values
+in release metadata and the chart copies them to its managed Kubernetes Secret.
+
+The `toolPassword` value has been removed. The chart automatically generates
+and preserves this internal configuration-tool password.
+
 ## Prerequisites
 
 - Familiarity with Kubernetes, containers, and Helm chart concepts and usage.
@@ -258,7 +268,7 @@ Example: Running custom `spotfire-config` tool tasks with an environment variabl
     ```bash
     kubectl create secret generic spotfire-user-credentials \
       --namespace="<NAMESPACE>" \
-      --from-literal=NEW_USER_PASSWORD="<YOUR-USER-PASSWORD>"
+      --from-literal=EXAMPLE_USER_PASSWORD="<YOUR-USER-PASSWORD>"
     ```
 
 2. Add the following to your `values.yaml` and run `helm install` or `helm upgrade`:
@@ -280,21 +290,31 @@ Example: Running custom `spotfire-config` tool tasks with an environment variabl
             echo "Scripts are executed in order. This one runs after the one above."
 
       commandScripts:
-        - name: create_user
-          script: >-
-            create-user
-            --bootstrap-config="${BOOTSTRAP_FILE}"
-            --tool-password="${TOOL_PASSWORD}"
-            --username="<SPOTFIRE_USERNAME>"
-            --password="${NEW_USER_PASSWORD}"
-            --ignore-existing=true
+        - name: create_example_user
+          script: |
+            create-user \
+              --bootstrap-config="${BOOTSTRAP_FILE}" \
+              --tool-password="${TOOL_PASSWORD}" \
+              --username="example-user" \
+              --password="${EXAMPLE_USER_PASSWORD}" \
+              --ignore-existing=true
 
-    extraEnvVarsSecret: spotfire-user-credentials
+    configJob:
+      extraEnvVars:
+        - name: EXAMPLE_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: spotfire-user-credentials
+              key: EXAMPLE_USER_PASSWORD
     ```
+
+Command scripts run in the configuration job, so configure its environment with `configJob.extraEnvVars`, `configJob.extraEnvVarsSecret`, or `configJob.extraEnvVarsCM`.
+
+For bulk user management, use the Spotfire Server [`export-users`](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/export-users.html) and [`import-users`](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/import-users.html) commands instead of adding multiple `create-user` commands and credentials to Helm values.
 
 For more information about `config.sh` scripts, see the Spotfire Server documentation about [scripting a configuration](https://docs.tibco.com/pub/spotfire_server/latest/doc/html/TIB_sfire_server_tsas_admin_help/server/topics/scripting_a_configuration.html).
 
-If your scripts require additional environment variables, use `extraEnvVarsSecret` or `extraEnvVarsCM` to add environment variables from existing Secrets or ConfigMaps.
+If your scripts require additional environment variables, use `configJob.extraEnvVars`, `configJob.extraEnvVarsSecret`, or `configJob.extraEnvVarsCM`.
 
 ### Managing configuration on helm install or upgrade
 

@@ -10,9 +10,10 @@ database:
   create-db:
     enabled: true
     adminUsername: postgres
-    adminPassword: adminpassword
+    adminPassword: 123456
     databaseUrl: jdbc://server/
 configuration:
+  encryptionPassword: 123456
   site:
     publicAddress: http://localhost/
   actionLog:
@@ -21,11 +22,11 @@ configuration:
     file:
       enabled: false
     database:
-      enabled: false
+      enabled: true
       create-actionlogdb:
-        enabled: false
+        enabled: true
         databaseUrl: "actionlogdbAdminurl"
-        adminPassword: "actionlogdbpassword25"
+        adminPassword: 123456
         doNotCreateUser: false
       config-action-log-database-logger:
         databaseUrl: "actionlogdburl"
@@ -34,9 +35,26 @@ configuration:
         additionalOptions: {}
 haproxy:
   enabled: false
+networkPolicy:
+  registration:
+    additionalAllowedFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: monitoring
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: prometheus
+  logForwarder:
+    additionalAllowedFrom:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: logging
+        podSelector:
+          matchLabels:
+            app.kubernetes.io/name: external-log-sender
 livenessProbe:
   enabled: false
 log-forwarder:
-  enabled: false
+  enabled: true
 startupProbe:
   enabled: false

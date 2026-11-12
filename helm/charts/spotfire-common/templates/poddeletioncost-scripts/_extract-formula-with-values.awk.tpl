@@ -203,6 +203,11 @@ function parse_metric_line(line,    rest, rb) {
     }
 
     line_value = substr(rest, RSTART, RLENGTH)
+    # Metric values are interpolated into the configured formula, so only
+    # bounded decimal literals may replace the default value of 0.
+    if (line_value !~ /^[+-]?[0-9]{1,9}([.][0-9]{1,9})?$/) {
+        return 0
+    }
     return 1
 }
 

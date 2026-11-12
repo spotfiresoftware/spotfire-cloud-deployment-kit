@@ -3,9 +3,13 @@ database:
     databaseUrl: "jdbc:postgresql://server:5432/spotfire"
     driverClass: "org.postgresql.Driver"
     username: "postgres"
-    password: "postgresPassword"
+    passwordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "spotfire-database-password"
   create-db:
     adminUsername: "postgres"
-    adminPassword: "postgresPassword"
+    adminPasswordExistingSecret:
+      name: "<spotfire-database-credentials>"
+      key: "database-admin-password"
     databaseUrl: "jdbc:postgresql://server:5432/"
     doNotCreateUser: true

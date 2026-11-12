@@ -39,6 +39,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "spotfire-server.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       containers:
         - name: config-job
           command: ["/bin/sh","-c"]
@@ -116,21 +117,25 @@ spec:
             - name: {{ default "deployments" .Values.volumes.deployments.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/deployments
               subPath: {{ .Values.volumes.deployments.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.certificates.existingClaim }}
             - name: {{ .Values.volumes.certificates.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/certs
               subPath: {{ .Values.volumes.certificates.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.customExt.existingClaim }}
             - name: {{ .Values.volumes.customExt.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/custom-ext
               subPath: {{ .Values.volumes.customExt.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- if .Values.volumes.customExtInformationservices.existingClaim }}
             - name: {{ .Values.volumes.customExtInformationservices.existingClaim }}-volume
               mountPath: /opt/spotfire/spotfireconfigtool/custom-ext-informationservices
               subPath: {{ .Values.volumes.customExtInformationservices.subPath | quote }}
+              readOnly: true
             {{- end }}
             {{- with .Values.configJob.extraVolumeMounts }}
               {{- toYaml . | nindent 12 }}

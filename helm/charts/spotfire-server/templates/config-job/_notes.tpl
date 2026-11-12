@@ -11,7 +11,7 @@ Note: Database upgrade is not enabled. Set .Values.database.upgrade to true to e
 - Spotfire database credentials
 
   # Database password for "{{ .Values.database.bootstrap.username }}":
-  export SPOTFIREDB_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfiredatabase.secret.name" . }} -o jsonpath="{.data.SPOTFIREDB_PASSWORD}" | base64 --decode)
+  export SPOTFIREDB_PASSWORD=$(kubectl get secrets --namespace {{ .Release.Namespace }} {{ include "spotfire-server.spotfiredatabase.secret.name" . }} -o jsonpath="{.data.{{ include "spotfire-server.spotfiredatabase.secret.passwordkey" . }}}" | base64 --decode)
 
 - Application URL
 {{ if .Values.ingress.enabled }}
@@ -37,6 +37,14 @@ Note: Database upgrade is not enabled. Set .Values.database.upgrade to true to e
 {{- end }}
 
   # The server backend address is {{ include "spotfire-server.fullname" . }}
+
+{{- if .Values.networkPolicy.enabled }}
+
+ - Registration network policy
+
+   # TCP 9080 registration protection requires a network plugin that enforces Kubernetes NetworkPolicies.
+   # Without one, this policy is accepted but TCP 9080 remains open.
+{{- end }}
 
 {{- if .Values.cliPod.enabled }}
 

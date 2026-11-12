@@ -4,11 +4,17 @@ SHELL          = /bin/bash
 
 PACKAGE_DIR   ?= packages
 REPO_URL      ?= # http://example.com/helm-repo/
+HELM_REPOSITORY_CONFIG ?= $(CURDIR)/$(PACKAGE_DIR)/repositories.yaml
+HELM_REPOSITORY_CACHE  ?= $(CURDIR)/$(PACKAGE_DIR)/repository-cache
+HELM_REPOSITORY_SETUP  ?= $(PACKAGE_DIR)/repositories.ready
+
+export HELM_REPOSITORY_CONFIG HELM_REPOSITORY_CACHE
 
 include ../versions.mk
 
 # Charts to package
 CHARTS := spotfire-common spotfire-server spotfire-webplayer spotfire-automationservices spotfire-terrservice spotfire-pythonservice spotfire-rservice spotfire-platform
+CHARTS_WITH_DEPENDENCIES := $(filter-out spotfire-common,$(CHARTS))
 
 # Define package file names for each chart
 SPOTFIRE_SERVER_TGZ             := $(PACKAGE_DIR)/spotfire-server-$(SPOTFIRE_SERVER_CHART_VERSION).tgz
@@ -23,7 +29,7 @@ SPOTFIRE_COMMON_TGZ             := $(PACKAGE_DIR)/spotfire-common-$(SPOTFIRE_COM
 CHART_PACKAGES = $(SPOTFIRE_SERVER_TGZ) $(SPOTFIRE_WEBPLAYER_TGZ) $(SPOTFIRE_AUTOMATIONSERVICES_TGZ) $(SPOTFIRE_TERRSERVICE_TGZ) $(SPOTFIRE_PYTHONSERVICE_TGZ) $(SPOTFIRE_RSERVICE_TGZ) $(SPOTFIRE_PLATFORM_TGZ)
 
 # Define phony targets for each chart, $(CHARTS) to allow running 'make spotfire-server' etc.
-.PHONY: build $(CHARTS) clean list push push-% documentation
+.PHONY: build $(CHARTS) clean list push push-% documentation update-chart-locks
 
 # Main target to package all charts and update index.yaml
 # Try -j to parallelize packaging but be aware of issues in helm - https://github.com/helm/helm/issues/10735
@@ -40,6 +46,7 @@ $(SPOTFIRE_TERRSERVICE_TGZ)        : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/
 $(SPOTFIRE_PYTHONSERVICE_TGZ)      : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-pythonservice/)
 $(SPOTFIRE_RSERVICE_TGZ)           : $(SPOTFIRE_COMMON_TGZ) $(shell find charts/spotfire-rservice/)
 $(SPOTFIRE_PLATFORM_TGZ)           : $(SPOTFIRE_COMMON_TGZ) $(SPOTFIRE_SERVER_TGZ) $(SPOTFIRE_WEBPLAYER_TGZ) $(SPOTFIRE_AUTOMATIONSERVICES_TGZ) $(SPOTFIRE_TERRSERVICE_TGZ) $(SPOTFIRE_PYTHONSERVICE_TGZ) $(SPOTFIRE_RSERVICE_TGZ) $(shell find charts/spotfire-platform/)
+$(SPOTFIRE_SERVER_TGZ)             : $(HELM_REPOSITORY_SETUP)
 
 # Alias for tgz
 spotfire-common : $(SPOTFIRE_COMMON_TGZ)
@@ -55,7 +62,18 @@ spotfire-platform : $(SPOTFIRE_PLATFORM_TGZ)
 # e.g. chart-name for '$(PACKAGE_DIR)/spotfire-server-1.0.0.tgz' becomes 'spotfire-server'
 $(CHART_PACKAGES) $(SPOTFIRE_COMMON_TGZ) : chart-name = $(shell basename $@ .tgz | sed 's/-[0-9]*\.[0-9]*\.[0-9]*//')
 $(CHART_PACKAGES) $(SPOTFIRE_COMMON_TGZ) :
-	helm package -u charts/$(chart-name) --destination $(PACKAGE_DIR)
+	$(if $(filter $(chart-name),$(CHARTS_WITH_DEPENDENCIES)),test -f charts/$(chart-name)/Chart.lock)
+	helm dependency build charts/$(chart-name)
+	helm package charts/$(chart-name) --destination $(PACKAGE_DIR)
+
+$(HELM_REPOSITORY_SETUP):
+	mkdir -p $(dir $@) $(HELM_REPOSITORY_CACHE)
+	helm repo add fluent https://fluent.github.io/helm-charts
+	helm repo add haproxytech https://haproxytech.github.io/helm-charts
+	touch $@
+
+update-chart-locks: $(HELM_REPOSITORY_SETUP)
+	$(foreach chart,$(CHARTS_WITH_DEPENDENCIES),helm dependency update charts/$(chart);)
 
 push : HELM_OCI_REGISTRY ?= $(error HELM_OCI_REGISTRY must be set e.g. oci://registry.example.com/)
 push : $(addprefix push-,$(CHARTS))
@@ -72,7 +90,6 @@ clean :
 	rm -rf -- $(PACKAGE_DIR)/
 	find . -name tmpcharts -type d -exec rm -rf -- {} \;
 	find . -wholename "*/charts/*.tgz" -exec rm -- {} \;
-	find . -iname "*.lock" -type f -exec rm -rf -- {} \;
 
 # Test targets for each chart
 # Charts will rebuild automatically before tests, but build them manually once first.

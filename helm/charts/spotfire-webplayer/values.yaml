@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-webplayer
   # -- The container image tag to use.
-  tag: "15.0.0-HF-004-v7.0.4"
+  tag: "15.1.0-v8.0.0"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -40,22 +40,24 @@ image:
 fluentBitSidecar:
   image:
     # -- The image repository for fluent-bit logging sidecar.
-    repository: fluent/fluent-bit
-    # -- The image tag to use for fluent-bit logging sidecar.
+    repository: cr.fluentbit.io/fluent/fluent-bit
+    # -- The release tag corresponding to the pinned fluent-bit logging sidecar digest.
     tag: "4.2.3"
+    # -- The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image.
+    digest: sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
-  # -- The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level.
-  securityContext: {}
-    # # -- Enable this if running as privileged.
-    # privileged: false
-    # # -- Enable this if running as NonRoot User.
-    # runAsNonRoot: true
-    # # -- User ID for the Container.
-    # runAsUser: 1000
-    # # -- Group ID for the Container.
-    # runAsGroup: 0
+  # -- The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level.
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    privileged: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
 
   # -- The resources setting for fluent-bit sidecar container.
   resources: {}
@@ -74,12 +76,13 @@ nameOverride: ""
 fullnameOverride: ""
 
 serviceAccount:
-  # Specifies whether a service account should be created.
+  # -- Create the service account. Users upgrading with an externally managed account must set this to false.
   create: false
-  # Annotations to add to the service account.
+  # -- Mount Kubernetes API credentials in the service Pods.
+  automountServiceAccountToken: false
+  # -- Annotations to add to the service account. Restart the service Pods after changing annotations.
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, then a name is generated using the fullname template.
+  # -- The service account name. When create is false, the account must already exist; an empty name uses the namespace default.
   name: ""
 
 podAnnotations:
@@ -88,24 +91,19 @@ podAnnotations:
   prometheus.io/scrape: "true"
 
 # -- The Pod securityContext setting applies to all of the containers inside the Pod.
-podSecurityContext: {}
-  # # -- Owner User ID for the volume and any file created in that volume.
-  # fsGroup: 1000
-  # # -- User ID for the Pod.
-  # runAsUser: 1000
-  # # -- Group ID for the Pod.
-  # runAsGroup: 0
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
 
 # -- The securityContext setting for the service container. Overrides any securityContext setting on the Pod level.
-securityContext: {}
-  # # -- Enable this if running as privileged.
-  # privileged: false
-  # # -- Enable this if running as NonRoot User.
-  # runAsNonRoot: true
-  # # -- User ID for the Container.
-  # runAsUser: 1000
-  # # -- Group ID for the Container.
-  # runAsGroup: 0
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  privileged: false
+  runAsNonRoot: true
+  runAsUser: 1000
 
 service:
   type: ClusterIP
@@ -189,17 +187,29 @@ podDeletionCost:
   # -- Number of replicas.
   replicaCount: 1
 
+  # -- Pod annotations for the podDeletionCost deployment.
+  podAnnotations: {}
+
   image:
     # -- Image registry for the podDeletionCost.
     registry:
     # -- Image repository for the podDeletionCost.
     repository: spotfire/spotfire-config
     # -- Image tag for the podDeletionCost.
-    tag: "15.0.0-v7.0.4"
+    tag: "15.1.0-v8.0.0"
     # -- Image pull policy for the podDeletionCost.
     pullPolicy: IfNotPresent
     # -- Image pull secrets for the podDeletionCost.
     pullSecrets: []
+
+  # -- Node selector for the podDeletionCost.
+  nodeSelector: {}
+
+  # -- Tolerations for the podDeletionCost.
+  tolerations: []
+
+  # -- Affinity for the podDeletionCost.
+  affinity: {}
 
   # -- Specifies the standard Kubernetes resource requests and/or limits
   resources: {}

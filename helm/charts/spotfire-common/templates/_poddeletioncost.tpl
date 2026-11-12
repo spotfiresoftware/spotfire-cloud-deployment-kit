@@ -102,11 +102,26 @@ spec:
     metadata:
       annotations:
         checksum/poddeletioncost-scripts: {{ include "spotfire-common.poddeletioncost.configMap" . | sha256sum }}
+        {{- with .Values.podDeletionCost.podAnnotations }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "spotfire-common.spotfire-service.labels" (mergeOverwrite (dict) . (dict "componentName" $componentName)) | nindent 8 }}
     spec:
       {{- include "spotfire-common.images.imagePullSecrets" (dict "image" .Values.podDeletionCost.image "globalPath" .Values.global.spotfire) | nindent 6 }}
       serviceAccountName: {{ include "spotfire-common.poddeletioncost.name" . }}
+      {{- with .Values.podDeletionCost.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podDeletionCost.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podDeletionCost.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: {{ $updaterContainerName }}
         image: "{{ include "spotfire-common.images.image" (dict "image" .Values.podDeletionCost.image "globalPath" .Values.global.spotfire) }}"

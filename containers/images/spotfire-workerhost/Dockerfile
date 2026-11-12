@@ -3,15 +3,9 @@ ARG SPOTFIRE_NODEMANAGER_IMAGE_TAG
 ARG SPOTFIRE_NODEMANAGER_VERSION
 
 #
-# spotfire-workerhost specific
+# Common Workerhost dependencies
 #
-FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG}
-
-# Reuses most labels from nodemanager
-LABEL org.opencontainers.image.title="spotfire/spotfire-workerhost" \
-    org.opencontainers.image.description="This container image is an extension of the Spotfire® node manager image with common software dependencies required by Spotfire services using .NET."
-
-# Temporarilty change from spotfire to root in order to install additional packages
+FROM spotfire/spotfire-nodemanager:${SPOTFIRE_NODEMANAGER_IMAGE_TAG} AS workerhost-base
 USER root
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -67,6 +61,33 @@ RUN apt-get install -y --no-install-recommends wget ca-certificates \
      aspnetcore-runtime-10.0 \
   && apt-get clean all
 
+#
+# dotnet-dump installer
+#
+FROM workerhost-base AS dotnet-dump-installer
+
+ARG INSTALL_DOTNET_DUMP=Y
+ARG DOTNET_DUMP_VERSION=9.0.661903
+
+COPY NuGet.Config /tmp/NuGet.Config
+RUN mkdir -p /out/tools \
+  && if [ "${INSTALL_DOTNET_DUMP}" = "Y" ]; then \
+      apt-get update \
+      && apt-get install -y --no-install-recommends dotnet-sdk-10.0 \
+      && dotnet tool install --tool-path /out/tools --version "${DOTNET_DUMP_VERSION}" --configfile /tmp/NuGet.Config dotnet-dump; \
+    else \
+      echo "Skipping dotnet-dump installation (INSTALL_DOTNET_DUMP=${INSTALL_DOTNET_DUMP})"; \
+    fi
+
+#
+# spotfire-workerhost specific
+#
+FROM workerhost-base
+
+# Reuses most labels from nodemanager
+LABEL org.opencontainers.image.title="spotfire/spotfire-workerhost" \
+    org.opencontainers.image.description="This container image is an extension of the Spotfire® node manager image with common software dependencies required by Spotfire services using .NET."
+
 # Enable libjemalloc2
 ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
@@ -74,19 +95,10 @@ ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 ARG INSTALL_ODBC_DRIVERS=Y
 ARG INSTALL_POSTGRES_DRIVER=Y
 ARG INSTALL_MARIADB_DRIVER=Y
-ARG INSTALL_DOTNET_DUMP=Y
 
 COPY --chown=spotfire:spotfire scripts/ ./scripts/
 RUN scripts/install-odbc-drivers.sh
 
-# Install dotnet-dump CLI tool (enabled by default)
-RUN if [ "${INSTALL_DOTNET_DUMP}" = "Y" ]; then \
-      mkdir -p /opt/spotfire/.dotnet/tools \
-      && wget -O /opt/spotfire/.dotnet/tools/dotnet-dump https://aka.ms/dotnet-dump/linux-x64 \
-      && chmod +x /opt/spotfire/.dotnet/tools/dotnet-dump \
-      && chown -R spotfire:spotfire /opt/spotfire/.dotnet; \
-    else \
-      echo "Skipping dotnet-dump installation (INSTALL_DOTNET_DUMP=${INSTALL_DOTNET_DUMP})"; \
-    fi
+COPY --from=dotnet-dump-installer --chown=spotfire:spotfire /out/tools/ /opt/spotfire/.dotnet/tools/
 
 USER spotfire

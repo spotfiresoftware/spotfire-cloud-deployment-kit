@@ -3,6 +3,9 @@
 # Exit on error, undefined variable or pipe failure.
 set -euo pipefail
 
+# Only unpack SDN and SPK files from trusted sources. This example runs as root
+# and deploys their contents as Web Player runtime modules.
+
 function print_usage() {
   echo "Usage: $0 <input file> [<input file> ...] <output directory>"
   echo ""

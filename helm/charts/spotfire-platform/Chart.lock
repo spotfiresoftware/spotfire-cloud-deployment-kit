@@ -1,0 +1,24 @@
+dependencies:
+- name: spotfire-server
+  repository: file://../spotfire-server/
+  version: 6.0.0
+- name: spotfire-webplayer
+  repository: file://../spotfire-webplayer/
+  version: 6.0.0
+- name: spotfire-automationservices
+  repository: file://../spotfire-automationservices/
+  version: 6.0.0
+- name: spotfire-terrservice
+  repository: file://../spotfire-terrservice/
+  version: 6.0.0
+- name: spotfire-rservice
+  repository: file://../spotfire-rservice/
+  version: 6.0.0
+- name: spotfire-pythonservice
+  repository: file://../spotfire-pythonservice/
+  version: 6.0.0
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 16.7.27
+digest: sha256:e1a2b75107b3bbb9c659d1dc9f742048b0f217b7959b7ce2e3a47b5b36ba8c67
+generated: "2026-08-13T19:48:49.076170816+02:00"

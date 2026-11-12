@@ -1,7 +1,7 @@
 #
-# spotfire-base container for latest released stable Debian
+# spotfire-base container for pinned Debian release
 #
-ARG DEBIAN_IMAGE_TAG=13-slim
+ARG DEBIAN_IMAGE_TAG=13.6-slim@sha256:3a39a0592364683e6bab97937b72cad5a8fa6dcbbee90edb3bb48c7f8e94f258
 
 #
 # common java-base
@@ -28,13 +28,6 @@ RUN apt-get update \
      libjemalloc2 \
      libmimalloc3 \
      curl \
-  && apt-get clean all
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y wget apt-transport-https gpg \
-  && wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null \
-  && echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" | tee /etc/apt/sources.list.d/adoptium.list \
-  && DEBIAN_FRONTEND=noninteractive apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y temurin-21-jdk --no-install-recommends \
   && apt-get clean all
 
 RUN groupadd -g 1000 spotfire \

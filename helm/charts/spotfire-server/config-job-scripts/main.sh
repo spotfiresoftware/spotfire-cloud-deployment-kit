@@ -110,7 +110,8 @@ log_level="${LOG_LEVEL:-}"
 if [ "${log_level^^}" = "DEBUG" ] ; then
     set -v
 elif [ "${log_level^^}" = "TRACE" ] ; then
-    set -x
+    # xtrace expands command arguments, which can expose credentials in pod logs.
+    set -v
 fi
 
 # Version information

@@ -39,17 +39,26 @@ You can package the provided charts, one by one, by following these steps from e
     cd <this-repo>/helm/charts/<spotfire-chart>
     ```
 
-2. Update the chart dependencies:
+2. For charts with HTTP dependencies, add the required repositories:
     ```bash
-    helm dependency update .
+    helm repo add fluent https://fluent.github.io/helm-charts
+    helm repo add haproxytech https://haproxytech.github.io/helm-charts
     ```
 
-3. Package the chart:
+3. Build the chart dependencies from the committed `Chart.lock` file:
+    ```bash
+    helm dependency build .
+    ```
+
+4. Package the chart:
     ```bash
     helm package . -d <helm-charts-destination-path>
     ```
 
 Repeat for each of the charts.
+
+To deliberately re-resolve dependencies, run `make update-chart-locks` from the repository root.
+Review and commit every resulting `Chart.lock` change before building and packaging.
 
 **Note**: The helm chart packages have dependencies; check the provided `Makefile` for more details.
 

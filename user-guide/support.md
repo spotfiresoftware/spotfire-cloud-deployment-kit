@@ -30,6 +30,11 @@ When reporting issues or seeking help, make sure to collect as much relevant inf
 - Any other relevant information.
 
 The script [generate-troubleshooting-bundle.sh](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/blob/main/utilities/generate-troubleshooting-bundle.sh) can be used as a starting point when collecting information from a Spotfire Helm deployment.
+By default, the bundle does not collect Kubernetes Secret resources, but it
+does export user-supplied Helm values unchanged. Use the chart's
+`*ExistingSecret` values for credentials to keep password values out of that
+export. Do not include Secrets with the bundle options unless support
+specifically requests them.
 
 In some scenarios, there might be a need to [collect logs during an extended period of time](examples/logging-with-efk.md#collect-logs-temporarily-eg-for-troubleshooting-with-an-additional-forwarding-target).
 
@@ -40,4 +45,3 @@ For issues related to the cloud native environment and third party products, see
 You are welcome to raise ideas and improvements related to the [Spotfire Cloud Deployment Kit](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit) in the [GitHub Issues tab](https://github.com/spotfiresoftware/spotfire-cloud-deployment-kit/issues).
 
 For general improvements related to the Spotfire products, use the [Ideas portal](https://spotfi.re/ideas).
-
