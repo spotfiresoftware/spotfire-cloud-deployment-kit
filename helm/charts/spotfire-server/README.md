@@ -1,6 +1,6 @@
 # spotfire-server
 
-![Version: 6.0.0](https://img.shields.io/badge/Version-6.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.1.0](https://img.shields.io/badge/AppVersion-15.1.0-informational?style=flat-square)
+![Version: 6.0.1](https://img.shields.io/badge/Version-6.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 15.1.0](https://img.shields.io/badge/AppVersion-15.1.0-informational?style=flat-square)
 
 Deploy Spotfire® Server on Kubernetes using Helm. This chart handles database schema setup, autoscaling, persistent storage, ingress routing, and configuration out of the box.
 
@@ -16,8 +16,8 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-common | spotfire-common | 6.0.0 |
-| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.55.* |
+| file://../spotfire-common | spotfire-common | 6.0.1 |
+| https://fluent.github.io/helm-charts | log-forwarder(fluent-bit) | 0.58.* |
 | https://haproxytech.github.io/helm-charts | haproxy | 1.27.* |
 
 ## Overview
@@ -773,7 +773,7 @@ For more details, see for example:
 | cliPod.image.pullSecrets | list | `[]` |  |
 | cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| cliPod.image.tag | string | `"15.1.0-v8.0.0"` | The spotfireConfig container image tag to use. |
+| cliPod.image.tag | string | `"15.1.0-v8.0.1"` | The spotfireConfig container image tag to use. |
 | cliPod.logLevel | string | `""` | Set to TRACE to increase log level. Defaults to DEBUG if unset. |
 | cliPod.nodeSelector | object | `{}` |  |
 | cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -793,7 +793,7 @@ For more details, see for example:
 | configJob.image.pullSecrets | list | `[]` |  |
 | configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| configJob.image.tag | string | `"15.1.0-v8.0.0"` | The spotfireConfig container image tag to use. |
+| configJob.image.tag | string | `"15.1.0-v8.0.1"` | The spotfireConfig container image tag to use. |
 | configJob.logLevel | string | `""` | Set verbosity for debugging config-job execution. Empty (default): Standard output with DEBUG logging from the configuration tool. `DEBUG`: Shows raw bash script lines + DEBUG-level configuration tool logging. `TRACE`: Shows raw bash script lines + TRACE-level configuration tool logging. |
 | configJob.nodeSelector | object | `{}` |  |
 | configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -829,7 +829,7 @@ For more details, see for example:
 | configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| configuration.deployment.defaultDeployment.image.tag | string | `"15.1.0-v8.0.0"` | The container image tag to use. |
+| configuration.deployment.defaultDeployment.image.tag | string | `"15.1.0-HF-001-v8.0.1"` | The container image tag to use. |
 | configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -874,17 +874,17 @@ For more details, see for example:
 | extraInitContainers | list | `[]` | Additional init containers to add to Spotfire server pod. More info: `kubectl explain deployment.spec.template.spec.initContainers` |
 | extraVolumeMounts | list | `[]` | Extra volumeMounts for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts` |
 | extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
-| fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | haproxy.enabled | bool | `true` |  |
-| haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
+| haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.26@sha256:f1ce627668cb2a195a55a5faa4689540edac89eaa69abb95ca843d522f2771a1"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
 | haproxy.image.repository | string | `"haproxytech/haproxy-alpine"` | overrides the image repository. |
-| haproxy.image.tag | string | `"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
+| haproxy.image.tag | string | `"3.2.26@sha256:f1ce627668cb2a195a55a5faa4689540edac89eaa69abb95ca843d522f2771a1"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
 | haproxy.includes | object | `{}` |  |
 | haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | haproxy.kind | string | `"Deployment"` |  |
@@ -932,7 +932,7 @@ For more details, see for example:
 | image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| image.tag | string | `"15.1.0-v8.0.0"` | The container image tag to use. |
+| image.tag | string | `"15.1.0-v8.0.1"` | The container image tag to use. |
 | ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -965,10 +965,10 @@ For more details, see for example:
 | log-forwarder.extraPorts[1].name | string | `"forward"` |  |
 | log-forwarder.extraPorts[1].port | int | `24224` |  |
 | log-forwarder.extraPorts[1].protocol | string | `"TCP"` |  |
-| log-forwarder.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
+| log-forwarder.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
 | log-forwarder.image.pullPolicy | string | `"IfNotPresent"` |  |
 | log-forwarder.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for log-forwarder. |
-| log-forwarder.image.tag | string | `"4.2.3"` | The image tag to use for log-forwarder. |
+| log-forwarder.image.tag | string | `"5.1.5"` | The image tag to use for log-forwarder. |
 | log-forwarder.kind | string | `"Deployment"` |  |
 | log-forwarder.labels."app.kubernetes.io/component" | string | `"logging"` |  |
 | log-forwarder.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
@@ -998,7 +998,7 @@ For more details, see for example:
 | podDeletionCost.image.pullSecrets | list | `[]` | Image pull secrets for the podDeletionCost. |
 | podDeletionCost.image.registry | string | `nil` | Image registry for the podDeletionCost. |
 | podDeletionCost.image.repository | string | `"spotfire/spotfire-config"` | Image repository for the podDeletionCost. |
-| podDeletionCost.image.tag | string | `"15.1.0-v8.0.0"` | Image tag for the podDeletionCost. |
+| podDeletionCost.image.tag | string | `"15.1.0-v8.0.1"` | Image tag for the podDeletionCost. |
 | podDeletionCost.minAbsDelta | string | `"5"` | Minimum numeric change to trigger a patch. |
 | podDeletionCost.nodeSelector | object | `{}` | Node selector for the podDeletionCost. |
 | podDeletionCost.podAnnotations | object | `{}` | Pod annotations for the podDeletionCost deployment. |
