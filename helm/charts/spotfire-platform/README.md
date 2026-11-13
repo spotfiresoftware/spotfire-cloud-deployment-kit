@@ -1,6 +1,6 @@
 # spotfire-platform
 
-![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6-v4.4.0](https://img.shields.io/badge/AppVersion-14.6--v4.4.0-informational?style=flat-square)
+![Version: 2.4.1](https://img.shields.io/badge/Version-2.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 14.6-v4.4.1](https://img.shields.io/badge/AppVersion-14.6--v4.4.1-informational?style=flat-square)
 
 This is an umbrella chart for Spotfire, a chart that groups several Spotfire services together. It allows you to deploy, upgrade, and manage a Spotfire environment with optional Spotfire services.
 
@@ -10,12 +10,12 @@ Kubernetes: `>=1.24.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-| file://../spotfire-automationservices/ | spotfire-automationservices | 2.4.0 |
-| file://../spotfire-pythonservice/ | spotfire-pythonservice | 2.4.0 |
-| file://../spotfire-rservice/ | spotfire-rservice | 2.4.0 |
-| file://../spotfire-server/ | spotfire-server | 2.4.0 |
-| file://../spotfire-terrservice/ | spotfire-terrservice | 2.4.0 |
-| file://../spotfire-webplayer/ | spotfire-webplayer | 2.4.0 |
+| file://../spotfire-automationservices/ | spotfire-automationservices | 2.4.1 |
+| file://../spotfire-pythonservice/ | spotfire-pythonservice | 2.4.1 |
+| file://../spotfire-rservice/ | spotfire-rservice | 2.4.1 |
+| file://../spotfire-server/ | spotfire-server | 2.4.1 |
+| file://../spotfire-terrservice/ | spotfire-terrservice | 2.4.1 |
+| file://../spotfire-webplayer/ | spotfire-webplayer | 2.4.1 |
 | https://charts.bitnami.com/bitnami | postgresql | 16.7.* |
 
 ## Overview
@@ -141,10 +141,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-automationservices.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-automationservices.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
-| spotfire-automationservices.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-automationservices.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-automationservices.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-automationservices.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-automationservices.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-automationservices.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-automationservices.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-automationservices.fullnameOverride | string | `""` |  |
@@ -152,7 +152,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-automationservices.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-automationservices.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-automationservices.image.repository | string | `"spotfire/spotfire-automationservices"` | The spotfire-server image repository. |
-| spotfire-automationservices.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-automationservices.image.tag | string | `"14.6.4-HF-019-v4.4.1"` | The container image tag to use. |
 | spotfire-automationservices.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":0,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local","spotfireServerHelmRelease":null},"threshold":8,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-automationservices.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-automationservices.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -223,10 +223,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-pythonservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-pythonservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
-| spotfire-pythonservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-pythonservice.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-pythonservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-pythonservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-pythonservice.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-pythonservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-pythonservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-pythonservice.fullnameOverride | string | `""` |  |
@@ -234,7 +234,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-pythonservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-pythonservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-pythonservice.image.repository | string | `"spotfire/spotfire-pythonservice"` | The spotfire-server image repository. |
-| spotfire-pythonservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-pythonservice.image.tag | string | `"14.6.4-v4.4.1"` | The container image tag to use. |
 | spotfire-pythonservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-pythonservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-pythonservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -303,10 +303,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-rservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-rservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
-| spotfire-rservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-rservice.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-rservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-rservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-rservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-rservice.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-rservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-rservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-rservice.fullnameOverride | string | `""` |  |
@@ -314,7 +314,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-rservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-rservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides the global.spotfire.image.registry value. |
 | spotfire-rservice.image.repository | string | `"spotfire/spotfire-rservice"` | The spotfire-server image repository. |
-| spotfire-rservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-rservice.image.tag | string | `"14.6.4-v4.4.1"` | The container image tag to use. |
 | spotfire-rservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments/ for more details. |
 | spotfire-rservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-rservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -387,7 +387,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.cliPod.image.pullSecrets | list | `[]` |  |
 | spotfire-server.cliPod.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides global.spotfire.image.registry value. |
 | spotfire-server.cliPod.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.cliPod.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
+| spotfire-server.cliPod.image.tag | string | `"14.6.4-v4.4.1"` | The spotfireConfig container image tag to use. |
 | spotfire-server.cliPod.logLevel | string | `""` | Set to DEBUG or TRACE to increase log level. Defaults to INFO if unset. |
 | spotfire-server.cliPod.nodeSelector | object | `{}` |  |
 | spotfire-server.cliPod.podAnnotations | object | `{}` | Podannotations for cliPod |
@@ -406,7 +406,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configJob.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configJob.image.registry | string | `nil` | The image registry for spotfireConfig. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configJob.image.repository | string | `"spotfire/spotfire-config"` | The spotfireConfig image repository. |
-| spotfire-server.configJob.image.tag | string | `"14.6.4-v4.4.0"` | The spotfireConfig container image tag to use. |
+| spotfire-server.configJob.image.tag | string | `"14.6.4-v4.4.1"` | The spotfireConfig container image tag to use. |
 | spotfire-server.configJob.logLevel | string | `""` | Set to `DEBUG` to show raw bash script lines, or `TRACE` to also enable trace-level configuration tool logging. Defaults to `INFO` if unset. |
 | spotfire-server.configJob.nodeSelector | object | `{}` |  |
 | spotfire-server.configJob.podAnnotations | object | `{}` | Podannotations for configJob |
@@ -442,7 +442,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.configuration.deployment.defaultDeployment.image.pullSecrets | list | `[]` |  |
 | spotfire-server.configuration.deployment.defaultDeployment.image.registry | string | `nil` | The image registry for spotfire-deployment. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.configuration.deployment.defaultDeployment.image.repository | string | `"spotfire/spotfire-deployment"` | The spotfire-deployment image repository. |
-| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-server.configuration.deployment.defaultDeployment.image.tag | string | `"14.6.4-HF-019-v4.4.1"` | The container image tag to use. |
 | spotfire-server.configuration.deployment.defaultDeployment.resources | object | `{}` | The resources setting for defaultDeployment. |
 | spotfire-server.configuration.deployment.enabled | bool | `true` | When enabled spotfire deployment areas will be created by the configuration job. See also `volumes.deployment`. |
 | spotfire-server.configuration.draining | object | `{"enabled":true,"minimumSeconds":90,"publishNotReadyAddresses":true,"timeoutSeconds":180}` | Configuration of the Spotfire Server container lifecycle PreStop hook. |
@@ -487,17 +487,17 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.extraInitContainers | list | `[]` | Additional init containers to add to Spotfire server pod. More info: `kubectl explain deployment.spec.template.spec.initContainers` |
 | spotfire-server.extraVolumeMounts | list | `[]` | Extra volumeMounts for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts` |
 | spotfire-server.extraVolumes | list | `[]` | Extra volumes for the spotfire-server container. More info: `kubectl explain deployment.spec.template.spec.volumes` |
-| spotfire-server.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-server.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-server.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-server.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-server.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-server.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-server.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-server.fluentBitSidecar.securityContext | object | `{}` | The securityContext setting for fluent-bit sidecar container. Overrides any securityContext setting on the Pod level. More info: `kubectl explain pod.spec.securityContext` |
 | spotfire-server.haproxy.config | string | The chart creates a configuration automatically. | The haproxy configuration file template. For implementation details see templates/haproxy-config.tpl. |
 | spotfire-server.haproxy.enabled | bool | `true` |  |
-| spotfire-server.haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
+| spotfire-server.haproxy.image | object | `{"repository":"haproxytech/haproxy-alpine","tag":"3.2.26@sha256:f1ce627668cb2a195a55a5faa4689540edac89eaa69abb95ca843d522f2771a1"}` | overrides haproxy chart default values. See [HAProxy Helm Chart](https://github.com/haproxytech/helm-charts/tree/main/haproxy) |
 | spotfire-server.haproxy.image.repository | string | `"haproxytech/haproxy-alpine"` | overrides the image repository. |
-| spotfire-server.haproxy.image.tag | string | `"3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
+| spotfire-server.haproxy.image.tag | string | `"3.2.26@sha256:f1ce627668cb2a195a55a5faa4689540edac89eaa69abb95ca843d522f2771a1"` | overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image. |
 | spotfire-server.haproxy.includes | object | `{}` |  |
 | spotfire-server.haproxy.includesMountPath | string | `"/etc/haproxy/includes"` |  |
 | spotfire-server.haproxy.kind | string | `"Deployment"` |  |
@@ -545,7 +545,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.image.pullSecrets | list | `[]` | spotfire-deployment image pull secrets. |
 | spotfire-server.image.registry | string | `nil` | The image registry for spotfire-server. Overrides `global.spotfire.image.registry` value. |
 | spotfire-server.image.repository | string | `"spotfire/spotfire-server"` | The spotfire-server image repository. |
-| spotfire-server.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-server.image.tag | string | `"14.6.4-v4.4.1"` | The container image tag to use. |
 | spotfire-server.ingress.annotations | object | `{}` | Annotations for the ingress object. See documentation for your ingress controller for valid annotations. |
 | spotfire-server.ingress.enabled | bool | `false` | Enables configuration of ingress to expose Spotfire Server. Requires ingress support in the Kubernetes cluster. |
 | spotfire-server.ingress.hosts[0].host | string | `"spotfire.local"` |  |
@@ -578,10 +578,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-server.log-forwarder.extraPorts[1].name | string | `"forward"` |  |
 | spotfire-server.log-forwarder.extraPorts[1].port | int | `24224` |  |
 | spotfire-server.log-forwarder.extraPorts[1].protocol | string | `"TCP"` |  |
-| spotfire-server.log-forwarder.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
+| spotfire-server.log-forwarder.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for log-forwarder. Clear when using an unpinned custom image. |
 | spotfire-server.log-forwarder.image.pullPolicy | string | `"IfNotPresent"` |  |
 | spotfire-server.log-forwarder.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for log-forwarder. |
-| spotfire-server.log-forwarder.image.tag | string | `"4.2.3"` | The image tag to use for log-forwarder. |
+| spotfire-server.log-forwarder.image.tag | string | `"5.1.5"` | The image tag to use for log-forwarder. |
 | spotfire-server.log-forwarder.kind | string | `"Deployment"` |  |
 | spotfire-server.log-forwarder.labels."app.kubernetes.io/component" | string | `"logging"` |  |
 | spotfire-server.log-forwarder.labels."app.kubernetes.io/part-of" | string | `"spotfire"` |  |
@@ -653,10 +653,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-terrservice.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-terrservice.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
-| spotfire-terrservice.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-terrservice.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-terrservice.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-terrservice.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-terrservice.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-terrservice.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-terrservice.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-terrservice.fullnameOverride | string | `""` |  |
@@ -664,7 +664,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-terrservice.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-terrservice.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-terrservice.image.repository | string | `"spotfire/spotfire-terrservice"` | The spotfire-server image repository. |
-| spotfire-terrservice.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-terrservice.image.tag | string | `"14.6.4-v4.4.1"` | The container image tag to use. |
 | spotfire-terrservice.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-terrservice.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-terrservice.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |
@@ -735,10 +735,10 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.extraInitContainers | list | `[]` | Additional init containers to add to the service pod. |
 | spotfire-webplayer.extraVolumeMounts | list | `[]` | Extra volumeMounts for the service container. More info: `kubectl explain deployment.spec.template.spec.containers.volumeMounts`. |
 | spotfire-webplayer.extraVolumes | list | `[]` | Extra volumes for the service container. More info: `kubectl explain deployment.spec.template.spec.volumes`. |
-| spotfire-webplayer.fluentBitSidecar.image.digest | string | `"sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
+| spotfire-webplayer.fluentBitSidecar.image.digest | string | `"sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"` | The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image. |
 | spotfire-webplayer.fluentBitSidecar.image.pullPolicy | string | `"IfNotPresent"` | The image pull policy for the fluent-bit logging sidecar image. |
 | spotfire-webplayer.fluentBitSidecar.image.repository | string | `"cr.fluentbit.io/fluent/fluent-bit"` | The image repository for fluent-bit logging sidecar. |
-| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"4.2.3"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
+| spotfire-webplayer.fluentBitSidecar.image.tag | string | `"5.1.5"` | The release tag corresponding to the pinned fluent-bit logging sidecar digest. |
 | spotfire-webplayer.fluentBitSidecar.resources | object | `{}` | The resources setting for fluent-bit sidecar container. |
 | spotfire-webplayer.fluentBitSidecar.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"privileged":false,"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | The securityContext setting for the Fluent Bit sidecar container. Overrides any securityContext setting on the Pod level. |
 | spotfire-webplayer.fullnameOverride | string | `""` |  |
@@ -746,7 +746,7 @@ For detailed usage instructions, please refer to the README.md files of the indi
 | spotfire-webplayer.image.pullSecrets | list | `[]` | Image pull secrets. |
 | spotfire-webplayer.image.registry | string | `nil` | The image registry for spotfire-server. Overrides global.spotfire.image.registry value. |
 | spotfire-webplayer.image.repository | string | `"spotfire/spotfire-webplayer"` | The spotfire-server image repository. |
-| spotfire-webplayer.image.tag | string | `"14.6.4-v4.4.0"` | The container image tag to use. |
+| spotfire-webplayer.image.tag | string | `"14.6.4-HF-019-v4.4.1"` | The container image tag to use. |
 | spotfire-webplayer.kedaAutoscaling | object | `{"advanced":{},"cooldownPeriod":300,"enabled":false,"fallback":{},"maxReplicas":4,"minReplicas":1,"pollingInterval":30,"spotfireConfig":{"prometheusServerAddress":"http://prometheus-server.monitor.svc.cluster.local"},"threshold":null,"triggers":[]}` | KEDA autoscaling configuration. See https://keda.sh/docs/latest/concepts/scaling-deployments for more details. |
 | spotfire-webplayer.kedaAutoscaling.cooldownPeriod | int | `300` | The period to wait after the last trigger reported active before scaling the resource back to 0. |
 | spotfire-webplayer.kedaAutoscaling.maxReplicas | int | `4` | This setting is passed to the HPA definition that KEDA creates for a given resource and holds the maximum number of replicas of the target resource. |

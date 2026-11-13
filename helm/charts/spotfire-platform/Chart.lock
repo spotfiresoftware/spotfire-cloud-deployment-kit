@@ -1,24 +1,24 @@
 dependencies:
 - name: spotfire-server
   repository: file://../spotfire-server/
-  version: 2.4.0
+  version: 2.4.1
 - name: spotfire-webplayer
   repository: file://../spotfire-webplayer/
-  version: 2.4.0
+  version: 2.4.1
 - name: spotfire-automationservices
   repository: file://../spotfire-automationservices/
-  version: 2.4.0
+  version: 2.4.1
 - name: spotfire-terrservice
   repository: file://../spotfire-terrservice/
-  version: 2.4.0
+  version: 2.4.1
 - name: spotfire-rservice
   repository: file://../spotfire-rservice/
-  version: 2.4.0
+  version: 2.4.1
 - name: spotfire-pythonservice
   repository: file://../spotfire-pythonservice/
-  version: 2.4.0
+  version: 2.4.1
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 16.7.27
-digest: sha256:be51ef109a1313799a7a0a8807bb1409d4b73cc9a481acd1b352297f78d85575
-generated: "2026-08-26T17:11:11.834420196+02:00"
+digest: sha256:e721e7a662408e6375581eeba76234ee6d4ffdf9a707a08a59e332ab5de2328c
+generated: "2026-11-02T10:50:33.92270186Z"

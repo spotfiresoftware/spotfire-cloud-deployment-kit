@@ -25,7 +25,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-server
   # -- The container image tag to use.
-  tag: "14.6.4-v4.4.0"
+  tag: "14.6.4-v4.4.1"
   # -- The spotfire-server image pull policy. Overrides `global.spotfire.image.pullPolicy`.
   pullPolicy:
   ## Optionally specify an array of imagePullSecrets.
@@ -37,9 +37,9 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: cr.fluentbit.io/fluent/fluent-bit
     # -- The release tag corresponding to the pinned fluent-bit logging sidecar digest.
-    tag: "4.2.3"
+    tag: "5.1.5"
     # -- The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image.
-    digest: sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2
+    digest: sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
@@ -272,7 +272,7 @@ cliPod:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.4-v4.4.0"
+    tag: "14.6.4-v4.4.1"
     # -- The spotfireConfig image pull policy. Overrides global.spotfire.image.pullPolicy.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -334,7 +334,7 @@ configJob:
     # -- The spotfireConfig image repository.
     repository: spotfire/spotfire-config
     # -- The spotfireConfig container image tag to use.
-    tag: "14.6.4-v4.4.0"
+    tag: "14.6.4-v4.4.1"
     # -- The spotfireConfig image pull policy. Overrides `global.spotfire.image.pullPolicy` value.
     pullPolicy:
     #  -- The spotfireConfig image pull secrets.
@@ -630,7 +630,7 @@ configuration:
         # -- The spotfire-deployment image repository.
         repository: spotfire/spotfire-deployment
         # -- The container image tag to use.
-        tag: "14.6.4-v4.4.0"
+        tag: "14.6.4-HF-019-v4.4.1"
         # -- The spotfire-deployment image pull policy. Overrides `global.spotfire.image.pullPolicy`.
         pullPolicy:
         ## Optionally specify an array of imagePullSecrets.
@@ -768,7 +768,7 @@ haproxy:
     # -- overrides the image repository.
     repository: haproxytech/haproxy-alpine
     # -- overrides the image tag whose default is the haproxy chart appVersion. Include @sha256:<digest> to pin the image.
-    tag: "3.2.23@sha256:441f189191238aba73965a3efd27ee9784b8a86886d572d6fe879e65247cc385"
+    tag: "3.2.26@sha256:f1ce627668cb2a195a55a5faa4689540edac89eaa69abb95ca843d522f2771a1"
 
   # -- Spotfire specific configuration related to haproxy.
   # @default -- Caching of static resource and debug response headers enabled.
@@ -908,9 +908,9 @@ log-forwarder:
     # -- The image repository for log-forwarder.
     repository: cr.fluentbit.io/fluent/fluent-bit
     # -- The image tag to use for log-forwarder.
-    tag: "4.2.3"
+    tag: "5.1.5"
     # -- The image digest to use for log-forwarder. Clear when using an unpinned custom image.
-    digest: "sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2"
+    digest: "sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4"
     pullPolicy: IfNotPresent
   podAnnotations:
     prometheus.io/path: /api/v1/metrics/prometheus

@@ -31,7 +31,7 @@ image:
   # -- The spotfire-server image repository.
   repository: spotfire/spotfire-webplayer
   # -- The container image tag to use.
-  tag: "14.6.4-v4.4.0"
+  tag: "14.6.4-HF-019-v4.4.1"
   # -- The spotfire-server image pull policy. Overrides global.spotfire.image.pullPolicy.
   pullPolicy:
   # -- Image pull secrets.
@@ -42,9 +42,9 @@ fluentBitSidecar:
     # -- The image repository for fluent-bit logging sidecar.
     repository: cr.fluentbit.io/fluent/fluent-bit
     # -- The release tag corresponding to the pinned fluent-bit logging sidecar digest.
-    tag: "4.2.3"
+    tag: "5.1.5"
     # -- The image digest to use for fluent-bit logging sidecar. Clear when using an unpinned custom image.
-    digest: sha256:a5761fa961cb22dd0875883a4d446b1acd99d4935d77358aa9f50ee177e44fe2
+    digest: sha256:2740f387f6e68fab66d28e4fa6a853387b9cab6ffb4cb78958f69bba4eb0e7b4
     # -- The image pull policy for the fluent-bit logging sidecar image.
     pullPolicy: IfNotPresent
 
